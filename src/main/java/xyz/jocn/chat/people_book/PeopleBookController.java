@@ -1,4 +1,4 @@
-package xyz.jocn.chat.controller;
+package xyz.jocn.chat.people_book;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/people-book")
 @RestController
-public class UserController {
+public class PeopleBookController {
 }

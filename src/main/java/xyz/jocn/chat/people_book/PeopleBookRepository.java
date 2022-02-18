@@ -1,9 +1,7 @@
-package xyz.jocn.chat.repo;
+package xyz.jocn.chat.people_book;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import xyz.jocn.chat.entity.PeopleBookEntity;
 
 @Repository
 public interface PeopleBookRepository extends JpaRepository<PeopleBookEntity, Long> {

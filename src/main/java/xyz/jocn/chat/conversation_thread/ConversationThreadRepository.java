@@ -1,9 +1,7 @@
-package xyz.jocn.chat.repo;
+package xyz.jocn.chat.conversation_thread;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import xyz.jocn.chat.entity.ConversationThreadEntity;
 
 @Repository
 public interface ConversationThreadRepository extends JpaRepository<ConversationThreadEntity, Long> {

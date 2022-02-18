@@ -1,4 +1,4 @@
-package xyz.jocn.chat.controller;
+package xyz.jocn.chat.room;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/rooms/{roomId}/threads/{threadId}/messages")
+@RequestMapping("/rooms")
 @RestController
-public class ThreadMessageController {
+public class RoomController {
+
+
 }

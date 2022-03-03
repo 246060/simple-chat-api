@@ -1,0 +1,14 @@
+package xyz.jocn.chat.room_message;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
+@RequestMapping("/rooms/{roomId}/messages")
+@RestController
+public class RoomMessageController {
+}

@@ -15,6 +15,7 @@
 5. h2, mysql
 6. aws ec2, nginx, s3, redis, codedeploy
 7. github repo, github action
+8. nosql(채팅 메시지는 document 로 관리 할까 고민중..) 
 
 ## 아키텍처 설계
 - websocekt + redis 는 event 신호 정도만 전달 

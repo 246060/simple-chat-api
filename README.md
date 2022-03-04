@@ -15,6 +15,96 @@ event를 통해서는 신호 정도만 전달 받음. 실제 데이터 전달은
 ![erd](api/docs/chat_erd.png)
 
 
+## event message foramt
+
+### web-socket 연결
+
+### 연결 요청 (ex. browser)
+모든 web-socket 연결은 반드시 header에 jwt 토큰 필요
+
+#### 요청 포맷
+Topic : event.client
+
+##### chat connect
+```json
+{
+    "type" : "chat",
+    "roomId" : "room-uuid",
+    "msg" : "room connection request"
+}
+```
+##### person connect
+```json
+{
+    "type" : "person",
+    "userId" : "user-uuid",
+    "msg" : "person connection request"
+}
+```
+##### base connect
+```json
+{
+    "type" : "all",
+    "msg" : "default connection request"
+}
+```
+
+### 연결 응답 
+Topic : event.server
+
+(note: websocket 요청의 jwt 유효성 확인)
+
+#### 성공 응답 포맷 
+
+##### chat 
+```json
+{
+    "type": "chat",
+	"roomId" : "room-uuid",
+    "msg": "connection success",
+}
+```
+
+##### person
+```json
+{
+    "type": "person",
+	"userId" : "user-uuid",
+    "msg": "connection success",
+}
+```
+
+##### all
+```json
+{
+    "type": "all",
+    "msg": "connection success",
+}
+```
+
+
+### redis publish format
+(api server)
+
+```text
+{
+	"relay-type" : "chat | person | all",
+	"[roomId]" : "room-uuid",
+	"[userId]" : "user-uuid",
+	"timestamp" : "utc time",
+	"msg-type" : 
+        // if relay-type : room  
+	    ["room.msg.new | room.person.in | room.person.out"]
+      
+        // if relay-type : person
+        ["person.invited | person.payment"]
+
+        // if relay-type : all
+        ["all.service-check | all.biz-event | all.new-feature"] 
+}
+
+```
+
 ### 현재 구상한 tech stack
 1. spring boot + web mvc, validator, actuator
 2. spring data + jpa & querydsl

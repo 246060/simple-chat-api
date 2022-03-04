@@ -9,7 +9,7 @@ event를 통해서는 신호 정도만 전달 받음. 실제 데이터 전달은
 
 
 ### 구상
-![architecture](api/docs/architecture.png)
+![architecture](docs/architecture.png)
 [이미지 참조](https://velog.io/@tigger/Github-Action%EA%B3%BC-AWS-S3-%EC%97%B0%EB%8F%99%ED%95%98%EA%B8%B0) 
 
 ![erd](api/docs/chat_erd.png)

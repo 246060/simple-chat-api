@@ -21,6 +21,13 @@
 - websocekt + redis 는 event 신호 정도만 전달 
 ![architecture](docs/architecture.png) 
 
+### 고려사항
+1. socket.io max connection per node and server
+2. socket.io max room per namespace
+3. pm2 or docker for node - 어떤 항식을 할지... 
+4. docker or not for spring - 어떤 항식을 할지...
+5. nginx stick session max connection   
+
 ## 스키마 설계 
 하는둥...
 ![erd](api/docs/chat_erd.png)

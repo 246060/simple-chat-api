@@ -1,33 +1,41 @@
-# toy project
+# [Toy Project] simple-chat-api 
 구상중...
 
-## simple-chat-api 
+- 간단한 채팅 기능 서버
+- 유저 클라이언트 제외 
+
+## Tech stack 
+현재 구상중이라 변경 가능 할 수도... 
+ 
+1. spring boot + web mvc, validator, actuator
+2. spring data + jpa & querydsl
+3. mapstruct
+4. spring data redis
+4. express, socket.io
+5. h2, mysql
+6. aws ec2, nginx, s3, redis, codedeploy
+7. github repo, github action
+
+## 아키텍처 설계
 - websocekt + redis 는 event 신호 정도만 전달 
-- user는 이벤트를 받으면 실 데이터를 api로 요청하여 받음  
+![architecture](docs/architecture.png) 
 
-
-### 구상
-![architecture](docs/architecture.png)
-[이미지 참조](https://velog.io/@tigger/Github-Action%EA%B3%BC-AWS-S3-%EC%97%B0%EB%8F%99%ED%95%98%EA%B8%B0) 
-
+## 스키마 설계 
+하는둥...
 ![erd](api/docs/chat_erd.png)
 
 
 ## event message foramt
-
-### web-socket 연결
-#### client
+### topic
+#### client 
 - emit : event.client
 - listen : event.server  
-
 #### server
 - emit : event.server
 - listen : event.client
 
-
 ### 연결 요청 (ex. browser)
 모든 web-socket 연결은 반드시 header에 jwt 토큰 필요
-
 #### 요청 포맷
 Topic : event.client
 
@@ -111,12 +119,6 @@ Topic : event.server
 
 ```
 
-### 현재 구상한 tech stack
-1. spring boot + web mvc, validator, actuator
-2. spring data + jpa & querydsl
-3. websocket : express + socket.io 
-3. mapstruct
-4. h2, mariadb
-5. aws ec2, nginx, s3
+
 
 

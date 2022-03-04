@@ -18,6 +18,14 @@ event를 통해서는 신호 정도만 전달 받음. 실제 데이터 전달은
 ## event message foramt
 
 ### web-socket 연결
+#### client
+- emit : event.client
+- listen : event.server  
+
+#### server
+- emit : event.server
+- listen : event.client
+
 
 ### 연결 요청 (ex. browser)
 모든 web-socket 연결은 반드시 header에 jwt 토큰 필요

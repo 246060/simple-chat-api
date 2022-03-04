@@ -1,7 +1,7 @@
 # [Toy Project] simple-chat-api 
 구상중...
 
-- 간단한 채팅 기능 서버
+- 간단한 채팅 서버
 - 유저 클라이언트 제외 
 
 ## Tech stack 
@@ -44,23 +44,20 @@ Topic : event.client
 ```json
 {
     "type" : "chat",
-    "roomId" : "room-uuid",
-    "msg" : "room connection request"
+    "roomId" : "room-uuid"
 }
 ```
 ##### person connect
 ```json
 {
     "type" : "person",
-    "userId" : "user-uuid",
-    "msg" : "person connection request"
+    "userId" : "user-uuid"
 }
 ```
 ##### base connect
 ```json
 {
-    "type" : "all",
-    "msg" : "default connection request"
+    "type" : "all"
 }
 ```
 
@@ -119,7 +116,6 @@ Topic : event.server
 }
 
 ```
-
-
+ 
 
 

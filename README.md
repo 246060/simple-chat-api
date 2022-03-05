@@ -31,7 +31,7 @@
 
 ## 스키마 설계 
 하는둥...
-![erd](api/docs/chat_erd.png)
+![erd](docs/erd.png)
 
 
 ## event message foramt

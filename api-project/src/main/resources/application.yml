@@ -1,1 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:chatDB;DB_CLOSE_DELAY=-1;MODE=MYSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect # MariaDB103Dialect
+    # defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create
+      show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      # mode: always
 
+logging:
+  level:
+    org.apache.coyote.http11: debug
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql: trace

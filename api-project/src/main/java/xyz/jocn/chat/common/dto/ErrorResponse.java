@@ -10,17 +10,17 @@ import lombok.Data;
 @Data
 public class ErrorResponse {
 	private int code;
-	private String message;
+	private String description;
 	private Object detail;
 
-	public ErrorResponse(int code, String message) {
+	public ErrorResponse(int code, String description) {
 		this.code = code;
-		this.message = message;
+		this.description = description;
 	}
 
-	public ErrorResponse(int code, String message, List<FieldError> fieldErrors) {
+	public ErrorResponse(int code, String description, List<FieldError> fieldErrors) {
 		this.code = code;
-		this.message = message;
+		this.description = description;
 		this.detail = convertFieldError(fieldErrors);
 	}
 

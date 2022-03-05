@@ -1,11 +1,11 @@
 # [Toy Project] simple-chat-api 
-구상중...
+현재 구상중..
 
 - 간단한 채팅 서버
 - 유저 클라이언트 제외 
 
 ## Tech stack 
-현재 구상중이라 변경 가능 할 수도... 
+현재 구상중.. 
  
 1. spring boot + web mvc, validator, actuator
 2. spring data + jpa & querydsl
@@ -18,6 +18,7 @@
 8. nosql(채팅 메시지는 document 로 관리 할까 고민중..) 
 
 ## 아키텍처 설계
+현재 구상중..
 - websocekt + redis 는 event 신호 정도만 전달 
 ![architecture](docs/architecture1.png) 
 
@@ -27,10 +28,9 @@
 3. pm2 or docker for node - 어떤 방식을 할지... 
 4. docker or not for spring - 어떤 방식을 할지...
 5. nginx stick session max connection   
-    - 위의 아키텍처 그림에서는 socket 서버가 클라이언트와 바로 연결되지만, 구상은 reverse proxy 뒤에 넣을 예정
 
-## 스키마 설계 
-하는둥...
+## ERD
+현재 구상중..
 ![erd](docs/erd.png)
 
 
@@ -51,21 +51,21 @@ Topic : event.client
 ##### chat connect
 ```json
 {
-    "type" : "chat",
-    "roomId" : "room-uuid"
+  "type" : "chat",
+  "roomId" : "room-uuid"
 }
 ```
 ##### person connect
 ```json
 {
-    "type" : "person",
-    "userId" : "user-uuid"
+  "type" : "person",
+  "userId" : "user-uuid"
 }
 ```
 ##### base connect
 ```json
 {
-    "type" : "all"
+  "type" : "all"
 }
 ```
 
@@ -79,26 +79,26 @@ Topic : event.server
 ##### chat 
 ```json
 {
-    "type": "chat",
-	"roomId" : "room-uuid",
-    "msg": "connection success",
+  "type": "chat",
+  "roomId" : "room-uuid",
+  "msg": "connection success",
 }
 ```
 
 ##### person
 ```json
 {
-    "type": "person",
-	"userId" : "user-uuid",
-    "msg": "connection success",
+  "type": "person",
+  "userId" : "user-uuid",
+  "msg": "connection success",
 }
 ```
 
 ##### all
 ```json
 {
-    "type": "all",
-    "msg": "connection success",
+  "type": "all",
+  "msg": "connection success",
 }
 ```
 
@@ -108,19 +108,19 @@ Topic : event.server
 
 ```text
 {
-	"relay-type" : "chat | person | all",
-	"[roomId]" : "room-uuid",
-	"[userId]" : "user-uuid",
-	"timestamp" : "utc time",
-	"msg-type" : 
+    "relay-type" : "chat | person | all",
+    "[roomId]" : "room-uuid",
+    "[userId]" : "user-uuid",
+    "timestamp" : "utc time",
+    "msg-type" : 
         // if relay-type : room  
-	    ["room.msg.new | room.person.in | room.person.out"]
-      
+        ["room.msg.new | room.person.in | room.person.out | ..."]
+        
         // if relay-type : person
-        ["person.invited | person.payment"]
-
+        ["person.invited | person.payment | ..."]
+        
         // if relay-type : all
-        ["all.service-check | all.biz-event | all.new-feature"] 
+        ["all.service-check | all.biz-event | all.new-feature | ..."] 
 }
 
 ```

@@ -19,7 +19,7 @@
 
 ## 아키텍처 설계
 - websocekt + redis 는 event 신호 정도만 전달 
-![architecture](docs/architecture.png) 
+![architecture](docs/architecture1.png) 
 
 ### 고려사항
 1. socket.io max connection per node and server

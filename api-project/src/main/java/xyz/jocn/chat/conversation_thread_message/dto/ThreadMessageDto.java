@@ -1,4 +1,4 @@
-package xyz.jocn.chat.thread_message.dto;
+package xyz.jocn.chat.conversation_thread_message.dto;
 
 import lombok.Data;
 

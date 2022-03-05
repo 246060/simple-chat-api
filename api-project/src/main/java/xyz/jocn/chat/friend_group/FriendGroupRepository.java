@@ -1,8 +1,8 @@
-package xyz.jocn.chat.people_book;
+package xyz.jocn.chat.friend_group;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PeopleBookRepository extends JpaRepository<PeopleBookEntity, Long> {
+public interface FriendGroupRepository extends JpaRepository<PeopleBookEntity, Long> {
 }

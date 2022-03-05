@@ -1,4 +1,4 @@
-package xyz.jocn.chat.thread_message;
+package xyz.jocn.chat.conversation_thread_message;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

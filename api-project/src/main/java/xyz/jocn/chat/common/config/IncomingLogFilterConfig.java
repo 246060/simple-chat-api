@@ -14,7 +14,7 @@ public class IncomingLogFilterConfig {
 	@Profile("!prod")
 	@Bean
 	public CommonsRequestLoggingFilter localCommonsRequestLoggingFilterFilter() {
-		log.info("load local CommonsRequestLoggingFilter");
+		log.info("load CommonsRequestLoggingFilter");
 		CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
 		filter.setIncludeClientInfo(true); // 클라이언트 주소와 세션 ID를 로그에 출력
 		filter.setIncludeQueryString(true);
@@ -29,7 +29,7 @@ public class IncomingLogFilterConfig {
 	@Profile("prod")
 	@Bean
 	public CommonsRequestLoggingFilter devCommonsRequestLoggingFilterFilter() {
-		log.info("load dev CommonsRequestLoggingFilter");
+		log.info("load CommonsRequestLoggingFilter");
 		CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
 		filter.setIncludeClientInfo(true); // 클라이언트 주소와 세션 ID를 로그에 출력
 		filter.setIncludeQueryString(true);

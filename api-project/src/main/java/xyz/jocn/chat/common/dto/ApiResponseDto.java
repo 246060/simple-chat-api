@@ -12,6 +12,12 @@ public class ApiResponseDto {
 	private ApiResponseDto() {
 	}
 
+	public static ApiResponseDto success() {
+		ApiResponseDto res = new ApiResponseDto();
+		res.setSuccess(true);
+		return res;
+	}
+
 	public static ApiResponseDto success(Object data) {
 		ApiResponseDto res = new ApiResponseDto();
 		res.setSuccess(true);

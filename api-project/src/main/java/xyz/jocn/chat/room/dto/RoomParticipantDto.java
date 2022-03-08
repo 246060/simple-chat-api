@@ -4,5 +4,7 @@ import lombok.Data;
 
 @Data
 public class RoomParticipantDto {
-	private long id;
+	private Long id;
+	private Long userId;
+	private String name;
 }

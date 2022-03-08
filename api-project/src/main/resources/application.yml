@@ -1,4 +1,18 @@
+app:
+  jwt-secret: ${jwt_secret}
+  accessToken-expireInSec: 2592000
+  refreshToken-expireInSec: 2592000
+
 spring:
+  #security:
+  #  filter:
+  #    order: 10
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080
+
   datasource:
     # url: jdbc:h2:mem:chatDB;DB_CLOSE_DELAY=-1;MODE=MYSQL
     # url: jdbc:h2:tcp://localhost/~/chatDB
@@ -27,6 +41,7 @@ spring:
 
 logging:
   level:
-    org.apache.coyote.http11: debug
+    #root: debug
+    #org.apache.coyote.http11: debug
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace

@@ -18,9 +18,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import xyz.jocn.chat.room.enums.ChatMessageType;
 import xyz.jocn.chat.room.enums.ThreadMessageState;
 
 @ToString
@@ -36,7 +38,12 @@ public class ThreadMessageEntity {
 	private long id;
 
 	@Enumerated(EnumType.STRING)
-	private ThreadMessageState state;
+	private ChatMessageType type;
+
+	@Enumerated(EnumType.STRING)
+	private ThreadMessageState state = ThreadMessageState.ACTIVE;
+
+	private String message;
 
 	@CreatedDate
 	private Instant createdAt;
@@ -52,4 +59,15 @@ public class ThreadMessageEntity {
 
 	@ManyToOne
 	private ThreadEntity thread;
+
+	@Builder
+	public ThreadMessageEntity(long id, ChatMessageType type, ThreadMessageState state, String message,
+		ThreadParticipantEntity threadParticipant, ThreadEntity thread) {
+		this.id = id;
+		this.type = type;
+		this.state = state;
+		this.message = message;
+		this.threadParticipant = threadParticipant;
+		this.thread = thread;
+	}
 }

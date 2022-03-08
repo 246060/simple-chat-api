@@ -1,16 +1,15 @@
 package xyz.jocn.chat.room.entity;
 
 import java.time.Instant;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.springframework.data.annotation.CreatedBy;
@@ -20,10 +19,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import xyz.jocn.chat.room.enums.RoomMessageCategory;
+import xyz.jocn.chat.room.enums.ChatMessageType;
 import xyz.jocn.chat.room.enums.RoomMessageState;
 
 @ToString
@@ -42,10 +42,10 @@ public class RoomMessageEntity {
 	private String message;
 
 	@Column(nullable = false, length = 10)
-	private RoomMessageCategory category;
+	private ChatMessageType type;
 
 	@Column(nullable = false, length = 10)
-	private RoomMessageState state;
+	private RoomMessageState state = RoomMessageState.ACTIVE;
 
 	private boolean hasThread = false;
 	private boolean hasMark = false;
@@ -62,10 +62,23 @@ public class RoomMessageEntity {
 	@LastModifiedBy
 	private long updatedBy;
 
-	@ManyToOne
-	private RoomParticipantEntity roomParticipant;
+	@ManyToOne(fetch = FetchType.LAZY)
+	private RoomParticipantEntity sender;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private RoomEntity room;
 
+	@Builder
+	public RoomMessageEntity(long id, String message, ChatMessageType type,
+		RoomMessageState state, boolean hasThread, boolean hasMark,
+		RoomParticipantEntity sender, RoomEntity room) {
+		this.id = id;
+		this.message = message;
+		this.type = type;
+		this.state = state;
+		this.hasThread = hasThread;
+		this.hasMark = hasMark;
+		this.sender = sender;
+		this.room = room;
+	}
 }

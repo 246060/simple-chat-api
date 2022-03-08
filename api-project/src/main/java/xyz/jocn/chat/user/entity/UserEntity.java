@@ -19,6 +19,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -38,10 +39,12 @@ public class UserEntity {
 
 	@Column(length = 100)
 	private String email;
+	private String name;
+	private String password;
 
 	@Column(length = 20)
 	@Enumerated(EnumType.STRING)
-	private UserState state;
+	private UserState state = UserState.ACTIVE;
 
 	@CreatedDate
 	private Instant createdAt;
@@ -51,4 +54,13 @@ public class UserEntity {
 
 	@LastModifiedBy
 	private long updatedBy;
+
+	@Builder
+	public UserEntity(long id, String email, String name, String password, UserState state) {
+		this.id = id;
+		this.email = email;
+		this.name = name;
+		this.password = password;
+		this.state = state;
+	}
 }

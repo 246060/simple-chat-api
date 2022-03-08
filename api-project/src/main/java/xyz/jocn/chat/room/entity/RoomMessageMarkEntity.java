@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,10 +17,11 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import xyz.jocn.chat.room.enums.RoomMessageMarkFlag;
+import xyz.jocn.chat.room.enums.MessageMarkFlag;
 
 @ToString
 @Getter
@@ -34,15 +36,23 @@ public class RoomMessageMarkEntity {
 	private long id;
 
 	@Enumerated(EnumType.STRING)
-	private RoomMessageMarkFlag flag;
+	private MessageMarkFlag flag;
 
 	@CreatedDate
 	private Instant createdAt;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private RoomMessageEntity roomMessage;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private RoomParticipantEntity roomParticipant;
 
+	@Builder
+	public RoomMessageMarkEntity(long id, MessageMarkFlag flag, RoomMessageEntity roomMessage,
+		RoomParticipantEntity roomParticipant) {
+		this.id = id;
+		this.flag = flag;
+		this.roomMessage = roomMessage;
+		this.roomParticipant = roomParticipant;
+	}
 }

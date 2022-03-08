@@ -14,6 +14,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -36,4 +37,10 @@ public class ThreadEntity {
 
 	@OneToOne
 	private RoomMessageEntity roomMessage;
+
+	@Builder
+	public ThreadEntity(long id, RoomMessageEntity roomMessage) {
+		this.id = id;
+		this.roomMessage = roomMessage;
+	}
 }

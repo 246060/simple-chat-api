@@ -14,6 +14,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -38,4 +39,12 @@ public class ThreadParticipantEntity {
 
 	@ManyToOne
 	private RoomParticipantEntity roomParticipant;
+
+	@Builder
+	public ThreadParticipantEntity(long id, ThreadEntity thread,
+		RoomParticipantEntity roomParticipant) {
+		this.id = id;
+		this.thread = thread;
+		this.roomParticipant = roomParticipant;
+	}
 }

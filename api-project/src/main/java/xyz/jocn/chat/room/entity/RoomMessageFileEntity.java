@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -39,9 +40,9 @@ public class RoomMessageFileEntity {
 	@CreatedBy
 	private Instant createdBy;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	private FileEntity file;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private RoomMessageEntity roomMessage;
 }

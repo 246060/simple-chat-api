@@ -1,5 +1,5 @@
 package xyz.jocn.chat.room.enums;
 
-public enum RoomMessageMarkFlag {
+public enum MessageMarkFlag {
 	Like, Dislike, Agree, Disagree
 }

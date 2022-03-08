@@ -1,21 +1,29 @@
 package xyz.jocn.chat.room;
 
+import static org.springframework.http.ResponseEntity.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
-import java.net.URI;
-import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.chat.room.dto.RoomCreateRequestDto;
+import xyz.jocn.chat.room.dto.RoomInviteRequestDto;
+import xyz.jocn.chat.room.dto.RoomMessageGetRequestDto;
+import xyz.jocn.chat.room.dto.RoomMessageMarkCreateRequestDto;
+import xyz.jocn.chat.room.dto.RoomMessageSendRequestDto;
+import xyz.jocn.chat.room.dto.ThreadMessageCreateRequestDto;
+import xyz.jocn.chat.room.dto.ThreadMessageMarkCreateRequestDto;
+import xyz.jocn.chat.room.dto.ThreadOpenRequestDto;
+import xyz.jocn.chat.room.service.RoomService;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,94 +31,158 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 public class RoomController {
 
+	private static final String USER_PK = "subject";
+	private final RoomService roomService;
+
 	@PostMapping
-	public ResponseEntity create() {
-		return null;
+	public ResponseEntity open(
+		@AuthenticationPrincipal(expression = USER_PK) String userId,
+		@RequestBody RoomCreateRequestDto dto
+	) {
+		dto.setHostId(userId);
+		return ok(success(roomService.open(dto)));
 	}
 
 	@GetMapping
-	public ResponseEntity<?> getRooms() {
-		return null;
+	public ResponseEntity<?> getRooms(
+		@AuthenticationPrincipal(expression = USER_PK) String userId
+	) {
+		return ok(success(roomService.getRoomList(userId)));
 	}
 
 	@PostMapping("/{roomId}/participants")
-	public ResponseEntity invite(@PathVariable String roomId) {
-		return null;
+	public ResponseEntity invite(
+		@PathVariable Long roomId,
+		@AuthenticationPrincipal(expression = USER_PK) String userId,
+		@RequestBody RoomInviteRequestDto dto
+	) {
+		dto.setRoomId(roomId);
+		roomService.invite(dto);
+		return ok(success());
 	}
 
 	@GetMapping("/{roomId}/participants")
-	public ResponseEntity getParticipants(@PathVariable String roomId) {
-		return null;
+	public ResponseEntity getParticipants(
+		@PathVariable Long roomId,
+		@AuthenticationPrincipal(expression = USER_PK) String userId
+	) {
+		return ok(success(roomService.getParticipants(roomId)));
 	}
 
 	@DeleteMapping("/{roomId}/participants/{participantId}")
-	public ResponseEntity exit(@PathVariable String roomId, @PathVariable String participantId) {
-		return null;
+	public ResponseEntity exit(
+		@PathVariable Long roomId,
+		@PathVariable Long participantId,
+		@AuthenticationPrincipal(expression = USER_PK) String userId
+	) {
+		roomService.exit(participantId);
+		return ok(success());
 	}
 
 	@PostMapping("/{roomId}/messages")
-	public ResponseEntity create(@PathVariable String roomId) {
+	public ResponseEntity create(
+		@PathVariable Long roomId,
+		@AuthenticationPrincipal(expression = USER_PK) String userId,
+		@RequestBody RoomMessageSendRequestDto dto
+	) {
 		// MvcUriComponentsBuilder.fromMethodName(RoomController.class,"getOne").build();
-		// 1. 체크 : 메시지 송신자가 룸의 파티원인가?
-		// 2. 메시지 저장
-		// 3. 룸 메시지 event publish
-		return null;
+		dto.setUserId(Long.parseLong(userId));
+		dto.setRoomId(roomId);
+		roomService.sendMessageToRoom(dto);
+		return ok(success());
 	}
 
 	@GetMapping("/{roomId}/messages")
-	public ResponseEntity<?> getRoomMessages(@PathVariable String roomId) {
-		return null;
+	public ResponseEntity<?> getRoomMessages(
+		@PathVariable Long roomId,
+		@RequestBody RoomMessageGetRequestDto dto
+	) {
+		dto.setRoomId(roomId);
+		return ok(success(roomService.getMessagesInRoom(dto)));
 	}
 
 	@PostMapping("/{roomId}/messages/{messageId}/marks")
 	public ResponseEntity post(
-		@PathVariable String roomId,
-		@PathVariable String messageId
+		@PathVariable Long roomId,
+		@PathVariable Long messageId,
+		@AuthenticationPrincipal(expression = USER_PK) String userId,
+		@RequestBody RoomMessageMarkCreateRequestDto dto
 	) {
-		return null;
+		dto.setMessageId(messageId);
+		dto.setUserId(Long.parseLong(userId));
+		roomService.putMarkOnRoomMessage(dto);
+		return ok(success());
 	}
 
 	@GetMapping("/{roomId}/messages/{messageId}/marks")
 	public ResponseEntity<?> get(
-		@PathVariable String roomId,
-		@PathVariable String messageId
+		@PathVariable Long roomId,
+		@PathVariable Long messageId
 	) {
-		return null;
+		return ok(success(roomService.getMessageMarks(messageId)));
 	}
 
-	@PatchMapping("/{roomId}/messages/{messageId}/marks/{markId}")
+	@DeleteMapping("/{roomId}/messages/{messageId}/marks/{markId}")
 	public ResponseEntity<?> put(
 		@PathVariable String roomId,
 		@PathVariable String messageId,
-		@PathVariable String markId
+		@PathVariable Long markId
 	) {
-		return null;
+		roomService.cancelRoomMessageMark(markId);
+		return ok(success());
 	}
-
 
 	@PostMapping("/{roomId}/messages/{messageId}/threads")
 	public ResponseEntity createThread(
-		@PathVariable String roomId,
-		@PathVariable String messageId
+		@PathVariable Long roomId,
+		@PathVariable Long messageId,
+		@RequestBody ThreadOpenRequestDto dto
 	) {
-		return null;
+		dto.setMessageId(messageId);
+		roomService.openThread(dto);
+		return ok(success());
 	}
 
 	@PostMapping("/{roomId}/messages/{messageId}/threads/{threadId}/messages")
 	public ResponseEntity createThreadMessage(
-		@PathVariable String roomId,
-		@PathVariable String messageId,
-		@PathVariable String threadId
+		@AuthenticationPrincipal(expression = USER_PK) String userId,
+		@RequestBody ThreadMessageCreateRequestDto dto
 	) {
-		return null;
+		roomService.sendMessageToThread(dto);
+		return ok(success());
 	}
 
 	@GetMapping("/{roomId}/messages/{messageId}/threads/{threadId}/messages")
 	public ResponseEntity getThreadMessage(
-		@PathVariable String roomId,
-		@PathVariable String messageId,
-		@PathVariable String threadId
+		@PathVariable Long threadId,
+		@AuthenticationPrincipal(expression = USER_PK) String userId
 	) {
-		return null;
+		return ok(success(roomService.getMessagesInThread(threadId)));
+	}
+
+	@PostMapping("/{roomId}/messages/{roomMessageId}/threads/{threadId}/messages/{threadMessageId}/marks")
+	public ResponseEntity post1(
+		@PathVariable Long threadMessageId,
+		@AuthenticationPrincipal(expression = USER_PK) String userId,
+		@RequestBody ThreadMessageMarkCreateRequestDto dto
+	) {
+		dto.setThreadMessageId(threadMessageId);
+		roomService.putMarkOnThreadMessage(dto);
+		return ok(success());
+	}
+
+	@GetMapping("/{roomId}/messages/{roomMessageId}/threads/{threadId}/messages/{threadMessageId}/marks")
+	public ResponseEntity<?> get2(
+		@PathVariable Long threadMessageId
+	) {
+		return ok(success(roomService.getThreadMessageMarks(threadMessageId)));
+	}
+
+	@DeleteMapping("/{roomId}/messages/{roomMessageId}/threads/{threadId}/messages/{threadMessageId}/marks/{markId}")
+	public ResponseEntity<?> pu3t(
+		@PathVariable Long markId
+	) {
+		roomService.cancelThreadMessageMark(markId);
+		return ok(success());
 	}
 }

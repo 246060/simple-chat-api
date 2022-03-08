@@ -18,6 +18,12 @@ public class ErrorResponse {
 		this.description = description;
 	}
 
+	public ErrorResponse(int code, String description, Object detail) {
+		this.code = code;
+		this.description = description;
+		this.detail = detail;
+	}
+
 	public ErrorResponse(int code, String description, List<FieldError> fieldErrors) {
 		this.code = code;
 		this.description = description;

@@ -1,5 +1,7 @@
 package xyz.jocn.chat.common.exception;
 
+import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
+
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -23,15 +26,26 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.chat.common.dto.ErrorResponse;
 
 @Slf4j
+@RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<?> handleHighestException(Exception ex,  WebRequest request) {
+	public ResponseEntity<?> handleHighestException(Exception ex, WebRequest request) {
 		HttpHeaders headers = new HttpHeaders();
 		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-		return this.handleExceptionInternal(ex, null, headers, status, request);
+		ErrorResponse error = new ErrorResponse(status.value(), "unknown server error");
+		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
+	}
+
+	@ExceptionHandler(AlreadyExistUserException.class)
+	public ResponseEntity<?> handleAlreadyExistUserException(AlreadyExistUserException ex, WebRequest request) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpStatus status = HttpStatus.UNAUTHORIZED;
+		ErrorResponse error = new ErrorResponse(status.value(), "invalid_user", "already exist");
+		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
 
 	@Override

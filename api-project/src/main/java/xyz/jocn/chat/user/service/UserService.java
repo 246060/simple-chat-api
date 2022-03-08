@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.common.exception.AlreadyExistUserException;
+import xyz.jocn.chat.user.exception.AlreadyExistUserException;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
 import xyz.jocn.chat.user.entity.UserEntity;
-import xyz.jocn.chat.user.repository.UserRepository;
+import xyz.jocn.chat.user.repo.user.UserRepository;
 
 @Slf4j
 @RequiredArgsConstructor

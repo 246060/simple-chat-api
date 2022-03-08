@@ -1,10 +1,9 @@
 package xyz.jocn.chat.common.util;
 
-import static xyz.jocn.chat.common.exception.TokenErrorCode.*;
+import static xyz.jocn.chat.auth.exception.TokenErrorCode.*;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.KeySpec;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
@@ -28,8 +27,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.common.dto.JwtClaimsSetDto;
-import xyz.jocn.chat.common.exception.TokenException;
+import xyz.jocn.chat.auth.dto.JwtClaimsSetDto;
+import xyz.jocn.chat.auth.exception.TokenException;
 
 @Slf4j
 @Component

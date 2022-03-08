@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.common.dto.ErrorResponse;
+import xyz.jocn.chat.user.exception.AlreadyExistUserException;
 
 @Slf4j
 @RestControllerAdvice

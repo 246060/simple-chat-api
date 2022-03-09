@@ -9,6 +9,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -21,6 +22,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 @ToString
 @Getter
@@ -34,14 +36,15 @@ public class RoomEntity {
 	@Id
 	private long id;
 
+	@ManyToOne
+	private UserEntity user;
+
 	@CreatedDate
 	private Instant createdAt;
 
-	@CreatedBy
-	private long createdBy;
-
 	@Builder
-	public RoomEntity(long id) {
+	public RoomEntity(long id, UserEntity user) {
 		this.id = id;
+		this.user = user;
 	}
 }

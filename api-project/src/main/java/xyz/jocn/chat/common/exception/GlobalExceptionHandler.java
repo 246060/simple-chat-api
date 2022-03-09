@@ -26,28 +26,53 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.chat.chat_space.exception.RoomException;
 import xyz.jocn.chat.common.dto.ErrorResponse;
-import xyz.jocn.chat.user.exception.AlreadyExistUserException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+
+	@ExceptionHandler(RoomException.class)
+	public ResponseEntity handleRoomException(RoomException ex, WebRequest request) {
+		log.error(ex.getMessage());
+		HttpHeaders headers = new HttpHeaders();
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		ErrorResponse error = new ErrorResponse(status.value(), ex.getMessage());
+		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
+	}
+
+
+	@ExceptionHandler(ResourceAlreadyExistException.class)
+	public ResponseEntity handleResourceAlreadyExistException(ResourceAlreadyExistException ex, WebRequest request) {
+		log.error(ex.getMessage());
+		HttpHeaders headers = new HttpHeaders();
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		ErrorResponse error = new ErrorResponse(status.value(), ex.getDescription(), ex.getMessage());
+		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
+	}
+
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
+		log.error(ex.getMessage());
+		HttpHeaders headers = new HttpHeaders();
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		ErrorResponse error = new ErrorResponse(status.value(), ex.getDescription(), ex.getMessage());
+		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
+	}
+
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<?> handleHighestException(Exception ex, WebRequest request) {
+	public ResponseEntity handleHighestException(Exception ex, WebRequest request) {
+		log.error(ex.getMessage());
 		HttpHeaders headers = new HttpHeaders();
 		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 		ErrorResponse error = new ErrorResponse(status.value(), "unknown server error");
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
 
-	@ExceptionHandler(AlreadyExistUserException.class)
-	public ResponseEntity<?> handleAlreadyExistUserException(AlreadyExistUserException ex, WebRequest request) {
-		HttpHeaders headers = new HttpHeaders();
-		HttpStatus status = HttpStatus.UNAUTHORIZED;
-		ErrorResponse error = new ErrorResponse(status.value(), "invalid_user", "already exist");
-		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
-	}
+
+
 
 	@Override
 	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,

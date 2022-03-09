@@ -1,4 +1,4 @@
-package xyz.jocn.chat.auth.exception;
+package xyz.jocn.chat.common.exception;
 
 public class TokenException extends RuntimeException {
 

@@ -8,15 +8,14 @@ import org.springframework.stereotype.Repository;
 
 import xyz.jocn.chat.chat_space.entity.RoomEntity;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
-import xyz.jocn.chat.user.entity.UserEntity;
 
 @Repository
 public interface RoomParticipantRepository
 	extends JpaRepository<RoomParticipantEntity, Long>, RoomParticipantRepositoryExt {
 
-	List<RoomParticipantEntity> findAllByUser(UserEntity user);
+	List<RoomParticipantEntity> findAllByUserId(Long userId);
 
 	List<RoomParticipantEntity> findAllByRoom(RoomEntity room);
 
-	Optional<RoomParticipantEntity> findByRoomAndUser(RoomEntity room, UserEntity userEntity);
+	Optional<RoomParticipantEntity> findByRoomIdAndUserId(long roomId, long userId);
 }

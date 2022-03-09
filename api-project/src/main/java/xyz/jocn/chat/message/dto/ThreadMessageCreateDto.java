@@ -9,7 +9,10 @@ import xyz.jocn.chat.message.enums.ChatMessageType;
 
 @Data
 public class ThreadMessageCreateDto {
-	private Long threadParticipantId;
+
+	private Long userId;
+	private Long threadId;
+
 	private ChatMessageType type;
 	private List<MultipartFile> files;
 	private String message;

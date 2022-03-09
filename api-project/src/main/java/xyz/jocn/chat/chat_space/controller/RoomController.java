@@ -35,7 +35,7 @@ public class RoomController {
 
 	@GetMapping("/rooms")
 	public ResponseEntity getRooms(@AuthenticationPrincipal(expression = USER_PK) String userId) {
-		return ok(success(roomService.getRoomList(userId)));
+		return ok(success(roomService.getRoomList(Long.parseLong(userId))));
 	}
 
 }

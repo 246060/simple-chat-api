@@ -1,6 +1,6 @@
-package xyz.jocn.chat.auth.service;
+package xyz.jocn.chat.auth;
 
-import static xyz.jocn.chat.auth.exception.TokenErrorCode.*;
+import static xyz.jocn.chat.common.exception.TokenErrorCode.*;
 
 import java.time.Instant;
 import java.util.Set;
@@ -14,11 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.auth.dto.TokenCreateRequestDto;
 import xyz.jocn.chat.auth.dto.TokenRefreshRequestDto;
 import xyz.jocn.chat.auth.dto.TokenResponseDto;
-import xyz.jocn.chat.auth.entity.TokenEntity;
-import xyz.jocn.chat.auth.repo.TokenRepository;
 import xyz.jocn.chat.auth.dto.JwtClaimsSetDto;
-import xyz.jocn.chat.user.exception.AuthenticationException;
-import xyz.jocn.chat.auth.exception.TokenException;
+import xyz.jocn.chat.common.exception.AuthenticationException;
+import xyz.jocn.chat.common.exception.TokenException;
 import xyz.jocn.chat.common.util.TokenUtil;
 import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.repo.user.UserRepository;

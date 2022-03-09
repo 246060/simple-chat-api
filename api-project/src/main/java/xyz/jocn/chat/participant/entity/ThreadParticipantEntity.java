@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import xyz.jocn.chat.chat_space.entity.ThreadEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 @ToString
 @Getter
@@ -39,13 +40,12 @@ public class ThreadParticipantEntity {
 	private ThreadEntity thread;
 
 	@ManyToOne
-	private RoomParticipantEntity roomParticipant;
+	private UserEntity user;
 
 	@Builder
-	public ThreadParticipantEntity(long id, ThreadEntity thread,
-		RoomParticipantEntity roomParticipant) {
+	public ThreadParticipantEntity(long id, ThreadEntity thread, UserEntity user) {
 		this.id = id;
 		this.thread = thread;
-		this.roomParticipant = roomParticipant;
+		this.user = user;
 	}
 }

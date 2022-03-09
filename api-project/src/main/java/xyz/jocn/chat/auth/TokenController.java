@@ -1,4 +1,4 @@
-package xyz.jocn.chat.auth.controller;
+package xyz.jocn.chat.auth;
 
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.auth.service.TokenService;
 import xyz.jocn.chat.auth.dto.TokenCreateRequestDto;
 import xyz.jocn.chat.auth.dto.TokenRefreshRequestDto;
 

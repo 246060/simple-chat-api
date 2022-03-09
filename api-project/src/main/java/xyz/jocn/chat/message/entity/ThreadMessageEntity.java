@@ -72,4 +72,8 @@ public class ThreadMessageEntity {
 		this.threadParticipant = threadParticipant;
 		this.thread = thread;
 	}
+
+	public void changeState(ThreadMessageState state) {
+		this.state = state;
+	}
 }

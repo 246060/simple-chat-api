@@ -6,4 +6,13 @@ import lombok.Data;
 public class PageDto<T> {
 	private PageMeta meta;
 	private T data;
+
+	public PageDto() {
+
+	}
+
+	public PageDto(PageMeta meta, T data) {
+		this.meta = meta;
+		this.data = data;
+	}
 }

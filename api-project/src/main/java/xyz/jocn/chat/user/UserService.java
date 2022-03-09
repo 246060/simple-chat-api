@@ -1,11 +1,13 @@
-package xyz.jocn.chat.user.service;
+package xyz.jocn.chat.user;
+
+import static xyz.jocn.chat.common.enums.ResourceType.*;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.user.exception.AlreadyExistUserException;
+import xyz.jocn.chat.common.exception.ResourceAlreadyExistException;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
 import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.repo.user.UserRepository;
@@ -22,7 +24,7 @@ public class UserService {
 		userRepository
 			.findByEmail(userSignUpRequestDto.getEmail())
 			.ifPresent(entity -> {
-				throw new AlreadyExistUserException();
+				throw new ResourceAlreadyExistException(USER);
 			});
 
 		userRepository.save(UserEntity.builder()

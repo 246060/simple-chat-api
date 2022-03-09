@@ -5,7 +5,8 @@ import xyz.jocn.chat.message.enums.MessageMarkFlag;
 
 @Data
 public class ThreadMessageMarkCreateDto {
-	private MessageMarkFlag type;
-	private Long threadParticipantId;
+	private Long userId;
+
 	private Long threadMessageId;
+	private MessageMarkFlag type;
 }

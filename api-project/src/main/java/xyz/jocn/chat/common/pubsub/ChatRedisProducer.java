@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ChatRedisProducer implements ChatProducer{
 
 	@Override
-	public boolean emit(ProducerEvent producerEvent) {
+	public boolean emit(PublishEvent producerEvent) {
 		return false;
 	}
 }

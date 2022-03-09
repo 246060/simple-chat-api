@@ -1,5 +1,7 @@
 package xyz.jocn.chat.message.service;
 
+import static xyz.jocn.chat.common.enums.ResourceType.*;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -7,24 +9,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.chat.chat_space.entity.ThreadEntity;
+import xyz.jocn.chat.chat_space.repo.thread.ThreadRepository;
+import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
+import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.message.converter.ThreadMessageConverter;
 import xyz.jocn.chat.message.converter.ThreadMessageMarkConverter;
+import xyz.jocn.chat.message.dto.ThreadMessageChangeDto;
 import xyz.jocn.chat.message.dto.ThreadMessageCreateDto;
 import xyz.jocn.chat.message.dto.ThreadMessageDto;
 import xyz.jocn.chat.message.dto.ThreadMessageMarkCreateDto;
 import xyz.jocn.chat.message.dto.ThreadMessageMarkDto;
 import xyz.jocn.chat.message.entity.ThreadMessageEntity;
 import xyz.jocn.chat.message.entity.ThreadMessageMarkEntity;
-import xyz.jocn.chat.message.exception.NotAvailableMessageTypeException;
-import xyz.jocn.chat.message.exception.NotFoundThreadMessageException;
-import xyz.jocn.chat.message.repo.thread_message_mark.ThreadMessageMarkRepository;
 import xyz.jocn.chat.message.repo.thread_message.ThreadMessageRepository;
+import xyz.jocn.chat.message.repo.thread_message_mark.ThreadMessageMarkRepository;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
-import xyz.jocn.chat.participant.exception.NotFoundThreadParticipantException;
+import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
 import xyz.jocn.chat.participant.repo.thread_participant.ThreadParticipantRepository;
-import xyz.jocn.chat.chat_space.entity.ThreadEntity;
-import xyz.jocn.chat.chat_space.exception.NotFoundThreadException;
-import xyz.jocn.chat.chat_space.repo.thread.ThreadRepository;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,25 +39,30 @@ public class ThreadMessageService {
 	private final ThreadMessageRepository threadMessageRepository;
 	private final ThreadMessageMarkRepository threadMessageMarkRepository;
 
+	private final RoomParticipantRepository roomParticipantRepository;
+
 	private final ThreadMessageConverter threadMessageConverter = ThreadMessageConverter.INSTANCE;
 	private final ThreadMessageMarkConverter threadMessageMarkConverter = ThreadMessageMarkConverter.INSTANCE;
 
 	@Transactional
-	public void sendMessageToThread(ThreadMessageCreateDto dto) {
+	public void send(ThreadMessageCreateDto dto) {
 		switch (dto.getType()) {
 			case SIMPLE:
 				sendSimpleMessageToThread(dto);
+				break;
 			default:
-				throw new NotAvailableMessageTypeException();
+				throw new NotAvailableFeatureException();
 		}
+		// ProducerEvent producerEvent = new ProducerEvent();
+		// producer.emit(producerEvent);
 	}
 
 	private void sendSimpleMessageToThread(ThreadMessageCreateDto dto) {
 
 		ThreadParticipantEntity threadParticipantEntity =
 			threadParticipantRepository
-				.findById(dto.getThreadParticipantId())
-				.orElseThrow(NotFoundThreadParticipantException::new);
+				.findByThreadIdAAndUserId(dto.getThreadId(), dto.getUserId())
+				.orElseThrow(() -> new ResourceNotFoundException(THREAD_PARTICIPANT));
 
 		threadMessageRepository.save(
 			ThreadMessageEntity.builder()
@@ -64,32 +71,33 @@ public class ThreadMessageService {
 				.message(dto.getMessage())
 				.build()
 		);
-
-		// ProducerEvent producerEvent = new ProducerEvent();
-		// producer.emit(producerEvent);
 	}
 
-	public List<ThreadMessageDto> getMessagesInThread(Long threadId) {
+	public List<ThreadMessageDto> getMessages(Long threadId) {
+
 		ThreadEntity threadEntity =
 			threadRepository
 				.findById(threadId)
-				.orElseThrow(NotFoundThreadException::new);
+				.orElseThrow(() -> new ResourceNotFoundException(THREAD));
 
-		return threadMessageConverter.toDto(threadMessageRepository.findByThread(threadEntity));
+		List<ThreadMessageEntity> threadMessageEntities =
+			threadMessageRepository.findByThread(threadEntity);
+
+		return threadMessageConverter.toDto(threadMessageEntities);
 	}
 
 	@Transactional
-	public void putMarkOnThreadMessage(ThreadMessageMarkCreateDto dto) {
+	public void mark(ThreadMessageMarkCreateDto dto) {
 
 		ThreadMessageEntity threadMessageEntity =
 			threadMessageRepository
 				.findById(dto.getThreadMessageId())
-				.orElseThrow(NotFoundThreadMessageException::new);
+				.orElseThrow(() -> new ResourceNotFoundException(THREAD_MESSAGE));
 
 		ThreadParticipantEntity threadParticipantEntity =
 			threadParticipantRepository
-				.findById(dto.getThreadParticipantId())
-				.orElseThrow(NotFoundThreadParticipantException::new);
+				.findById(dto.getUserId())
+				.orElseThrow(() -> new ResourceNotFoundException(THREAD_PARTICIPANT));
 
 		threadMessageMarkRepository.save(
 			ThreadMessageMarkEntity.builder()
@@ -103,11 +111,11 @@ public class ThreadMessageService {
 		// producer.emit(producerEvent);
 	}
 
-	public List<ThreadMessageMarkDto> getThreadMessageMarks(Long threadMessageId) {
+	public List<ThreadMessageMarkDto> getMarks(Long messageId) {
 		ThreadMessageEntity threadMessageEntity =
 			threadMessageRepository
-				.findById(threadMessageId)
-				.orElseThrow(NotFoundThreadMessageException::new);
+				.findById(messageId)
+				.orElseThrow(() -> new ResourceNotFoundException(THREAD_MESSAGE));
 
 		return threadMessageMarkConverter.toDto(
 			threadMessageMarkRepository.findAllByThreadMessage(threadMessageEntity)
@@ -117,5 +125,15 @@ public class ThreadMessageService {
 	@Transactional
 	public void cancelThreadMessageMark(Long markId) {
 		threadMessageMarkRepository.deleteById(markId);
+	}
+
+	@Transactional
+	public void change(ThreadMessageChangeDto dto) {
+		ThreadMessageEntity threadMessageEntity =
+			threadMessageRepository
+				.findById(dto.getThreadMessageId())
+				.orElseThrow(() -> new ResourceNotFoundException(THREAD_MESSAGE));
+
+		threadMessageEntity.changeState(dto.getState());
 	}
 }

@@ -5,6 +5,7 @@ import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.chat.participant.dto.RoomExitDto;
 import xyz.jocn.chat.participant.dto.RoomInviteRequestDto;
 import xyz.jocn.chat.participant.service.RoomParticipantService;
 
@@ -37,9 +39,18 @@ public class RoomParticipantController {
 		return ok(success(roomParticipantService.getParticipants(roomId)));
 	}
 
-	@DeleteMapping("/rooms/participants/{participantId}")
-	public ResponseEntity exit(@PathVariable String roomId, @PathVariable Long participantId) {
-		roomParticipantService.exit(participantId);
+	@DeleteMapping("/rooms/{roomId}/participants/{participantId}")
+	public ResponseEntity exit(
+		@PathVariable Long roomId,
+		@PathVariable Long participantId,
+		@AuthenticationPrincipal(expression = USER_PK) String userId
+	) {
+		RoomExitDto dto = new RoomExitDto();
+		dto.setRoomId(roomId);
+		dto.setParticipantId(participantId);
+		dto.setUserId(Long.parseLong(userId));
+
+		roomParticipantService.exit(dto);
 		return ok(success());
 	}
 }

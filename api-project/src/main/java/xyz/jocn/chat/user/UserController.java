@@ -1,4 +1,4 @@
-package xyz.jocn.chat.user.converter;
+package xyz.jocn.chat.user;
 
 import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
-import xyz.jocn.chat.user.service.UserService;
 
 @Slf4j
 @RequiredArgsConstructor

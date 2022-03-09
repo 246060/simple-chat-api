@@ -1,4 +1,4 @@
-package xyz.jocn.chat.auth.entity;
+package xyz.jocn.chat.auth;
 
 import java.time.Instant;
 

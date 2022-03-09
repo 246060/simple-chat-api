@@ -7,6 +7,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -38,9 +39,13 @@ public class ThreadEntity {
 	@OneToOne
 	private RoomMessageEntity roomMessage;
 
+	@ManyToOne
+	private RoomEntity room;
+
 	@Builder
-	public ThreadEntity(long id, RoomMessageEntity roomMessage) {
+	public ThreadEntity(long id, RoomMessageEntity roomMessage, RoomEntity room) {
 		this.id = id;
 		this.roomMessage = roomMessage;
+		this.room = room;
 	}
 }

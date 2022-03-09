@@ -34,6 +34,81 @@
 ![erd](docs/erd.png)
 
 
+## api server interface
+
+```text
+POST /token
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email" : 
+  "password" : 
+}
+```
+
+```text
+POST /token/refresh
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refresh_token" : 
+}
+```
+
+```text
+POST /rooms
+Content-Type: application/json
+Accept: application/json
+
+{
+
+  "invitee-id" : 
+}
+```
+
+```text
+GET /rooms
+Accept: application/json
+```
+
+```text
+POST /rooms/messages/{messageId}/threads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "participant-id" : 
+}
+```
+
+```text
+
+```
+
+```text
+
+```
+
+```text
+
+```
+
+```text
+
+```
+
+```text
+
+```
+
+```text
+
+```
+
+
+
 ## event message foramt
 ### topic
 #### client 

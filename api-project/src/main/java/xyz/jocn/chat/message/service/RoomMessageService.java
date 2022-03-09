@@ -1,17 +1,23 @@
 package xyz.jocn.chat.message.service;
 
+import static xyz.jocn.chat.common.enums.ResourceType.*;
+
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.chat_space.entity.RoomEntity;
-import xyz.jocn.chat.chat_space.exception.NotFoundRoomException;
-import xyz.jocn.chat.chat_space.repo.room.RoomRepository;
 import xyz.jocn.chat.common.dto.PageDto;
+import xyz.jocn.chat.common.dto.PageMeta;
+import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
+import xyz.jocn.chat.common.exception.ResourceNotFoundException;
+import xyz.jocn.chat.message.converter.RoomMessageConverter;
 import xyz.jocn.chat.message.converter.RoomMessageMarkConverter;
+import xyz.jocn.chat.message.dto.RoomMessageChangeDto;
 import xyz.jocn.chat.message.dto.RoomMessageDto;
 import xyz.jocn.chat.message.dto.RoomMessageGetDto;
 import xyz.jocn.chat.message.dto.RoomMessageMarkCreateDto;
@@ -19,12 +25,9 @@ import xyz.jocn.chat.message.dto.RoomMessageMarkDto;
 import xyz.jocn.chat.message.dto.RoomMessageSendDto;
 import xyz.jocn.chat.message.entity.RoomMessageEntity;
 import xyz.jocn.chat.message.entity.RoomMessageMarkEntity;
-import xyz.jocn.chat.message.exception.NotAvailableMessageTypeException;
-import xyz.jocn.chat.message.exception.NotFoundRoomMessageException;
-import xyz.jocn.chat.message.repo.room_message_mark.RoomMessageMarkRepository;
 import xyz.jocn.chat.message.repo.room_message.RoomMessageRepository;
+import xyz.jocn.chat.message.repo.room_message_mark.RoomMessageMarkRepository;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
-import xyz.jocn.chat.participant.exception.NotFoundRoomParticipantException;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
 
 @Slf4j
@@ -33,11 +36,11 @@ import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository
 @Transactional(readOnly = true)
 public class RoomMessageService {
 
-	private final RoomRepository roomRepository;
 	private final RoomParticipantRepository roomParticipantRepository;
 	private final RoomMessageRepository roomMessageRepository;
 	private final RoomMessageMarkRepository roomMessageMarkRepository;
 
+	private final RoomMessageConverter roomMessageConverter = RoomMessageConverter.INSTANCE;
 	private final RoomMessageMarkConverter roomMessageMarkConverter = RoomMessageMarkConverter.INSTANCE;
 
 	@Transactional
@@ -45,52 +48,58 @@ public class RoomMessageService {
 		switch (dto.getType()) {
 			case SIMPLE:
 				sendSimpleMessageToRoom(dto);
+				break;
 			default:
-				throw new NotAvailableMessageTypeException();
+				throw new NotAvailableFeatureException();
 		}
-
 		// ProducerEvent producerEvent = new ProducerEvent();
 		// producer.emit(producerEvent);
 	}
 
 	private void sendSimpleMessageToRoom(RoomMessageSendDto dto) {
-		RoomEntity roomEntity =
-			roomRepository
-				.findById(dto.getRoomId())
-				.orElseThrow(NotFoundRoomException::new);
 
 		RoomParticipantEntity roomParticipantEntity =
 			roomParticipantRepository
-				.findById(dto.getParticipantId())
-				.orElseThrow(NotFoundRoomParticipantException::new);
+				.findByRoomIdAndUserId(dto.getRoomId(), dto.getUserId())
+				.orElseThrow(() -> new ResourceNotFoundException(ROOM_PARTICIPANT));
 
-		RoomMessageEntity roomMessageEntity =
+		roomMessageRepository.save(
 			RoomMessageEntity.builder()
 				.type(dto.getType())
-				.room(roomEntity)
+				.room(roomParticipantEntity.getRoom())
 				.sender(roomParticipantEntity)
-				.build();
-
-		roomMessageRepository.save(roomMessageEntity);
+				.build()
+		);
 	}
 
-	public PageDto<RoomMessageDto> getMessagesInRoom(RoomMessageGetDto dto) {
+	public PageDto<RoomMessageDto> getMessagesInRoom(RoomMessageGetDto dto, PageMeta pageMeta) {
 
-		return null;
+		PageRequest pageRequest = PageRequest.of(pageMeta.getPageIndex(), pageMeta.getSizePerPage());
+		Page<RoomMessageEntity> page = roomMessageRepository.findAllByRoomId(dto.getRoomId(), pageRequest);
+
+		PageMeta meta = new PageMeta();
+		meta.setPageIndex(page.getNumber());
+		meta.setSizePerPage(page.getNumberOfElements());
+		meta.setHasNext(page.hasNext());
+		meta.setHasPrev(page.hasPrevious());
+		meta.setTotalItems(page.getTotalElements());
+		meta.setTotalPages(page.getTotalPages());
+
+		return new PageDto(meta, page.getContent());
 	}
 
 	@Transactional
-	public void putMarkOnRoomMessage(RoomMessageMarkCreateDto dto) {
+	public void mark(RoomMessageMarkCreateDto dto) {
 
 		RoomMessageEntity roomMessageEntity =
 			roomMessageRepository
 				.findById(dto.getMessageId())
-				.orElseThrow(NotFoundRoomMessageException::new);
+				.orElseThrow(() -> new ResourceNotFoundException(ROOM_MESSAGE));
 
 		RoomParticipantEntity roomParticipantEntity =
 			roomParticipantRepository
-				.findById(dto.getParticipantId())
-				.orElseThrow(NotFoundRoomParticipantException::new);
+				.findByRoomIdAndUserId(roomMessageEntity.getRoom().getId(), dto.getUserId())
+				.orElseThrow(() -> new ResourceNotFoundException(ROOM_PARTICIPANT));
 
 		roomMessageMarkRepository.save(
 			RoomMessageMarkEntity.builder()
@@ -104,9 +113,11 @@ public class RoomMessageService {
 		// producer.emit(producerEvent);
 	}
 
-	public List<RoomMessageMarkDto> getMessageMarks(Long messageId) {
-		RoomMessageEntity roomMessageEntity = roomMessageRepository.findById(messageId)
-			.orElseThrow(NotFoundRoomMessageException::new);
+	public List<RoomMessageMarkDto> getMarks(Long messageId) {
+		RoomMessageEntity roomMessageEntity =
+			roomMessageRepository
+				.findById(messageId)
+				.orElseThrow(() -> new ResourceNotFoundException(ROOM_MESSAGE));
 
 		List<RoomMessageMarkEntity> roomMessageMarkEntities =
 			roomMessageMarkRepository.findAllByRoomMessage(roomMessageEntity);
@@ -115,7 +126,17 @@ public class RoomMessageService {
 	}
 
 	@Transactional
-	public void cancelRoomMessageMark(Long markId) {
+	public void cancelMark(Long markId) {
 		roomMessageMarkRepository.deleteById(markId);
+	}
+
+	@Transactional
+	public void change(RoomMessageChangeDto dto) {
+		RoomMessageEntity roomMessageEntity =
+			roomMessageRepository
+				.findById(dto.getMessageId())
+				.orElseThrow(() -> new ResourceNotFoundException(ROOM_MESSAGE));
+
+		roomMessageEntity.changeState(dto.getState());
 	}
 }

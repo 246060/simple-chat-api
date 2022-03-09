@@ -1,4 +1,4 @@
-package xyz.jocn.chat.user.exception;
+package xyz.jocn.chat.common.exception;
 
 public class AuthenticationException extends RuntimeException{
 	public AuthenticationException() {

@@ -83,4 +83,20 @@ public class RoomMessageEntity {
 		this.sender = sender;
 		this.room = room;
 	}
+
+	public boolean hasThread() {
+		return hasThread;
+	}
+
+	public boolean hasMark() {
+		return hasMark;
+	}
+
+	public void changeState(RoomMessageState state) {
+		this.state = state;
+	}
+
+	public void openThread() {
+		this.hasThread = true;
+	}
 }

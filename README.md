@@ -39,13 +39,15 @@
 4. docker or not for spring - 어떤 방식을 할지...
 5. nginx stick session max connection   
 6. api server 부하 테스트 jmeter? ngrinder? 
-7. 디비 테이블 별 소프트 fk와 물리 fk 결정
-8. 디비 테이블 별 소프트 삭제와 물리 삭제 결정, casecade도 같이 고려
-9. message 테이블은 record가 엄청 많을건데... 어떻게 관리하지? table 파티션? nosql scale out? 
 
 ## ERD
 현재 구상중..
 ![erd](docs/erd-smp-cht.png)
+
+### 고려사항
+1. 디비 테이블 별 소프트 fk와 물리 fk 결정
+2. 디비 테이블 별 소프트 삭제와 물리 삭제 결정, casecade도 같이 고려
+3. message 테이블은 record가 엄청 많을건데... 어떻게 관리하지? table 파티션? nosql scale out? 
 
 ## Version History
 

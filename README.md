@@ -5,22 +5,32 @@
 - 유저 클라이언트 제외 
 
 ## Tech stack 
-현재 구상중.. 
+현재 구상중.. 🤔
  
-1. spring boot + web mvc, validator, actuator
-2. spring data + jpa & querydsl
-3. mapstruct
-4. spring data redis
-4. express, socket.io
-5. h2, mysql
-6. aws ec2, nginx, s3, redis, codedeploy
-7. github repo, github action
-8. nosql(채팅 메시지는 document 로 관리 할까 고민중..) 
+1. api server 
+    - spring boot mvc 
+    - spring validator 
+    - spring actuator
+    - spring data jpa
+    - querydsl
+    - mapstruct
+    - h2, mysql
+        - mysql replication (try? nope) 
+    - spring data redis
+    - nginx : RR
+2. socket server
+    - node + express
+    - socket.io
+    - nginx : stick
+3. Redis
+    - Cluster (try? nope) 
+4. Github Repo + Action, Codedeploy
+5. NoSQL(Try to manage chat messages by NoSQL? nope) 
 
 ## 아키텍처 설계
 현재 구상중..
 - websocekt + redis 는 event 신호 정도만 전달 
-![architecture](docs/architecture1.png) 
+![architecture](docs/arch-smp-chat.png) 
 
 ### 고려사항
 1. socket.io max connection per node and server
@@ -29,103 +39,58 @@
 4. docker or not for spring - 어떤 방식을 할지...
 5. nginx stick session max connection   
 6. api server 부하 테스트 jmeter? ngrinder? 
-
+7. 디비 테이블 별 소프트 fk와 물리 fk 결정
+8. 디비 테이블 별 소프트 삭제와 물리 삭제 결정, casecade도 같이 고려
+9. message 테이블은 record가 엄청 많을건데... 어떻게 관리하지? table 파티션? nosql scale out? 
 
 ## ERD
 현재 구상중..
-![erd](docs/erd.png)
+![erd](docs/erd-smp-cht.png)
+
+## Version History
+
+### API Server Version 0
+    
+1. user api
+    - sign up
+    - sign out
+    - get me info
+     
+2. token api
+    - issue access token by credentials
+    - issue access token by refresh token
+3. friends group
+    - group
+        - create
+        - delete
+        - friends
+            - add
+            - delete
+            - block
+4. room api
+    - open
+    - invite friends
+    - message
+        - send
+        - receive
+        - mark
+            - create
+            - cancel
+5. thread api
+    - open
+    - message
+        - send
+        - receive
+        - mark
+            - create
+            - cancel
+
+6. redis 연동
 
 
-## event message foramt
-### topic
-#### client 
-- emit : event.client
-- listen : event.server  
-#### server
-- emit : event.server
-- listen : event.client
+### Socket Server Version 0
+socket 서버는 이벤트 전파 역할만 하므로 많은 기능이 없다.
 
-### 연결 요청 (ex. browser)
-모든 web-socket 연결은 반드시 header에 jwt 토큰 필요
-#### 요청 포맷
-Topic : event.client
-
-##### chat connect
-```json
-{
-  "type" : "chat",
-  "roomId" : "room-uuid"
-}
-```
-##### person connect
-```json
-{
-  "type" : "person",
-  "userId" : "user-uuid"
-}
-```
-##### base connect
-```json
-{
-  "type" : "all"
-}
-```
-
-### 연결 응답 
-Topic : event.server
-
-(note: websocket 요청의 jwt 유효성 확인)
-
-#### 성공 응답 포맷 
-
-##### chat 
-```json
-{
-  "type": "chat",
-  "roomId" : "room-uuid",
-  "msg": "connection success",
-}
-```
-
-##### person
-```json
-{
-  "type": "person",
-  "userId" : "user-uuid",
-  "msg": "connection success",
-}
-```
-
-##### all
-```json
-{
-  "type": "all",
-  "msg": "connection success",
-}
-```
-
-
-### redis publish format
-(api server)
-
-```text
-{
-    "relay-type" : "chat | person | all",
-    "[roomId]" : "room-uuid",
-    "[userId]" : "user-uuid",
-    "timestamp" : "utc time",
-    "msg-type" : 
-        // if relay-type : room  
-        ["room.msg.new | room.person.in | room.person.out | ..."]
-        
-        // if relay-type : person
-        ["person.invited | person.payment | ..."]
-        
-        // if relay-type : all
-        ["all.service-check | all.biz-event | all.new-feature | ..."] 
-}
-
-```
- 
-
-
+1. socket.io connection with jwt 
+2. socket.io client 연결
+2. redis 연동

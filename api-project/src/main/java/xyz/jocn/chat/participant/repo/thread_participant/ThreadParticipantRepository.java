@@ -8,12 +8,13 @@ import org.springframework.stereotype.Repository;
 
 import xyz.jocn.chat.chat_space.entity.ThreadEntity;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 @Repository
 public interface ThreadParticipantRepository
 	extends JpaRepository<ThreadParticipantEntity, Long>, ThreadParticipantRepositoryExt {
 
-	Optional<ThreadParticipantEntity> findByThreadIdAAndUserId(Long threadId, Long userId);
+	Optional<ThreadParticipantEntity> findByThreadAndUser(ThreadEntity thread, UserEntity userEntity);
 
 	List<ThreadParticipantEntity> findAllByUserId(Long userId);
 

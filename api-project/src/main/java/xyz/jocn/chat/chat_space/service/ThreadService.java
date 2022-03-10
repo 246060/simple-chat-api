@@ -1,6 +1,5 @@
 package xyz.jocn.chat.chat_space.service;
 
-import static xyz.jocn.chat.common.enums.ResourceType.THREAD;
 import static xyz.jocn.chat.common.enums.ResourceType.*;
 import static xyz.jocn.chat.common.pubsub.EventTarget.*;
 import static xyz.jocn.chat.common.pubsub.EventType.*;
@@ -65,25 +64,22 @@ public class ThreadService {
 			);
 
 		List<UserEntity> users = new ArrayList<>();
-		users.add(UserEntity.builder().id(threadOpenDto.getUserId()).build());
+		users.add(new UserEntity(threadOpenDto.getUserId()));
 		users.add(roomMessageEntity.getSender().getUser());
 
 		for (UserEntity user : users) {
 			threadParticipantRepository.save(
-				ThreadParticipantEntity.builder()
-					.user(user)
-					.thread(threadEntity)
-					.build()
+				ThreadParticipantEntity.builder().user(user).thread(threadEntity).build()
 			);
 		}
 
-		{ // pub event
+		{ // event
 			List<Long> receivers = users.stream().map(UserEntity::getId).collect(Collectors.toList());
 
 			PublishEvent publishEvent = new PublishEvent();
 			publishEvent.setTarget(INDIVIDUAL);
 			publishEvent.setReceiver(Collections.singletonList(receivers));
-			publishEvent.setType(THREAD_OPEN);
+			publishEvent.setType(THREAD_EVENT);
 			publishEvent.setSpaceId(threadEntity.getId());
 
 			chatProducer.emit(publishEvent);

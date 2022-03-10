@@ -28,6 +28,8 @@
 3. pm2 or docker for node - 어떤 방식을 할지... 
 4. docker or not for spring - 어떤 방식을 할지...
 5. nginx stick session max connection   
+6. api server 부하 테스트 jmeter? ngrinder? 
+
 
 ## ERD
 현재 구상중..

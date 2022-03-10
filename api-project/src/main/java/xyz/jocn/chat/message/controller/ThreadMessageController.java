@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -23,40 +24,41 @@ import xyz.jocn.chat.message.service.ThreadMessageService;
 
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping("/threads")
 @RestController
 public class ThreadMessageController {
 
 	private static final String USER_PK = JWT_CLAIM_FIELD_NAME_USER_KEY;
 	private final ThreadMessageService threadMessageService;
 
-	@PostMapping("/threads/{threadId}/messages")
+	@PostMapping("/{threadId}/messages")
 	public ResponseEntity send(
+		@AuthenticationPrincipal(expression = USER_PK) String userId,
 		@PathVariable Long threadId,
-		@RequestBody ThreadMessageCreateDto dto,
-		@AuthenticationPrincipal(expression = USER_PK) String userId
+		@RequestBody ThreadMessageCreateDto dto
 	) {
+		dto.setThreadId(threadId);
+		dto.setUserId(Long.parseLong(userId));
 		threadMessageService.send(dto);
 		return ok(success());
 	}
 
-	@GetMapping("/threads/{threadId}/messages")
+	@GetMapping("/{threadId}/messages")
 	public ResponseEntity getMessages(@PathVariable Long threadId) {
 		return ok(success(threadMessageService.getMessages(threadId)));
 	}
 
-	@PatchMapping("/threads/{threadId}/messages/{threadMessageId}")
+	@PatchMapping("/messages/{threadMessageId}")
 	public ResponseEntity changeMessage(
 		@PathVariable Long threadMessageId,
 		@RequestBody ThreadMessageChangeDto dto
 	) {
-
 		dto.setThreadMessageId(threadMessageId);
 		threadMessageService.change(dto);
-
 		return ok(success());
 	}
 
-	@PostMapping("/threads/messages/{threadMessageId}/marks")
+	@PostMapping("/messages/{threadMessageId}/marks")
 	public ResponseEntity mark(
 		@PathVariable Long threadMessageId,
 		@RequestBody ThreadMessageMarkCreateDto dto
@@ -67,12 +69,12 @@ public class ThreadMessageController {
 		return ok(success());
 	}
 
-	@GetMapping("/threads/messages/{threadMessageId}/marks")
+	@GetMapping("/messages/{threadMessageId}/marks")
 	public ResponseEntity get2(@PathVariable Long threadMessageId) {
 		return ok(success(threadMessageService.getMarks(threadMessageId)));
 	}
 
-	@DeleteMapping("/threads/messages/marks/{markId}")
+	@DeleteMapping("/messages/marks/{markId}")
 	public ResponseEntity pu3t(@PathVariable Long markId) {
 		threadMessageService.cancelThreadMessageMark(markId);
 		return ok(success());

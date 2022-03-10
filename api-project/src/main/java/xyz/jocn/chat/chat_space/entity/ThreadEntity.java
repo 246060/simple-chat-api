@@ -42,6 +42,11 @@ public class ThreadEntity {
 	@ManyToOne
 	private RoomEntity room;
 
+	public ThreadEntity(long id) {
+		this.id = id;
+	}
+
+
 	@Builder
 	public ThreadEntity(long id, RoomMessageEntity roomMessage, RoomEntity room) {
 		this.id = id;

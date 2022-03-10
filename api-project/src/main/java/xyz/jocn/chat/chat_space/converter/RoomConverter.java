@@ -8,11 +8,12 @@ import xyz.jocn.chat.chat_space.dto.RoomDto;
 import xyz.jocn.chat.chat_space.entity.RoomEntity;
 import xyz.jocn.chat.participant.converter.RoomParticipantConverter;
 
-@Mapper(uses = {RoomParticipantConverter.class})
+@Mapper
+	// (uses = {RoomParticipantConverter.class})
 public interface RoomConverter {
 
 	RoomConverter INSTANCE = Mappers.getMapper(RoomConverter.class);
 
-	@Mapping(source = "id", target = "roomId")
+	@Mapping(target = "roomId", source = "id")
 	RoomDto toDto(RoomEntity entity);
 }

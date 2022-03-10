@@ -42,6 +42,10 @@ public class RoomEntity {
 	@CreatedDate
 	private Instant createdAt;
 
+	public RoomEntity(long id) {
+		this.id = id;
+	}
+
 	@Builder
 	public RoomEntity(long id, UserEntity user) {
 		this.id = id;

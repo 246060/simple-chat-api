@@ -1,6 +1,8 @@
 package xyz.jocn.chat.message.service;
 
 import static xyz.jocn.chat.common.enums.ResourceType.*;
+import static xyz.jocn.chat.common.pubsub.EventTarget.*;
+import static xyz.jocn.chat.common.pubsub.EventType.*;
 
 import java.util.List;
 
@@ -15,7 +17,8 @@ import xyz.jocn.chat.common.dto.PageDto;
 import xyz.jocn.chat.common.dto.PageMeta;
 import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
-import xyz.jocn.chat.message.converter.RoomMessageConverter;
+import xyz.jocn.chat.common.pubsub.ChatProducer;
+import xyz.jocn.chat.common.pubsub.PublishEvent;
 import xyz.jocn.chat.message.converter.RoomMessageMarkConverter;
 import xyz.jocn.chat.message.dto.RoomMessageChangeDto;
 import xyz.jocn.chat.message.dto.RoomMessageDto;
@@ -40,8 +43,9 @@ public class RoomMessageService {
 	private final RoomMessageRepository roomMessageRepository;
 	private final RoomMessageMarkRepository roomMessageMarkRepository;
 
-	private final RoomMessageConverter roomMessageConverter = RoomMessageConverter.INSTANCE;
 	private final RoomMessageMarkConverter roomMessageMarkConverter = RoomMessageMarkConverter.INSTANCE;
+
+	private final ChatProducer chatProducer;
 
 	@Transactional
 	public void sendMessageToRoom(RoomMessageSendDto dto) {
@@ -52,8 +56,12 @@ public class RoomMessageService {
 			default:
 				throw new NotAvailableFeatureException();
 		}
-		// ProducerEvent producerEvent = new ProducerEvent();
-		// producer.emit(producerEvent);
+
+		PublishEvent publishEvent = new PublishEvent();
+		publishEvent.setTarget(ROOM_AREA);
+		publishEvent.setType(ROOM_MESSAGE_EVENT);
+		publishEvent.setSpaceId(dto.getRoomId());
+		chatProducer.emit(publishEvent);
 	}
 
 	private void sendSimpleMessageToRoom(RoomMessageSendDto dto) {
@@ -109,15 +117,17 @@ public class RoomMessageService {
 				.build()
 		);
 
-		// ProducerEvent producerEvent = new ProducerEvent();
-		// producer.emit(producerEvent);
+		PublishEvent publishEvent = new PublishEvent();
+		publishEvent.setTarget(ROOM_AREA);
+		publishEvent.setType(ROOM_MESSAGE_EVENT);
+		publishEvent.setSpaceId(roomMessageEntity.getRoom().getId());
+		chatProducer.emit(publishEvent);
 	}
 
 	public List<RoomMessageMarkDto> getMarks(Long messageId) {
+
 		RoomMessageEntity roomMessageEntity =
-			roomMessageRepository
-				.findById(messageId)
-				.orElseThrow(() -> new ResourceNotFoundException(ROOM_MESSAGE));
+			roomMessageRepository.findById(messageId).orElseThrow(() -> new ResourceNotFoundException(ROOM_MESSAGE));
 
 		List<RoomMessageMarkEntity> roomMessageMarkEntities =
 			roomMessageMarkRepository.findAllByRoomMessage(roomMessageEntity);
@@ -127,16 +137,37 @@ public class RoomMessageService {
 
 	@Transactional
 	public void cancelMark(Long markId) {
-		roomMessageMarkRepository.deleteById(markId);
+
+		RoomMessageMarkEntity roomMessageMarkEntity =
+			roomMessageMarkRepository
+				.findById(markId)
+				.orElseThrow(() -> new ResourceNotFoundException(THREAD_MESSAGE_MARK));
+
+		long roomId = roomMessageMarkEntity.getRoomParticipant().getRoom().getId();
+
+		roomMessageMarkRepository.delete(roomMessageMarkEntity);
+
+		PublishEvent publishEvent = new PublishEvent();
+		publishEvent.setTarget(ROOM_AREA);
+		publishEvent.setType(ROOM_MESSAGE_EVENT);
+		publishEvent.setSpaceId(roomId);
+		chatProducer.emit(publishEvent);
 	}
 
 	@Transactional
 	public void change(RoomMessageChangeDto dto) {
+
 		RoomMessageEntity roomMessageEntity =
 			roomMessageRepository
 				.findById(dto.getMessageId())
 				.orElseThrow(() -> new ResourceNotFoundException(ROOM_MESSAGE));
 
 		roomMessageEntity.changeState(dto.getState());
+
+		PublishEvent publishEvent = new PublishEvent();
+		publishEvent.setTarget(ROOM_AREA);
+		publishEvent.setType(ROOM_MESSAGE_EVENT);
+		publishEvent.setSpaceId(roomMessageEntity.getRoom().getId());
+		chatProducer.emit(publishEvent);
 	}
 }

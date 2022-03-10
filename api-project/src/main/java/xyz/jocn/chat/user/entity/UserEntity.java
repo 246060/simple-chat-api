@@ -55,6 +55,10 @@ public class UserEntity {
 	@LastModifiedBy
 	private long updatedBy;
 
+	public UserEntity(long id) {
+		this.id = id;
+	}
+
 	@Builder
 	public UserEntity(long id, String email, String name, String password, UserState state) {
 		this.id = id;

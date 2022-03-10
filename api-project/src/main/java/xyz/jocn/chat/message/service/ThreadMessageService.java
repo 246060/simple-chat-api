@@ -1,6 +1,8 @@
 package xyz.jocn.chat.message.service;
 
 import static xyz.jocn.chat.common.enums.ResourceType.*;
+import static xyz.jocn.chat.common.pubsub.EventTarget.*;
+import static xyz.jocn.chat.common.pubsub.EventType.*;
 
 import java.util.List;
 
@@ -13,6 +15,8 @@ import xyz.jocn.chat.chat_space.entity.ThreadEntity;
 import xyz.jocn.chat.chat_space.repo.thread.ThreadRepository;
 import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
+import xyz.jocn.chat.common.pubsub.ChatProducer;
+import xyz.jocn.chat.common.pubsub.PublishEvent;
 import xyz.jocn.chat.message.converter.ThreadMessageConverter;
 import xyz.jocn.chat.message.converter.ThreadMessageMarkConverter;
 import xyz.jocn.chat.message.dto.ThreadMessageChangeDto;
@@ -25,8 +29,8 @@ import xyz.jocn.chat.message.entity.ThreadMessageMarkEntity;
 import xyz.jocn.chat.message.repo.thread_message.ThreadMessageRepository;
 import xyz.jocn.chat.message.repo.thread_message_mark.ThreadMessageMarkRepository;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
-import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
 import xyz.jocn.chat.participant.repo.thread_participant.ThreadParticipantRepository;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,13 +43,14 @@ public class ThreadMessageService {
 	private final ThreadMessageRepository threadMessageRepository;
 	private final ThreadMessageMarkRepository threadMessageMarkRepository;
 
-	private final RoomParticipantRepository roomParticipantRepository;
-
 	private final ThreadMessageConverter threadMessageConverter = ThreadMessageConverter.INSTANCE;
 	private final ThreadMessageMarkConverter threadMessageMarkConverter = ThreadMessageMarkConverter.INSTANCE;
 
+	private final ChatProducer chatProducer;
+
 	@Transactional
 	public void send(ThreadMessageCreateDto dto) {
+
 		switch (dto.getType()) {
 			case SIMPLE:
 				sendSimpleMessageToThread(dto);
@@ -53,16 +58,20 @@ public class ThreadMessageService {
 			default:
 				throw new NotAvailableFeatureException();
 		}
-		// ProducerEvent producerEvent = new ProducerEvent();
-		// producer.emit(producerEvent);
+
+		PublishEvent publishEvent = new PublishEvent();
+		publishEvent.setTarget(THREAD_AREA);
+		publishEvent.setType(THREAD_MESSAGE_EVENT);
+		publishEvent.setSpaceId(dto.getThreadId());
+		chatProducer.emit(publishEvent);
 	}
 
 	private void sendSimpleMessageToThread(ThreadMessageCreateDto dto) {
 
-		ThreadParticipantEntity threadParticipantEntity =
-			threadParticipantRepository
-				.findByThreadIdAAndUserId(dto.getThreadId(), dto.getUserId())
-				.orElseThrow(() -> new ResourceNotFoundException(THREAD_PARTICIPANT));
+		ThreadParticipantEntity threadParticipantEntity = null;
+		// threadParticipantRepository
+		// .findByThreadIdAAndUserId(dto.getThreadId(), dto.getUserId())
+		// .orElseThrow(() -> new ResourceNotFoundException(THREAD_PARTICIPANT));
 
 		threadMessageRepository.save(
 			ThreadMessageEntity.builder()
@@ -96,8 +105,10 @@ public class ThreadMessageService {
 
 		ThreadParticipantEntity threadParticipantEntity =
 			threadParticipantRepository
-				.findById(dto.getUserId())
-				.orElseThrow(() -> new ResourceNotFoundException(THREAD_PARTICIPANT));
+				.findByThreadAndUser(
+					threadMessageEntity.getThread(),
+					UserEntity.builder().id(dto.getUserId()).build()
+				).orElseThrow(() -> new ResourceNotFoundException(THREAD_PARTICIPANT));
 
 		threadMessageMarkRepository.save(
 			ThreadMessageMarkEntity.builder()
@@ -107,11 +118,15 @@ public class ThreadMessageService {
 				.build()
 		);
 
-		// ProducerEvent producerEvent = new ProducerEvent();
-		// producer.emit(producerEvent);
+		PublishEvent publishEvent = new PublishEvent();
+		publishEvent.setTarget(THREAD_AREA);
+		publishEvent.setType(THREAD_MESSAGE_EVENT);
+		publishEvent.setSpaceId(threadParticipantEntity.getThread().getId());
+		chatProducer.emit(publishEvent);
 	}
 
 	public List<ThreadMessageMarkDto> getMarks(Long messageId) {
+
 		ThreadMessageEntity threadMessageEntity =
 			threadMessageRepository
 				.findById(messageId)
@@ -124,16 +139,35 @@ public class ThreadMessageService {
 
 	@Transactional
 	public void cancelThreadMessageMark(Long markId) {
-		threadMessageMarkRepository.deleteById(markId);
+
+		ThreadMessageMarkEntity threadMessageMarkEntity =
+			threadMessageMarkRepository
+				.findById(markId)
+				.orElseThrow(() -> new ResourceNotFoundException(THREAD_MESSAGE_MARK));
+
+		threadMessageMarkRepository.delete(threadMessageMarkEntity);
+
+		PublishEvent publishEvent = new PublishEvent();
+		publishEvent.setTarget(THREAD_AREA);
+		publishEvent.setType(THREAD_MESSAGE_EVENT);
+		publishEvent.setSpaceId(threadMessageMarkEntity.getThreadParticipant().getThread().getId());
+		chatProducer.emit(publishEvent);
 	}
 
 	@Transactional
 	public void change(ThreadMessageChangeDto dto) {
+
 		ThreadMessageEntity threadMessageEntity =
 			threadMessageRepository
 				.findById(dto.getThreadMessageId())
 				.orElseThrow(() -> new ResourceNotFoundException(THREAD_MESSAGE));
 
 		threadMessageEntity.changeState(dto.getState());
+
+		PublishEvent publishEvent = new PublishEvent();
+		publishEvent.setTarget(THREAD_AREA);
+		publishEvent.setType(THREAD_MESSAGE_EVENT);
+		publishEvent.setSpaceId(threadMessageEntity.getThread().getId());
+		chatProducer.emit(publishEvent);
 	}
 }

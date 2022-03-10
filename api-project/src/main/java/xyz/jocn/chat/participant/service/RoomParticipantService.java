@@ -68,18 +68,7 @@ public class RoomParticipantService {
 	}
 
 	public List<RoomParticipantDto> getParticipants(Long roomId) {
-
-		RoomEntity roomEntity =
-			roomRepository
-				.findById(roomId)
-				.orElseThrow(() -> new ResourceNotFoundException(ROOM));
-
-		List<RoomParticipantEntity> participants = roomParticipantRepository.findAllByRoom(roomEntity);
-		for (RoomParticipantEntity participant : participants) {
-			participant.getUser().getName();
-		}
-
-		return roomParticipantConverter.toDto(participants);
+		return roomParticipantConverter.toDto(roomParticipantRepository.findAllByRoomId(roomId));
 	}
 
 	@Transactional

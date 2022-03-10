@@ -70,6 +70,10 @@ public class RoomMessageEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private RoomEntity room;
 
+	public RoomMessageEntity(long id) {
+		this.id = id;
+	}
+
 	@Builder
 	public RoomMessageEntity(long id, String message, ChatMessageType type,
 		RoomMessageState state, boolean hasThread, boolean hasMark,

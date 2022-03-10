@@ -4,5 +4,7 @@ import lombok.Data;
 
 @Data
 public class ThreadDto {
-	private long id;
+	private Long threadId;
+	private Long roomId;
+	private Long roomMessageId;
 }

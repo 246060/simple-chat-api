@@ -13,8 +13,13 @@ public interface ThreadConverter {
 
 	ThreadConverter INSTANCE = Mappers.getMapper(ThreadConverter.class);
 
+	@Mapping(target = "threadId", source = "id")
+	@Mapping(target = "roomId", source = "room.id")
+	@Mapping(target = "roomMessageId", source = "roomMessage.id")
 	ThreadDto toDto(ThreadEntity entity);
 
-	@Mapping(target = ".", source = "thread")
+	@Mapping(target = "threadId", source = "thread.id")
+	@Mapping(target = "roomId", source = "thread.room.id")
+	@Mapping(target = "roomMessageId", source = "thread.roomMessage.id")
 	ThreadDto toDto(ThreadParticipantEntity threadParticipantEntity);
 }

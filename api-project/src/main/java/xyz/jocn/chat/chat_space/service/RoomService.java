@@ -22,8 +22,6 @@ import xyz.jocn.chat.chat_space.exception.RoomException;
 import xyz.jocn.chat.chat_space.repo.room.RoomRepository;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.common.pubsub.ChatProducer;
-import xyz.jocn.chat.common.pubsub.EventTarget;
-import xyz.jocn.chat.common.pubsub.EventType;
 import xyz.jocn.chat.common.pubsub.PublishEvent;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
@@ -51,18 +49,15 @@ public class RoomService {
 			throw new RoomException("cannot invite yourself");
 		}
 
-		UserEntity host =
-			userRepository.findById(dto.getHostId()).orElseThrow(() -> new ResourceNotFoundException(USER));
-
 		UserEntity invitee =
 			userRepository.findById(dto.getInviteeId()).orElseThrow(() -> new ResourceNotFoundException(USER));
 
-		RoomEntity room =
-			roomRepository.save(RoomEntity.builder().user(host).build());
+		UserEntity host = new UserEntity(dto.getHostId());
+
+		RoomEntity room = roomRepository.save(RoomEntity.builder().user(host).build());
 
 		roomParticipantRepository.save(RoomParticipantEntity.builder().room(room).user(host).build());
 		roomParticipantRepository.save(RoomParticipantEntity.builder().room(room).user(invitee).build());
-
 
 		{ // pub event
 			List<Long> receivers = new ArrayList<>();
@@ -71,8 +66,8 @@ public class RoomService {
 
 			PublishEvent publishEvent = new PublishEvent();
 			publishEvent.setTarget(INDIVIDUAL);
+			publishEvent.setType(ROOM_EVENT);
 			publishEvent.setReceiver(Collections.singletonList(receivers));
-			publishEvent.setType(ROOM_OPEN);
 			publishEvent.setSpaceId(room.getId());
 
 			producer.emit(publishEvent);

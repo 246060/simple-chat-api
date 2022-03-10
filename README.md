@@ -53,8 +53,8 @@
     
 1. user api
     - sign up
-    - sign out
-    - get me info
+    - delete 
+    - get me 
      
 2. token api
     - issue access token by credentials

@@ -4,6 +4,12 @@ import static org.springframework.http.ResponseEntity.*;
 import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +21,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.chat_space.dto.RoomCreateDto;
 import xyz.jocn.chat.chat_space.service.RoomService;
+import xyz.jocn.chat.common.pubsub.EventDto;
+import xyz.jocn.chat.common.pubsub.EventTarget;
+import xyz.jocn.chat.common.pubsub.EventType;
+import xyz.jocn.chat.common.pubsub.MessagePublisher;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,6 +33,33 @@ public class RoomController {
 
 	private static final String USER_PK = JWT_CLAIM_FIELD_NAME_USER_KEY;
 	private final RoomService roomService;
+
+	private final MessagePublisher redisMessagePublisher;
+
+	@PostConstruct
+	public void init() throws InterruptedException {
+
+		for (int i = 0; i < 100000; i++) {
+			CompletableFuture.runAsync(() -> {
+				try {
+					Thread.sleep(new Random().nextInt(10000));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+				redisMessagePublisher.emit(
+					EventDto.builder()
+						.id(new Random().nextLong())
+						.message("helloworld")
+						.receiver(List.of(new Random().nextLong()))
+						.spaceId(new Random().nextLong())
+						.type(EventType.ROOM_EVENT)
+						.target(EventTarget.ROOM_AREA)
+						.build()
+				);
+			});
+		}
+	}
 
 	@PostMapping("/rooms")
 	public ResponseEntity open(

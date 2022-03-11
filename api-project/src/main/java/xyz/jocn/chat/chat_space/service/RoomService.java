@@ -4,8 +4,6 @@ import static xyz.jocn.chat.common.enums.ResourceType.*;
 import static xyz.jocn.chat.common.pubsub.EventTarget.*;
 import static xyz.jocn.chat.common.pubsub.EventType.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,8 +19,8 @@ import xyz.jocn.chat.chat_space.entity.RoomEntity;
 import xyz.jocn.chat.chat_space.exception.RoomException;
 import xyz.jocn.chat.chat_space.repo.room.RoomRepository;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
-import xyz.jocn.chat.common.pubsub.ChatProducer;
-import xyz.jocn.chat.common.pubsub.PublishEvent;
+import xyz.jocn.chat.common.pubsub.EventDto;
+import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
 import xyz.jocn.chat.user.entity.UserEntity;
@@ -40,7 +38,7 @@ public class RoomService {
 
 	private final RoomConverter roomConverter = RoomConverter.INSTANCE;
 
-	private final ChatProducer producer;
+	private final MessagePublisher publisher;
 
 	@Transactional
 	public RoomDto open(RoomCreateDto dto) {
@@ -60,17 +58,14 @@ public class RoomService {
 		roomParticipantRepository.save(RoomParticipantEntity.builder().room(room).user(invitee).build());
 
 		{ // pub event
-			List<Long> receivers = new ArrayList<>();
-			receivers.add(host.getId());
-			receivers.add(invitee.getId());
-
-			PublishEvent publishEvent = new PublishEvent();
-			publishEvent.setTarget(INDIVIDUAL);
-			publishEvent.setType(ROOM_EVENT);
-			publishEvent.setReceiver(Collections.singletonList(receivers));
-			publishEvent.setSpaceId(room.getId());
-
-			producer.emit(publishEvent);
+			publisher.emit(
+				EventDto.builder()
+					.target(INDIVIDUAL)
+					.type(ROOM_EVENT)
+					.receiver(List.of(host.getId(), invitee.getId()))
+					.spaceId(room.getId())
+					.build()
+			);
 		}
 
 		return roomConverter.toDto(room);

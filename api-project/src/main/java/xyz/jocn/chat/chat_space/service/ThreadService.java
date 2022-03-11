@@ -20,8 +20,8 @@ import xyz.jocn.chat.chat_space.dto.ThreadOpenDto;
 import xyz.jocn.chat.chat_space.entity.ThreadEntity;
 import xyz.jocn.chat.chat_space.repo.thread.ThreadRepository;
 import xyz.jocn.chat.common.exception.ResourceAlreadyExistException;
-import xyz.jocn.chat.common.pubsub.ChatProducer;
-import xyz.jocn.chat.common.pubsub.PublishEvent;
+import xyz.jocn.chat.common.pubsub.EventDto;
+import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.message.entity.RoomMessageEntity;
 import xyz.jocn.chat.message.repo.room_message.RoomMessageRepository;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
@@ -39,7 +39,8 @@ public class ThreadService {
 	private final ThreadParticipantRepository threadParticipantRepository;
 
 	private final ThreadConverter threadConverter = ThreadConverter.INSTANCE;
-	private final ChatProducer chatProducer;
+
+	private final MessagePublisher publisher;
 
 	@Transactional
 	public ThreadDto open(ThreadOpenDto threadOpenDto) {
@@ -75,14 +76,14 @@ public class ThreadService {
 
 		{ // event
 			List<Long> receivers = users.stream().map(UserEntity::getId).collect(Collectors.toList());
-
-			PublishEvent publishEvent = new PublishEvent();
-			publishEvent.setTarget(INDIVIDUAL);
-			publishEvent.setReceiver(Collections.singletonList(receivers));
-			publishEvent.setType(THREAD_EVENT);
-			publishEvent.setSpaceId(threadEntity.getId());
-
-			chatProducer.emit(publishEvent);
+			publisher.emit(
+				EventDto.builder()
+					.target(INDIVIDUAL)
+					.type(THREAD_EVENT)
+					.receiver(Collections.singletonList(receivers))
+					.spaceId(threadEntity.getId())
+					.build()
+			);
 		}
 
 		return threadConverter.toDto(threadEntity);

@@ -69,6 +69,8 @@
             - add
             - delete
             - block
+                - add
+                - cancel
 4. room api
     - open
     - invite friends
@@ -76,7 +78,7 @@
         - send
         - receive
         - mark
-            - create
+            - add
             - cancel
 5. thread api
     - open

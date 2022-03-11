@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import xyz.jocn.chat.common.pubsub.ChatProducer;
 import xyz.jocn.chat.message.repo.room_message.RoomMessageRepository;
 import xyz.jocn.chat.message.repo.room_message_mark.RoomMessageMarkRepository;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;

@@ -15,8 +15,8 @@ import xyz.jocn.chat.chat_space.entity.ThreadEntity;
 import xyz.jocn.chat.chat_space.repo.thread.ThreadRepository;
 import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
-import xyz.jocn.chat.common.pubsub.ChatProducer;
-import xyz.jocn.chat.common.pubsub.PublishEvent;
+import xyz.jocn.chat.common.pubsub.EventDto;
+import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.message.converter.ThreadMessageConverter;
 import xyz.jocn.chat.message.converter.ThreadMessageMarkConverter;
 import xyz.jocn.chat.message.dto.ThreadMessageChangeDto;
@@ -46,7 +46,7 @@ public class ThreadMessageService {
 	private final ThreadMessageConverter threadMessageConverter = ThreadMessageConverter.INSTANCE;
 	private final ThreadMessageMarkConverter threadMessageMarkConverter = ThreadMessageMarkConverter.INSTANCE;
 
-	private final ChatProducer chatProducer;
+	private final MessagePublisher publisher;
 
 	@Transactional
 	public void send(ThreadMessageCreateDto dto) {
@@ -59,11 +59,15 @@ public class ThreadMessageService {
 				throw new NotAvailableFeatureException();
 		}
 
-		PublishEvent publishEvent = new PublishEvent();
-		publishEvent.setTarget(THREAD_AREA);
-		publishEvent.setType(THREAD_MESSAGE_EVENT);
-		publishEvent.setSpaceId(dto.getThreadId());
-		chatProducer.emit(publishEvent);
+		{ // pub event
+			publisher.emit(
+				EventDto.builder()
+					.target(THREAD_AREA)
+					.type(THREAD_MESSAGE_EVENT)
+					.spaceId(dto.getThreadId())
+					.build()
+			);
+		}
 	}
 
 	private void sendSimpleMessageToThread(ThreadMessageCreateDto dto) {
@@ -118,11 +122,15 @@ public class ThreadMessageService {
 				.build()
 		);
 
-		PublishEvent publishEvent = new PublishEvent();
-		publishEvent.setTarget(THREAD_AREA);
-		publishEvent.setType(THREAD_MESSAGE_EVENT);
-		publishEvent.setSpaceId(threadParticipantEntity.getThread().getId());
-		chatProducer.emit(publishEvent);
+		{ // pub event
+			publisher.emit(
+				EventDto.builder()
+					.target(THREAD_AREA)
+					.type(THREAD_MESSAGE_EVENT)
+					.spaceId(threadParticipantEntity.getThread().getId())
+					.build()
+			);
+		}
 	}
 
 	public List<ThreadMessageMarkDto> getMarks(Long messageId) {
@@ -147,11 +155,16 @@ public class ThreadMessageService {
 
 		threadMessageMarkRepository.delete(threadMessageMarkEntity);
 
-		PublishEvent publishEvent = new PublishEvent();
-		publishEvent.setTarget(THREAD_AREA);
-		publishEvent.setType(THREAD_MESSAGE_EVENT);
-		publishEvent.setSpaceId(threadMessageMarkEntity.getThreadParticipant().getThread().getId());
-		chatProducer.emit(publishEvent);
+		{ // pub event
+			publisher.emit(
+				EventDto.builder()
+					.target(THREAD_AREA)
+					.type(THREAD_MESSAGE_EVENT)
+					.spaceId(threadMessageMarkEntity.getThreadParticipant().getThread().getId())
+					.build()
+			);
+		}
+
 	}
 
 	@Transactional
@@ -164,10 +177,14 @@ public class ThreadMessageService {
 
 		threadMessageEntity.changeState(dto.getState());
 
-		PublishEvent publishEvent = new PublishEvent();
-		publishEvent.setTarget(THREAD_AREA);
-		publishEvent.setType(THREAD_MESSAGE_EVENT);
-		publishEvent.setSpaceId(threadMessageEntity.getThread().getId());
-		chatProducer.emit(publishEvent);
+		{ // pub event
+			publisher.emit(
+				EventDto.builder()
+					.target(THREAD_AREA)
+					.type(THREAD_MESSAGE_EVENT)
+					.spaceId(threadMessageEntity.getThread().getId())
+					.build()
+			);
+		}
 	}
 }

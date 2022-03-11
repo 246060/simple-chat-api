@@ -17,8 +17,8 @@ import xyz.jocn.chat.common.dto.PageDto;
 import xyz.jocn.chat.common.dto.PageMeta;
 import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
-import xyz.jocn.chat.common.pubsub.ChatProducer;
-import xyz.jocn.chat.common.pubsub.PublishEvent;
+import xyz.jocn.chat.common.pubsub.EventDto;
+import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.message.converter.RoomMessageMarkConverter;
 import xyz.jocn.chat.message.dto.RoomMessageChangeDto;
 import xyz.jocn.chat.message.dto.RoomMessageDto;
@@ -45,7 +45,7 @@ public class RoomMessageService {
 
 	private final RoomMessageMarkConverter roomMessageMarkConverter = RoomMessageMarkConverter.INSTANCE;
 
-	private final ChatProducer chatProducer;
+	private final MessagePublisher publisher;
 
 	@Transactional
 	public void sendMessageToRoom(RoomMessageSendDto dto) {
@@ -57,11 +57,16 @@ public class RoomMessageService {
 				throw new NotAvailableFeatureException();
 		}
 
-		PublishEvent publishEvent = new PublishEvent();
-		publishEvent.setTarget(ROOM_AREA);
-		publishEvent.setType(ROOM_MESSAGE_EVENT);
-		publishEvent.setSpaceId(dto.getRoomId());
-		chatProducer.emit(publishEvent);
+		{
+			publisher.emit(
+				EventDto.builder()
+					.target(ROOM_AREA)
+					.type(ROOM_MESSAGE_EVENT)
+					.spaceId(dto.getRoomId())
+					.build()
+			);
+		}
+
 	}
 
 	private void sendSimpleMessageToRoom(RoomMessageSendDto dto) {
@@ -117,11 +122,15 @@ public class RoomMessageService {
 				.build()
 		);
 
-		PublishEvent publishEvent = new PublishEvent();
-		publishEvent.setTarget(ROOM_AREA);
-		publishEvent.setType(ROOM_MESSAGE_EVENT);
-		publishEvent.setSpaceId(roomMessageEntity.getRoom().getId());
-		chatProducer.emit(publishEvent);
+		{
+			publisher.emit(
+				EventDto.builder()
+					.target(ROOM_AREA)
+					.type(ROOM_MESSAGE_EVENT)
+					.spaceId(roomMessageEntity.getRoom().getId())
+					.build()
+			);
+		}
 	}
 
 	public List<RoomMessageMarkDto> getMarks(Long messageId) {
@@ -147,11 +156,15 @@ public class RoomMessageService {
 
 		roomMessageMarkRepository.delete(roomMessageMarkEntity);
 
-		PublishEvent publishEvent = new PublishEvent();
-		publishEvent.setTarget(ROOM_AREA);
-		publishEvent.setType(ROOM_MESSAGE_EVENT);
-		publishEvent.setSpaceId(roomId);
-		chatProducer.emit(publishEvent);
+		{
+			publisher.emit(
+				EventDto.builder()
+					.target(ROOM_AREA)
+					.type(ROOM_MESSAGE_EVENT)
+					.spaceId(roomId)
+					.build()
+			);
+		}
 	}
 
 	@Transactional
@@ -164,10 +177,14 @@ public class RoomMessageService {
 
 		roomMessageEntity.changeState(dto.getState());
 
-		PublishEvent publishEvent = new PublishEvent();
-		publishEvent.setTarget(ROOM_AREA);
-		publishEvent.setType(ROOM_MESSAGE_EVENT);
-		publishEvent.setSpaceId(roomMessageEntity.getRoom().getId());
-		chatProducer.emit(publishEvent);
+		{
+			publisher.emit(
+				EventDto.builder()
+					.target(ROOM_AREA)
+					.type(ROOM_MESSAGE_EVENT)
+					.spaceId(roomMessageEntity.getRoom().getId())
+					.build()
+			);
+		}
 	}
 }

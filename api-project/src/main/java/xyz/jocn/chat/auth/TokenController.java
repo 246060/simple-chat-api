@@ -21,6 +21,7 @@ import xyz.jocn.chat.auth.dto.TokenRefreshRequestDto;
 @RestController
 public class TokenController {
 
+
 	private final TokenService tokenService;
 
 	@PostMapping

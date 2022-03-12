@@ -1,12 +1,8 @@
 # [Toy Project] simple-chat-api 
-현재 구상중..
-
 - 간단한 채팅 서버
 - 유저 클라이언트 제외 
 
 ## Tech stack 
-현재 구상중.. 🤔
- 
 1. api server 
     - spring boot mvc 
     - spring validator 
@@ -27,7 +23,7 @@
 4. Github Repo + Action, Codedeploy
 5. NoSQL(Try to manage chat messages by NoSQL? nope) 
 6. docker    
-    - 개발환경에서 인프라 구성 docker-compose
+    - 로컬 개발환경 인프라 구성 docker-compose
     - mysql replication
     - redis
     - nginx * 2

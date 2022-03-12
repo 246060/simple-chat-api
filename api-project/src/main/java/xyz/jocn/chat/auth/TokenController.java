@@ -5,6 +5,7 @@ import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,6 @@ import xyz.jocn.chat.auth.dto.TokenRefreshRequestDto;
 @RequestMapping("/token")
 @RestController
 public class TokenController {
-
 
 	private final TokenService tokenService;
 
@@ -38,6 +38,31 @@ public class TokenController {
 			.status(HttpStatus.CREATED)
 			.cacheControl(CacheControl.noStore())
 			.body(success(tokenService.refresh(tokenRefreshRequestDto)));
+	}
+
+	/*
+	 * read-write
+	 * */
+	@PostMapping("/test1")
+	public ResponseEntity test1() {
+		tokenService.test1();
+		return ResponseEntity.ok(success());
+	}
+
+	/*
+	 * read-only
+	 * */
+	@GetMapping("/test2")
+	public ResponseEntity test2() {
+		return ResponseEntity.ok(success(tokenService.test2()));
+	}
+
+	/*
+	 * read-write and read-only
+	 * */
+	@PostMapping("/test3")
+	public ResponseEntity test3() {
+		return ResponseEntity.ok(success(tokenService.test3()));
 	}
 
 }

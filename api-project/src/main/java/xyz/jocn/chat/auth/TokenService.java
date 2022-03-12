@@ -3,7 +3,9 @@ package xyz.jocn.chat.auth;
 import static xyz.jocn.chat.common.exception.TokenErrorCode.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.chat.auth.dto.JwtClaimsSetDto;
 import xyz.jocn.chat.auth.dto.TokenCreateRequestDto;
 import xyz.jocn.chat.auth.dto.TokenRefreshRequestDto;
 import xyz.jocn.chat.auth.dto.TokenResponseDto;
-import xyz.jocn.chat.auth.dto.JwtClaimsSetDto;
 import xyz.jocn.chat.common.exception.AuthenticationException;
 import xyz.jocn.chat.common.exception.TokenException;
 import xyz.jocn.chat.common.util.TokenUtil;
@@ -87,4 +89,24 @@ public class TokenService {
 			.build();
 	}
 
+	@Transactional
+	public void test1() {
+		TokenEntity entity = TokenEntity.builder()
+			.refreshToken(UUID.randomUUID().toString())
+			.build();
+		tokenRepository.save(entity);
+	}
+
+	public List<TokenEntity> test2() {
+		return tokenRepository.findAll();
+	}
+
+	@Transactional
+	public List<TokenEntity> test3() {
+		TokenEntity entity = TokenEntity.builder()
+			.refreshToken(UUID.randomUUID().toString())
+			.build();
+		tokenRepository.save(entity);
+		return tokenRepository.findAll();
+	}
 }

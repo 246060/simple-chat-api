@@ -6,12 +6,16 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
-@Component
 public class RedisMessagePublisher implements MessagePublisher {
 
 	private final RedisTemplate<String, String> redisTemplate;
 	private final ChannelTopic topic;
+
+	public RedisMessagePublisher(
+		RedisTemplate<String, String> redisTemplate, ChannelTopic topic) {
+		this.redisTemplate = redisTemplate;
+		this.topic = topic;
+	}
 
 	public void emit(EventDto event) {
 		redisTemplate.convertAndSend(topic.getTopic(), event);

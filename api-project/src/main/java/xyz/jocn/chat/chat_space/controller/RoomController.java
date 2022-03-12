@@ -36,10 +36,10 @@ public class RoomController {
 
 	private final MessagePublisher redisMessagePublisher;
 
-	@PostConstruct
+	// @PostConstruct
 	public void init() throws InterruptedException {
 
-		for (int i = 0; i < 100000; i++) {
+		for (int i = 0; i < 100; i++) {
 			CompletableFuture.runAsync(() -> {
 				try {
 					Thread.sleep(new Random().nextInt(10000));

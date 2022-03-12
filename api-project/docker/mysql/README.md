@@ -1,7 +1,7 @@
 ## 구성 방법
 
 1. docker-compose up -d
-2. docker exec -it mysql_main mysql -uroot -proot
+2. docker exec -it mysql_primary mysql -uroot -proot
 3. 접속한 상태에서 mysql/main/init/init.sql 내용의 쿼리를 실행
 4. !! binary_log and position 체크 (replica 연결할때 사용)
 5. docker exec -it mysql_replica mysql -uroot -proot
@@ -13,10 +13,12 @@
 
 
 ## Tip
+
+### docker container name 으로 연결
 ```sql
 -- slave db server query
 CHANGE MASTER TO
-    MASTER_HOST='mysql_main',
+    MASTER_HOST='mysql_primary',
     MASTER_USER='replica',
     MASTER_PASSWORD='1234',
     MASTER_LOG_FILE='binary_log.000003',
@@ -45,6 +47,19 @@ services:
     ...
     networks:
       - net-mysql
+```
+
+### primary, replica query 확인
+
+디비의 general_log 설정을 확인 후 쿼리로 어떤 서버로 쿼리가 나갔는지 확인 가능
+
+```sql
+-- my.cnf 이미 설정되어 있음. 
+show variables like '%general%';
+show variables like 'log_output';
+set global log_output='table';
+
+select * from general_log gl  order by event_time DESC ;
 ```
 
 ## TODO

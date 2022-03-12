@@ -1,0 +1,45 @@
+version: '3'
+networks:
+  net-mysql:
+    driver: bridge
+
+services:
+  mysql_main:
+    container_name: mysql_main
+    image: mysql:8.0.28
+    restart: always
+    command: >
+      bash -c "chmod 644 /etc/mysql/conf.d/*.cnf && /entrypoint.sh mysqld"
+    volumes:
+      - ./mysql/main/data:/var/lib/mysql
+      - ./mysql/main/conf:/etc/mysql/conf.d
+    environment:
+      - TZ=UTC
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=dev
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    ports:
+      - "3306:3306"
+    networks:
+      - net-mysql
+
+  mysql_replica:
+    container_name: mysql_replica
+    image: mysql:8.0.28
+    restart: always
+    depends_on:
+      - mysql_main
+    command: >
+      bash -c "chmod 644 /etc/mysql/conf.d/*.cnf && /entrypoint.sh mysqld"
+    volumes:
+      - ./mysql/replica/data:/var/lib/mysql
+      - ./mysql/replica/conf:/etc/mysql/conf.d
+    environment:
+      - TZ=UTC
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=dev
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    ports:
+      - "3307:3306"
+    networks:
+      - net-mysql

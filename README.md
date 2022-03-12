@@ -26,11 +26,11 @@
     - Cluster (try? nope) 
 4. Github Repo + Action, Codedeploy
 5. NoSQL(Try to manage chat messages by NoSQL? nope) 
-6. docker
-  - 개발환경에서 인프라 구성은 docker-compose 사용
-  - mysql replication
-  - redis
-  - nginx * 2
+6. docker    
+    - 개발환경에서 인프라 구성 docker-compose
+    - mysql replication
+    - redis
+    - nginx * 2
 
 ## 아키텍처 설계
 현재 구상중..

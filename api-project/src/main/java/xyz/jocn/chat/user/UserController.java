@@ -3,7 +3,13 @@ package xyz.jocn.chat.user;
 import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
+import javax.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,10 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.chat.common.exception.ApiAccessDenyException;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
 
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/users")
 @RestController
 public class UserController {
@@ -24,28 +32,25 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping
-	public ResponseEntity signUp(@RequestBody UserSignUpRequestDto userSignUpRequestDto) {
+	public ResponseEntity signUp(@RequestBody @Valid UserSignUpRequestDto userSignUpRequestDto) {
 		userService.signUp(userSignUpRequestDto);
 		return ResponseEntity.ok(success());
 	}
 
-	@PostMapping("/{userId}/friends")
-	public ResponseEntity create(@PathVariable String userId) {
-		return null;
+	@GetMapping("/me")
+	public ResponseEntity me(@AuthenticationPrincipal(expression = USER_PK) String userId) {
+		return ResponseEntity.ok(success(userService.getUser(Long.parseLong(userId))));
 	}
 
-	@PostMapping("/{userId}/friends/groups")
-	public ResponseEntity group() {
-		return null;
-	}
-
-	@PostMapping("/{userId}/friends/groups/{groupId}")
-	public ResponseEntity group(@PathVariable String groupId) {
-		return null;
-	}
-
-	@PostMapping("/{userId}/friends/block")
-	public ResponseEntity blockFriendAddition(@PathVariable String userId) {
-		return null;
+	@DeleteMapping("/{id}")
+	public ResponseEntity withdrawal(
+		@PathVariable Long id,
+		@AuthenticationPrincipal(expression = USER_PK) String userId
+	) {
+		if (userService.isNotResourceOwner(id, Long.parseLong(userId))) {
+			throw new ApiAccessDenyException("only withdraw own account");
+		}
+		userService.withdrawal(id);
+		return ResponseEntity.ok(success());
 	}
 }

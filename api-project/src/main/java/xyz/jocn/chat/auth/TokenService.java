@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,9 @@ import xyz.jocn.chat.user.repo.user.UserRepository;
 @Service
 public class TokenService {
 
+	@Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+	private String issuer;
+
 	private final TokenRepository tokenRepository;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -48,7 +54,7 @@ public class TokenService {
 				.builder()
 				.subject(String.valueOf(userEntity.getId()))
 				.expirationTime(now.plusSeconds(tokenUtil.getAccessTokenExpireInSec()))
-				.issuer("http://localhost:8080")
+				.issuer(issuer)
 				.scope(Set.of("USER"))
 				.build()
 		);
@@ -87,26 +93,5 @@ public class TokenService {
 			.accessToken(accessToken)
 			.expiresIn(tokenUtil.getAccessTokenExpireInSec())
 			.build();
-	}
-
-	@Transactional
-	public void test1() {
-		TokenEntity entity = TokenEntity.builder()
-			.refreshToken(UUID.randomUUID().toString())
-			.build();
-		tokenRepository.save(entity);
-	}
-
-	public List<TokenEntity> test2() {
-		return tokenRepository.findAll();
-	}
-
-	@Transactional
-	public List<TokenEntity> test3() {
-		TokenEntity entity = TokenEntity.builder()
-			.refreshToken(UUID.randomUUID().toString())
-			.build();
-		tokenRepository.save(entity);
-		return tokenRepository.findAll();
 	}
 }

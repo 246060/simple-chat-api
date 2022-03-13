@@ -13,6 +13,19 @@ public class ErrorResponse {
 	private String description;
 	private Object detail;
 
+	@Data
+	public static class InvalidField {
+		private String name;
+		private Object value;
+		private String reason;
+
+		public InvalidField(String name, Object value, String reason) {
+			this.name = name;
+			this.value = value;
+			this.reason = reason;
+		}
+	}
+
 	public ErrorResponse(int code, String description) {
 		this.code = code;
 		this.description = description;
@@ -38,17 +51,5 @@ public class ErrorResponse {
 				fieldError.getDefaultMessage()
 			)
 		).collect(Collectors.toUnmodifiableList());
-	}
-
-	public static class InvalidField {
-		private String name;
-		private Object value;
-		private String reason;
-
-		public InvalidField(String name, Object value, String reason) {
-			this.name = name;
-			this.value = value;
-			this.reason = reason;
-		}
 	}
 }

@@ -19,14 +19,19 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.Value;
+import xyz.jocn.chat.user.enums.UserRole;
 import xyz.jocn.chat.user.enums.UserState;
 
 @ToString
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "user", uniqueConstraints = {@UniqueConstraint(name = "uk_user_email", columnNames = "email")})
@@ -39,12 +44,22 @@ public class UserEntity {
 
 	@Column(length = 100)
 	private String email;
+
+	@Column(length = 50)
 	private String name;
+
+	@Column(length = 100)
 	private String password;
 
+	@Builder.Default
 	@Column(length = 20)
 	@Enumerated(EnumType.STRING)
 	private UserState state = UserState.ACTIVE;
+
+	@Builder.Default
+	@Column(length = 20)
+	@Enumerated(EnumType.STRING)
+	private UserRole role = UserRole.USER;
 
 	@CreatedDate
 	private Instant createdAt;
@@ -59,12 +74,7 @@ public class UserEntity {
 		this.id = id;
 	}
 
-	@Builder
-	public UserEntity(long id, String email, String name, String password, UserState state) {
-		this.id = id;
-		this.email = email;
-		this.name = name;
-		this.password = password;
-		this.state = state;
+	public void delete() {
+		this.state = UserState.DELETED;
 	}
 }

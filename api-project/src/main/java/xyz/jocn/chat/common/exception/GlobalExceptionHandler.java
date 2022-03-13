@@ -2,6 +2,8 @@ package xyz.jocn.chat.common.exception;
 
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
+import java.util.List;
+
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -33,7 +36,6 @@ import xyz.jocn.chat.common.dto.ErrorResponse;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-
 	@ExceptionHandler(RoomException.class)
 	public ResponseEntity handleRoomException(RoomException ex, WebRequest request) {
 		log.error(ex.getMessage());
@@ -43,6 +45,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
 
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity handleAuthenticationException(AuthenticationException ex, WebRequest request) {
+		log.error(ex.getMessage());
+		HttpHeaders headers = new HttpHeaders();
+		HttpStatus status = HttpStatus.UNAUTHORIZED;
+		ErrorResponse error = new ErrorResponse(status.value(), ex.getMessage());
+		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
+	}
+
+	@ExceptionHandler(ApiAccessDenyException.class)
+	public ResponseEntity handleApiAccessDenyException(ApiAccessDenyException ex, WebRequest request) {
+		HttpHeaders headers = new HttpHeaders();
+		HttpStatus status = HttpStatus.FORBIDDEN;
+		ErrorResponse error = new ErrorResponse(status.value(), ex.getMessage());
+		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
+	}
 
 	@ExceptionHandler(ResourceAlreadyExistException.class)
 	public ResponseEntity handleResourceAlreadyExistException(ResourceAlreadyExistException ex, WebRequest request) {
@@ -70,9 +88,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ErrorResponse error = new ErrorResponse(status.value(), "unknown server error");
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
-
-
-
 
 	@Override
 	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
@@ -135,9 +150,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-		HttpHeaders headers, HttpStatus status, WebRequest request) {
-		return super.handleMethodArgumentNotValid(ex, headers, status, request);
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(
+		MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+		final String desc = "argument invalid";
+		ErrorResponse error = new ErrorResponse(status.value(), desc, ex.getBindingResult().getFieldErrors());
+		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
 
 	@Override

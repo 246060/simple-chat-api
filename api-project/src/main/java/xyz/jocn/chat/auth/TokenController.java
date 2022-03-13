@@ -2,10 +2,11 @@ package xyz.jocn.chat.auth;
 
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
+import javax.validation.Valid;
+
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,7 @@ public class TokenController {
 	private final TokenService tokenService;
 
 	@PostMapping
-	public ResponseEntity generate(@RequestBody TokenCreateRequestDto tokenCreateRequestDto) {
+	public ResponseEntity generate(@RequestBody @Valid TokenCreateRequestDto tokenCreateRequestDto) {
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
 			.cacheControl(CacheControl.noStore())
@@ -33,36 +34,10 @@ public class TokenController {
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity refresh(@RequestBody TokenRefreshRequestDto tokenRefreshRequestDto) {
+	public ResponseEntity refresh(@RequestBody @Valid TokenRefreshRequestDto tokenRefreshRequestDto) {
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
 			.cacheControl(CacheControl.noStore())
 			.body(success(tokenService.refresh(tokenRefreshRequestDto)));
 	}
-
-	/*
-	 * read-write
-	 * */
-	@PostMapping("/test1")
-	public ResponseEntity test1() {
-		tokenService.test1();
-		return ResponseEntity.ok(success());
-	}
-
-	/*
-	 * read-only
-	 * */
-	@GetMapping("/test2")
-	public ResponseEntity test2() {
-		return ResponseEntity.ok(success(tokenService.test2()));
-	}
-
-	/*
-	 * read-write and read-only
-	 * */
-	@PostMapping("/test3")
-	public ResponseEntity test3() {
-		return ResponseEntity.ok(success(tokenService.test3()));
-	}
-
 }

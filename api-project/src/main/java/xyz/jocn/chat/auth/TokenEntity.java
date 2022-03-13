@@ -19,6 +19,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,8 @@ import xyz.jocn.chat.user.entity.UserEntity;
 
 @ToString
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "token")
@@ -48,12 +51,4 @@ public class TokenEntity {
 
 	@LastModifiedDate
 	private Instant updatedAt;
-
-	@Builder
-	public TokenEntity(long id, UserEntity user, String refreshToken, Instant refreshExpireTime) {
-		this.id = id;
-		this.user = user;
-		this.refreshToken = refreshToken;
-		this.refreshExpireTime = refreshExpireTime;
-	}
 }

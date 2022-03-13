@@ -15,6 +15,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,8 @@ import xyz.jocn.chat.message.entity.RoomMessageEntity;
 
 @ToString
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "thread")
@@ -44,13 +47,5 @@ public class ThreadEntity {
 
 	public ThreadEntity(long id) {
 		this.id = id;
-	}
-
-
-	@Builder
-	public ThreadEntity(long id, RoomMessageEntity roomMessage, RoomEntity room) {
-		this.id = id;
-		this.roomMessage = roomMessage;
-		this.room = room;
 	}
 }

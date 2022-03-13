@@ -19,6 +19,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,8 @@ import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
 
 @ToString
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "room_message")
@@ -46,6 +49,7 @@ public class RoomMessageEntity {
 	@Column(nullable = false, length = 10)
 	private ChatMessageType type;
 
+	@Builder.Default
 	@Column(nullable = false, length = 10)
 	private RoomMessageState state = RoomMessageState.ACTIVE;
 
@@ -72,20 +76,6 @@ public class RoomMessageEntity {
 
 	public RoomMessageEntity(long id) {
 		this.id = id;
-	}
-
-	@Builder
-	public RoomMessageEntity(long id, String message, ChatMessageType type,
-		RoomMessageState state, boolean hasThread, boolean hasMark,
-		RoomParticipantEntity sender, RoomEntity room) {
-		this.id = id;
-		this.message = message;
-		this.type = type;
-		this.state = state;
-		this.hasThread = hasThread;
-		this.hasMark = hasMark;
-		this.sender = sender;
-		this.room = room;
 	}
 
 	public boolean hasThread() {

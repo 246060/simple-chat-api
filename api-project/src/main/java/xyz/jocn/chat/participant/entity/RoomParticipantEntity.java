@@ -15,6 +15,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,8 @@ import xyz.jocn.chat.user.entity.UserEntity;
 
 @ToString
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "room_participant")
@@ -42,11 +45,4 @@ public class RoomParticipantEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private UserEntity user;
-
-	@Builder
-	public RoomParticipantEntity(long id, RoomEntity room, UserEntity user) {
-		this.id = id;
-		this.room = room;
-		this.user = user;
-	}
 }

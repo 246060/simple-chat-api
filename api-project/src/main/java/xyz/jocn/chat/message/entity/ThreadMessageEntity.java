@@ -18,6 +18,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,8 @@ import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
 
 @ToString
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "thread_message")
@@ -42,6 +45,7 @@ public class ThreadMessageEntity {
 	@Enumerated(EnumType.STRING)
 	private ChatMessageType type;
 
+	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	private ThreadMessageState state = ThreadMessageState.ACTIVE;
 
@@ -61,17 +65,6 @@ public class ThreadMessageEntity {
 
 	@ManyToOne
 	private ThreadEntity thread;
-
-	@Builder
-	public ThreadMessageEntity(long id, ChatMessageType type, ThreadMessageState state, String message,
-		ThreadParticipantEntity threadParticipant, ThreadEntity thread) {
-		this.id = id;
-		this.type = type;
-		this.state = state;
-		this.message = message;
-		this.threadParticipant = threadParticipant;
-		this.thread = thread;
-	}
 
 	public void changeState(ThreadMessageState state) {
 		this.state = state;

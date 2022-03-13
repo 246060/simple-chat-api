@@ -17,6 +17,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,8 @@ import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
 
 @ToString
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "thread_message_mark")
@@ -48,12 +51,4 @@ public class ThreadMessageMarkEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private ThreadParticipantEntity threadParticipant;
 
-	@Builder
-	public ThreadMessageMarkEntity(long id, MessageMarkFlag flag,
-		ThreadMessageEntity threadMessage, ThreadParticipantEntity threadParticipant) {
-		this.id = id;
-		this.flag = flag;
-		this.threadMessage = threadMessage;
-		this.threadParticipant = threadParticipant;
-	}
 }

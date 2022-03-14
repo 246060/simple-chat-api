@@ -2,6 +2,10 @@
 - 간단한 채팅 서버
 - 유저 클라이언트 제외 
 
+## TODO
+1. redis local test 환경 구축
+2. 
+
 ## Tech stack 
 1. api server 
     - spring boot mvc 
@@ -17,7 +21,7 @@
 2. socket server
     - node + express
     - socket.io
-    - nginx : stick
+    - nginx : sticky session
 3. Redis
     - Cluster (try? nope) 
 4. Github Repo + Action, Codedeploy
@@ -38,7 +42,7 @@
 2. socket.io max room per namespace
 3. pm2 or docker for node - 어떤 방식을 할지... 
 4. docker or not for spring - 어떤 방식을 할지...
-5. nginx stick session max connection   
+5. nginx sticky session max connection   
 6. api server 부하 테스트 jmeter? ngrinder? 
 
 ## ERD

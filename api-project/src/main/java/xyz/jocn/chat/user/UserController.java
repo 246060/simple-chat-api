@@ -1,5 +1,6 @@
 package xyz.jocn.chat.user;
 
+import static org.springframework.http.ResponseEntity.*;
 import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
@@ -34,12 +35,12 @@ public class UserController {
 	@PostMapping
 	public ResponseEntity signUp(@RequestBody @Valid UserSignUpRequestDto userSignUpRequestDto) {
 		userService.signUp(userSignUpRequestDto);
-		return ResponseEntity.ok(success());
+		return ok(success());
 	}
 
 	@GetMapping("/me")
 	public ResponseEntity me(@AuthenticationPrincipal(expression = USER_PK) String userId) {
-		return ResponseEntity.ok(success(userService.getUser(Long.parseLong(userId))));
+		return ok(success(userService.getUser(Long.parseLong(userId))));
 	}
 
 	@DeleteMapping("/{id}")
@@ -51,6 +52,6 @@ public class UserController {
 			throw new ApiAccessDenyException("only withdraw own account");
 		}
 		userService.withdrawal(id);
-		return ResponseEntity.ok(success());
+		return ok(success());
 	}
 }

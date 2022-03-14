@@ -21,12 +21,17 @@ import xyz.jocn.chat.user.repo.user.UserRepository;
 @Transactional(readOnly = true)
 @Service
 public class UserService {
+
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final UserConverter userConverter = UserConverter.INSTANCE;
 
-	public static boolean isNotResourceOwner(Long id1, Long id2) {
-		return !String.valueOf(id1).equals(id2);
+	public boolean isResourceOwner(Long id1, Long id2) {
+		return id1 == id2;
+	}
+
+	public boolean isNotResourceOwner(Long id1, Long id2) {
+		return !isResourceOwner(id1, id2);
 	}
 
 	@Transactional
@@ -38,11 +43,13 @@ public class UserService {
 				throw new ResourceAlreadyExistException(USER);
 			});
 
+		String password = passwordEncoder.encode(userSignUpRequestDto.getPassword());
+
 		UserEntity userEntity =
 			UserEntity.builder()
 				.email(userSignUpRequestDto.getEmail())
 				.name(userSignUpRequestDto.getName())
-				.password(passwordEncoder.encode(userSignUpRequestDto.getPassword()))
+				.password(password)
 				.build();
 
 		userRepository.save(userEntity);

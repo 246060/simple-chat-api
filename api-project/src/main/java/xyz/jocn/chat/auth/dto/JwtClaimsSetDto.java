@@ -5,11 +5,9 @@ import java.util.List;
 import java.util.Set;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
-@ToString
-@Getter
+@Data
 public class JwtClaimsSetDto {
 
 	private String subject;
@@ -22,11 +20,11 @@ public class JwtClaimsSetDto {
 	private Set<String> scope;
 
 	@Builder
-	public JwtClaimsSetDto(String subject, Instant expirationTime, Instant issueTime, String issuer,
+	public JwtClaimsSetDto(String subject, Instant expirationTime, String issuer,
 		Instant notBeforeTime, String jwtID, List<String> audience, Set<String> scope) {
 		this.subject = subject;
 		this.expirationTime = expirationTime;
-		this.issueTime = issueTime;
+		this.issueTime = Instant.now();
 		this.issuer = issuer;
 		this.notBeforeTime = notBeforeTime;
 		this.jwtID = jwtID;

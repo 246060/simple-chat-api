@@ -2,8 +2,6 @@ package xyz.jocn.chat.common.exception;
 
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
-import java.util.List;
-
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.validation.BindException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -82,10 +79,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity handleHighestException(Exception ex, WebRequest request) {
-		log.error(ex.getMessage());
+		StringBuffer sb = new StringBuffer();
+		sb.append(String.format("%s : %s", ex.getClass().getSimpleName(), ex.getMessage()));
+		sb.append(System.lineSeparator());
+
+		for (StackTraceElement stackTraceElement : ex.getStackTrace()) {
+			sb.append("\t");
+			sb.append(stackTraceElement);
+			sb.append(System.lineSeparator());
+		}
+		log.error(sb.toString());
+
 		HttpHeaders headers = new HttpHeaders();
 		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-		ErrorResponse error = new ErrorResponse(status.value(), "unknown server error");
+		ErrorResponse error = new ErrorResponse(status.value(), "unknown server error", ex.getMessage());
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
 

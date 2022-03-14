@@ -1,7 +1,12 @@
 package xyz.jocn.chat.common.config;
 
-import javax.crypto.SecretKey;
+import java.util.Base64;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,10 +15,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -23,13 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.common.util.TokenUtil;
 
 @Slf4j
-@RequiredArgsConstructor
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	// https://www.toptal.com/spring/spring-security-tutorial
 	// https://developer.okta.com/blog/2021/05/05/client-credentials-spring-security
-
-	private final TokenUtil tokenUtil;
 
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -46,12 +46,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		;
 	}
 
+	@Value("${app.jwt-secret}")
+	private String secret;
+
 	@Bean
 	public JwtDecoder jwtDecoder() {
-		NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(tokenUtil.getJwtKey()).build();
-		// OAuth2TokenValidator<Jwt> withAudience = new DelegatingOAuth2TokenValidator<>(audienceValidator());
-		// jwtDecoder.setJwtValidator(withAudience);
-		return jwtDecoder;
+		byte[] decodedKey = Base64.getDecoder().decode(secret);
+		SecretKey secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "HmacSHA256");
+		return NimbusJwtDecoder.withSecretKey(secretKey).build();
 	}
 
 	@Bean
@@ -61,8 +63,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public CorsFilter corsFilter() {
-		// Used by spring security if CORS is enabled.
-
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
 		config.addAllowedOrigin("*");

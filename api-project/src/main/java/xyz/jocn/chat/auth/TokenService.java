@@ -1,15 +1,11 @@
 package xyz.jocn.chat.auth;
 
+import static java.time.Instant.*;
 import static xyz.jocn.chat.common.exception.TokenErrorCode.*;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,9 +28,6 @@ import xyz.jocn.chat.user.repo.user.UserRepository;
 @Service
 public class TokenService {
 
-	@Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-	private String issuer;
-
 	private final TokenRepository tokenRepository;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -43,32 +36,27 @@ public class TokenService {
 	@Transactional
 	public TokenResponseDto generateToken(TokenCreateRequestDto tokenCreateRequestDto) {
 
-		UserEntity userEntity = userRepository.findByEmail(tokenCreateRequestDto.getEmail())
-			.filter(user -> passwordEncoder.matches(tokenCreateRequestDto.getPassword(), user.getPassword()))
-			.orElseThrow(AuthenticationException::new);
+		UserEntity userEntity =
+			userRepository
+				.findByEmail(tokenCreateRequestDto.getEmail())
+				.filter(user -> passwordEncoder.matches(tokenCreateRequestDto.getPassword(), user.getPassword()))
+				.orElseThrow(AuthenticationException::new);
 
-		Instant now = Instant.now();
-
-		String accessToken = tokenUtil.generateJwt(
-			JwtClaimsSetDto
-				.builder()
-				.subject(String.valueOf(userEntity.getId()))
-				.expirationTime(now.plusSeconds(tokenUtil.getAccessTokenExpireInSec()))
-				.issuer(issuer)
-				.scope(Set.of("USER"))
-				.build()
-		);
+		JwtClaimsSetDto claims = JwtClaimsSetDto.builder()
+			.subject(String.valueOf(userEntity.getId()))
+			.scope(Set.of(userEntity.getRole().name()))
+			.build();
 
 		TokenEntity tokenEntity = TokenEntity.builder()
 			.user(userEntity)
 			.refreshToken(tokenUtil.generateRefreshToken())
-			.refreshExpireTime(now.plusSeconds(tokenUtil.getRefreshTokenExpireInSec()))
+			.refreshExpireTime(claims.getIssueTime().plusSeconds(tokenUtil.getRefreshTokenExpireInSec()))
 			.build();
 
 		tokenRepository.save(tokenEntity);
 
 		return TokenResponseDto.builder()
-			.accessToken(accessToken)
+			.accessToken(tokenUtil.generateJwt(claims))
 			.expiresIn(tokenUtil.getAccessTokenExpireInSec())
 			.refreshToken(tokenEntity.getRefreshToken())
 			.build();
@@ -77,20 +65,18 @@ public class TokenService {
 	@Transactional
 	public TokenResponseDto refresh(TokenRefreshRequestDto tokenRefreshRequestDto) {
 
-		TokenEntity tokenEntity = tokenRepository.findByRefreshTokenAndRefreshExpireTimeAfter(
-			tokenRefreshRequestDto.getRefreshToken(),
-			Instant.now()
-		).orElseThrow(() -> new TokenException(NotExistRefreshToken));
+		TokenEntity tokenEntity =
+			tokenRepository.findByRefreshTokenAndRefreshExpireTimeAfter(
+				tokenRefreshRequestDto.getRefreshToken(), now()
+			).orElseThrow(() -> new TokenException(NotExistRefreshToken));
 
-		Instant now = Instant.now();
-
-		String accessToken = tokenUtil.generateJwt(JwtClaimsSetDto.builder()
+		JwtClaimsSetDto claims = JwtClaimsSetDto.builder()
 			.subject(String.valueOf(tokenEntity.getUser().getId()))
-			.expirationTime(now.plusSeconds(tokenUtil.getAccessTokenExpireInSec()))
-			.build());
+			.scope(Set.of(tokenEntity.getUser().getRole().name()))
+			.build();
 
 		return TokenResponseDto.builder()
-			.accessToken(accessToken)
+			.accessToken(tokenUtil.generateJwt(claims))
 			.expiresIn(tokenUtil.getAccessTokenExpireInSec())
 			.build();
 	}

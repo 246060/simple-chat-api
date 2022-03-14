@@ -44,7 +44,7 @@ class UserControllerTest {
 
 		willDoNothing()
 			.given(userService)
-			.signUp(dto)
+			.signUp(any(UserSignUpRequestDto.class))
 		;
 
 		String jsonStr = om.writeValueAsString(dto);
@@ -74,7 +74,7 @@ class UserControllerTest {
 
 		then(userService)
 			.should(times(1))
-			.signUp(dto)
+			.signUp(any(UserSignUpRequestDto.class))
 		;
 	}
 
@@ -87,8 +87,7 @@ class UserControllerTest {
 		UserDto dto = new UserDto();
 		dto.setId(userId);
 
-		given(userService.getUser(userId))
-			.willReturn(dto);
+		given(userService.getUser(anyLong())).willReturn(dto);
 
 		// when
 		ResultActions actions =
@@ -118,7 +117,7 @@ class UserControllerTest {
 
 		then(userService)
 			.should()
-			.getUser(userId)
+			.getUser(anyLong())
 		;
 	}
 
@@ -130,7 +129,7 @@ class UserControllerTest {
 
 		willDoNothing()
 			.given(userService)
-			.withdrawal(userId);
+			.withdrawal(anyLong());
 
 		given(userService.isNotResourceOwner(anyLong(), anyLong()))
 			.willReturn(false);
@@ -160,7 +159,7 @@ class UserControllerTest {
 
 		then(userService)
 			.should(times(1))
-			.withdrawal(userId)
+			.withdrawal(anyLong())
 		;
 	}
 }

@@ -14,9 +14,9 @@ import org.springframework.test.annotation.Rollback;
 import xyz.jocn.chat.chat_space.entity.RoomEntity;
 import xyz.jocn.chat.user.entity.UserEntity;
 
-@Rollback(false)
+//@Rollback(false)
+//@AutoConfigureTestDatabase(replace = NONE)
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = NONE)
 class JpaTest {
 
 	@Autowired
@@ -25,12 +25,14 @@ class JpaTest {
 	@DisplayName("id 값만 있는 걸로 fk 값이 들어가는지 확인")
 	@Test
 	void test1() {
-		UserEntity user = UserEntity.builder().email("hello@test.com").build();
+		UserEntity user = UserEntity.builder().email("hello1111111@test.com").build();
 		em.persist(user);
-		em.flush();
 
-		RoomEntity r = RoomEntity.builder().user(new UserEntity(1)).build();
+		Long userId = user.getId();
+
+		RoomEntity r = RoomEntity.builder().user(new UserEntity(userId)).build();
 		em.persist(r);
 		em.flush();
+		em.clear();
 	}
 }

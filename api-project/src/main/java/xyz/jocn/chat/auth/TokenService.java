@@ -3,7 +3,6 @@ package xyz.jocn.chat.auth;
 import static java.time.Instant.*;
 import static xyz.jocn.chat.common.exception.TokenErrorCode.*;
 
-import java.time.Instant;
 import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;

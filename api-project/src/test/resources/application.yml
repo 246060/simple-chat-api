@@ -1,2 +1,10 @@
 app:
   jwt-secret: jCIIGf7BKMMszsfSIXYS2v/CI1+aQ0fl4yZegXjVQLk=
+  accessToken-expireInSec: 2592000
+  refreshToken-expireInSec: 2592000
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080

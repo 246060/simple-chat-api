@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TokenRepository extends JpaRepository<TokenEntity, Long> {
-	Optional<TokenEntity> findByRefreshTokenAndRefreshExpireTimeAfter(String refreshToken, Instant refreshExpireTime);
+	Optional<TokenEntity> findByRefreshTokenAndRefreshExpireTimeAfter(String refreshToken, Instant now);
 }

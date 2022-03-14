@@ -4,7 +4,6 @@
 
 ## TODO
 1. redis local test 환경 구축
-2. 
 
 ## Tech stack 
 1. api server 

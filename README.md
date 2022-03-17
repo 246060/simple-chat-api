@@ -46,59 +46,20 @@
 
 ## ERD
 현재 구상중..
-![erd](docs/erd-smp-cht.png)
+
 
 ### 고려사항
 1. 디비 테이블 별 소프트 fk와 물리 fk 결정
 2. 디비 테이블 별 소프트 삭제와 물리 삭제 결정, casecade도 같이 고려
 3. message 테이블은 record가 엄청 많을건데... 어떻게 관리하지? table 파티션? nosql scale out? 
 
-## Version History
-
-### API Server Version 0
-    
-1. user api
-    - sign up
-    - delete 
-    - get me 
-     
-2. token api
-    - issue access token by credentials
-    - issue access token by refresh token
-3. friends group
-    - group
-        - create
-        - delete
-        - friends
-            - add
-            - delete
-            - block
-                - add
-                - cancel
-4. room api
-    - open
-    - invite friends
-    - message
-        - send
-        - receive
-        - mark
-            - add
-            - cancel
-5. thread api
-    - open
-    - message
-        - send
-        - receive
-        - mark
-            - create
-            - cancel
-
-6. redis 연동
-
-
-### Socket Server Version 0
-socket 서버는 이벤트 전파 역할만 하므로 많은 기능이 없다.
-
-1. socket.io connection with jwt 
-2. socket.io client 연결
-2. redis 연동
+## 기능
+  1. 유저 가입/탈퇴
+  2. 토큰 발급/재발급
+  3. 방만들기
+  4. 초대하기
+  5. 메시지 발송
+  6. 특정 사용자의 초대 거부
+  7. 쓰레드 생성
+  8. 쓰레드 메시지 발송
+  

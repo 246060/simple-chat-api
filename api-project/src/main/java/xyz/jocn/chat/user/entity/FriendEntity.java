@@ -4,10 +4,13 @@ import java.time.Instant;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -34,12 +37,16 @@ public class FriendEntity {
 	@Id
 	private long id;
 
+	private String name;
+	private boolean favorite = false;
+	private boolean hidden = false;
+
 	@CreatedDate
 	private Instant createdAt;
 
-	@ManyToOne
-	private FriendGroupEntity group;
+	@ManyToOne(fetch = FetchType.LAZY)
+	private UserEntity source;
 
-	@ManyToOne
-	private UserEntity friend;
+	@ManyToOne(fetch = FetchType.LAZY)
+	private UserEntity target;
 }

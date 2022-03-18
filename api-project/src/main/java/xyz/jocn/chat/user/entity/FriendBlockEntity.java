@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -37,9 +38,9 @@ public class FriendBlockEntity {
 	@CreatedDate
 	private Instant createdAt;
 
-	@ManyToOne
-	private UserEntity user;
+	@ManyToOne(fetch = FetchType.LAZY)
+	private UserEntity source;
 
-	@ManyToOne
-	private UserEntity blockedUser;
+	@ManyToOne(fetch = FetchType.LAZY)
+	private UserEntity target;
 }

@@ -46,7 +46,7 @@
 
 ## ERD
 현재 구상중..
-
+![erd](docs/erd-smp-cht.png)
 
 ### 고려사항
 1. 디비 테이블 별 소프트 fk와 물리 fk 결정

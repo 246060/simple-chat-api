@@ -9,12 +9,12 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import xyz.jocn.chat.file.entity.QFileEntity;
 
 @Repository
-public class FileRepositoryImpl implements FileRepositoryExt {
+public class FileMetaRepositoryImpl implements FileMetaRepositoryExt {
 
 	private final JPAQueryFactory queryFactory;
 	private final QFileEntity file;
 
-	public FileRepositoryImpl(EntityManager entityManager) {
+	public FileMetaRepositoryImpl(EntityManager entityManager) {
 		this.queryFactory = new JPAQueryFactory(entityManager);
 		this.file = QFileEntity.fileEntity;
 	}

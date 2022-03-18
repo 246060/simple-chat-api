@@ -5,13 +5,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import xyz.jocn.chat.file.repo.FileRepository;
+import xyz.jocn.chat.file.repo.FileMetaRepository;
 
 @ExtendWith(MockitoExtension.class)
 class FileServiceTest {
 
 	@Mock
-	FileRepository fileRepository;
+	FileMetaRepository fileRepository;
 	@InjectMocks
 	FileService service;
 }

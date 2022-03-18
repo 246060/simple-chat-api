@@ -8,6 +8,7 @@ import lombok.Data;
 
 @Data
 public class TokenRefreshRequestDto {
+
 	@NotEmpty
 	@JsonProperty("refresh_token")
 	private String refreshToken;

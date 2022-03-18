@@ -19,6 +19,7 @@ import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
 import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.enums.UserState;
 import xyz.jocn.chat.user.repo.user.UserRepository;
+import xyz.jocn.chat.user.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -77,7 +78,7 @@ class UserServiceTest {
 			.willReturn(Optional.of(userEntity));
 
 		// when
-		UserDto dto = service.getUser(userId);
+		UserDto dto = service.fetchMe(userId);
 		System.out.println("dto = " + dto);
 
 		// then
@@ -94,12 +95,12 @@ class UserServiceTest {
 			.willReturn(Optional.empty());
 
 		// when + then
-		assertThatThrownBy(() -> service.getUser(userId))
+		assertThatThrownBy(() -> service.fetchMe(userId))
 			.isInstanceOf(ResourceNotFoundException.class);
 	}
 
 	@Test
-	void withdrawal() {
+	void exit() {
 		// given
 		Long userId = 1L;
 
@@ -113,7 +114,7 @@ class UserServiceTest {
 			.willReturn(Optional.of(userEntity));
 
 		// when
-		service.withdrawal(userId);
+		service.exit(userId);
 
 		// then
 		assertThat(userEntity)
@@ -122,7 +123,7 @@ class UserServiceTest {
 	}
 
 	@Test
-	void withdrawal_ResourceNotFoundException() {
+	void exit_ResourceNotFoundException() {
 		// given
 		Long userId = 1L;
 
@@ -130,60 +131,10 @@ class UserServiceTest {
 			.willReturn(Optional.empty());
 
 		// when + then
-		assertThatThrownBy(() -> service.withdrawal(userId))
+		assertThatThrownBy(() -> service.exit(userId))
 			.isInstanceOf(ResourceNotFoundException.class);
 	}
 
-	@Test
-	void isNotResourceOwner1() {
-		// given
-		Long id1 = 1L;
-		Long id2 = 2L;
 
-		// when
-		boolean isTrue = service.isNotResourceOwner(id1, id2);
-
-		// then
-		assertThat(isTrue).isTrue();
-	}
-
-	@Test
-	void isNotResourceOwner2() {
-		// given
-		Long id1 = 1L;
-		Long id2 = 1L;
-
-		// when
-		boolean isFalse = service.isNotResourceOwner(id1, id2);
-
-		// then
-		assertThat(isFalse).isFalse();
-	}
-
-	@Test
-	void isResourceOwner1() {
-		// given
-		Long id1 = 1L;
-		Long id2 = 1L;
-
-		// when
-		boolean isTrue = service.isResourceOwner(id1, id2);
-
-		// then
-		assertThat(isTrue).isTrue();
-	}
-
-	@Test
-	void isResourceOwner2() {
-		// given
-		Long id1 = 1L;
-		Long id2 = 2L;
-
-		// when
-		boolean isFalse = service.isResourceOwner(id1, id2);
-
-		// then
-		assertThat(isFalse).isFalse();
-	}
 
 }

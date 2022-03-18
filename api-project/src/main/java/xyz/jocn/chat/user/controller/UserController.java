@@ -1,14 +1,15 @@
-package xyz.jocn.chat.user;
+package xyz.jocn.chat.user.controller;
 
 import static org.springframework.http.ResponseEntity.*;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.*;
 import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
+import static xyz.jocn.chat.common.util.AppUtil.*;
 
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,10 +22,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.common.exception.ApiAccessDenyException;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
+import xyz.jocn.chat.user.service.UserService;
 
 @Slf4j
 @RequiredArgsConstructor
-@Validated
 @RequestMapping("/users")
 @RestController
 public class UserController {
@@ -33,25 +34,25 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping
-	public ResponseEntity signUp(@RequestBody @Valid UserSignUpRequestDto userSignUpRequestDto) {
-		userService.signUp(userSignUpRequestDto);
-		return ok(success());
+	public ResponseEntity<?> signUp(@RequestBody @Valid UserSignUpRequestDto userSignUpRequestDto) {
+		long id = userService.signUp(userSignUpRequestDto);
+		return created(fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri()).body(success());
 	}
 
 	@GetMapping("/me")
-	public ResponseEntity me(@AuthenticationPrincipal(expression = USER_PK) String userId) {
-		return ok(success(userService.getUser(Long.parseLong(userId))));
+	public ResponseEntity<?> fetchMe(@AuthenticationPrincipal(expression = USER_PK) String userId) {
+		return ok(success(userService.fetchMe(Long.parseLong(userId))));
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity withdrawal(
+	public ResponseEntity<?> exit(
 		@PathVariable Long id,
 		@AuthenticationPrincipal(expression = USER_PK) String userId
 	) {
-		if (userService.isNotResourceOwner(id, Long.parseLong(userId))) {
-			throw new ApiAccessDenyException("only withdraw own account");
+		if (isNotResourceOwner(id, Long.parseLong(userId))) {
+			throw new ApiAccessDenyException("delete only own account");
 		}
-		userService.withdrawal(id);
+		userService.exit(id);
 		return ok(success());
 	}
 }

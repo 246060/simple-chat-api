@@ -4,6 +4,8 @@ import java.time.Instant;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import xyz.jocn.chat.chat_space.entity.ThreadEntity;
+import xyz.jocn.chat.participant.enums.ParticipantState;
 import xyz.jocn.chat.user.entity.UserEntity;
 
 @ToString
@@ -45,4 +48,12 @@ public class ThreadParticipantEntity {
 	@ManyToOne
 	private UserEntity user;
 
+	private String name;
+
+	@Enumerated(EnumType.STRING)
+	private ParticipantState state = ParticipantState.ACTIVE;
+
+	public void exit() {
+		this.state = ParticipantState.EXIT;
+	}
 }

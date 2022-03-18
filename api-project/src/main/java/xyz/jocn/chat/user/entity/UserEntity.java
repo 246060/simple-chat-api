@@ -61,6 +61,11 @@ public class UserEntity {
 	@Enumerated(EnumType.STRING)
 	private UserRole role = UserRole.USER;
 
+	private String imageUrl;
+	private String stateMessage;
+
+	private Instant lastLoginTime;
+
 	@CreatedDate
 	private Instant createdAt;
 
@@ -68,7 +73,7 @@ public class UserEntity {
 	private Instant updatedAt;
 
 	@LastModifiedBy
-	private long updatedBy;
+	private Long updatedBy;
 
 	public UserEntity(long id) {
 		this.id = id;
@@ -77,4 +82,13 @@ public class UserEntity {
 	public void delete() {
 		this.state = UserState.DELETED;
 	}
+
+	public void reactivate() {
+		this.state = UserState.ACTIVE;
+	}
+
+	public void changePassword(String password) {
+		this.password = password;
+	}
+
 }

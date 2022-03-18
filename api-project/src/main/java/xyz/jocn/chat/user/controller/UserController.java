@@ -30,7 +30,7 @@ import xyz.jocn.chat.user.service.UserService;
 @RestController
 public class UserController {
 
-	private static final String USER_PK = JWT_CLAIM_FIELD_NAME_USER_KEY;
+	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
 	private final UserService userService;
 
 	@PostMapping
@@ -40,19 +40,13 @@ public class UserController {
 	}
 
 	@GetMapping("/me")
-	public ResponseEntity<?> fetchMe(@AuthenticationPrincipal(expression = USER_PK) String userId) {
+	public ResponseEntity<?> fetchMe(@AuthenticationPrincipal(expression = UID) String userId) {
 		return ok(success(userService.fetchMe(Long.parseLong(userId))));
 	}
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> exit(
-		@PathVariable Long id,
-		@AuthenticationPrincipal(expression = USER_PK) String userId
-	) {
-		if (isNotResourceOwner(id, Long.parseLong(userId))) {
-			throw new ApiAccessDenyException("delete only own account");
-		}
-		userService.exit(id);
+	@DeleteMapping("/me")
+	public ResponseEntity<?> exit(@AuthenticationPrincipal(expression = UID) String userId) {
+		userService.exit(Long.parseLong(userId));
 		return ok(success());
 	}
 }

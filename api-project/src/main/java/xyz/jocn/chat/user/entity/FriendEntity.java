@@ -49,4 +49,24 @@ public class FriendEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private UserEntity target;
+
+	public void changeHidden(boolean hidden) {
+		this.hidden = hidden;
+	}
+
+	public void cancelHidden() {
+		this.hidden = false;
+	}
+
+	public void changeFavorite(boolean favorite) {
+		this.favorite = favorite;
+	}
+
+	public void cancelFavorite() {
+		this.favorite = false;
+	}
+
+	public void changeName(String newName) {
+		this.name = newName;
+	}
 }

@@ -3,6 +3,7 @@ package xyz.jocn.chat.user.service;
 import static xyz.jocn.chat.common.enums.ResourceType.*;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,12 +14,11 @@ import xyz.jocn.chat.common.exception.ResourceAlreadyExistException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.user.converter.FriendBlockConverter;
 import xyz.jocn.chat.user.converter.FriendConverter;
-import xyz.jocn.chat.user.dto.FriendBlockCancelRequestDto;
-import xyz.jocn.chat.user.dto.FriendBlockCreateRequestDto;
 import xyz.jocn.chat.user.dto.FriendBlockDto;
-import xyz.jocn.chat.user.dto.FriendCreateRequestDto;
-import xyz.jocn.chat.user.dto.FriendDeleteRequestDto;
 import xyz.jocn.chat.user.dto.FriendDto;
+import xyz.jocn.chat.user.dto.FriendRequestDto;
+import xyz.jocn.chat.user.dto.FriendSearchDto;
+import xyz.jocn.chat.user.dto.FriendUidsDto;
 import xyz.jocn.chat.user.entity.FriendBlockEntity;
 import xyz.jocn.chat.user.entity.FriendEntity;
 import xyz.jocn.chat.user.entity.UserEntity;
@@ -36,19 +36,24 @@ public class FriendService {
 	private final FriendBlockRepository friendBlockRepository;
 	private final UserRepository userRepository;
 
-	private final FriendConverter friendController = FriendConverter.INSTANCE;
+	private final FriendConverter friendConverter = FriendConverter.INSTANCE;
 	private final FriendBlockConverter friendBlockConverter = FriendBlockConverter.INSTANCE;
 
+
+	/*
+	 * Command =============================================================================
+	 * */
+
 	@Transactional
-	public Long addFriend(FriendCreateRequestDto dto) {
+	public Long addFriend(long uid, FriendRequestDto dto) {
 
 		UserEntity target =
 			userRepository
-				.findById(dto.getTargetId())
+				.findByEmail(dto.getTargetEmail())
 				.orElseThrow(() -> new ResourceNotFoundException(USER));
 
 		FriendEntity friendEntity = FriendEntity.builder()
-			.source(UserEntity.builder().id(dto.getUserId()).build())
+			.source(UserEntity.builder().id(uid).build())
 			.target(target)
 			.build();
 
@@ -57,29 +62,25 @@ public class FriendService {
 		return friendEntity.getId();
 	}
 
-	public List<FriendDto> fetchFriends(long userId) {
-		return friendController.toDto(friendRepository.findAllBySourceId(userId));
+	@Transactional
+	public void deleteFriends(long uid, FriendUidsDto dto) {
+		friendRepository.deleteAllBySourceIdAndTargetIdIn(uid, dto.getTargets());
 	}
 
 	@Transactional
-	public void deleteFriends(FriendDeleteRequestDto dto) {
-		friendRepository.deleteAllBySourceIdAndTargetIdIn(dto.getSourceId(), dto.getTargetIds());
-	}
-
-	@Transactional
-	public long addBlock(FriendBlockCreateRequestDto dto) {
+	public long addBlock(long uid, FriendRequestDto dto) {
 
 		UserEntity target =
 			userRepository
-				.findById(dto.getTargetId())
+				.findById(dto.getTargetUid())
 				.orElseThrow(() -> new ResourceNotFoundException(FRIEND_BLOCK));
 
 		friendBlockRepository
-			.findBySourceIdAndTargetId(dto.getSourceId(), dto.getTargetId())
+			.findBySourceIdAndTargetId(uid, dto.getTargetUid())
 			.ifPresent(friendBlockEntity -> new ResourceAlreadyExistException(FRIEND_BLOCK));
 
 		FriendBlockEntity friendBlockEntity = FriendBlockEntity.builder()
-			.source(UserEntity.builder().id(dto.getSourceId()).build())
+			.source(UserEntity.builder().id(uid).build())
 			.target(target)
 			.build();
 
@@ -88,12 +89,40 @@ public class FriendService {
 		return friendBlockEntity.getId();
 	}
 
-	public List<FriendBlockDto> fetchBlocks(long userId) {
-		return friendBlockConverter.toDto(friendBlockRepository.findAllBySourceId(userId));
+	@Transactional
+	public void cancelBlock(long uid, FriendUidsDto dto) {
+		friendBlockRepository.deleteAllBySourceIdAndTargetIdIn(uid, dto.getTargets());
 	}
 
 	@Transactional
-	public void cancelBlock(FriendBlockCancelRequestDto dto) {
-		friendBlockRepository.deleteAllBySourceIdAndTargetIdIn(dto.getSourceId(), dto.getTargetIds());
+	public FriendDto update(long uid, FriendDto dto) {
+
+		FriendEntity friend = friendRepository
+			.findByIdAndSourceId(dto.getId(), uid)
+			.orElseThrow(() -> new ResourceNotFoundException(FRIEND));
+
+		if (Objects.nonNull(dto.getFavorite())) {
+			friend.changeFavorite(dto.getFavorite());
+		}
+		if (Objects.nonNull(dto.getHidden())) {
+			friend.changeHidden(dto.getHidden());
+		}
+		if (Objects.nonNull(dto.getName())) {
+			friend.changeName(dto.getName());
+		}
+
+		return friendConverter.toDto(friend);
+	}
+
+	/*
+	 * Query ===============================================================================
+	 * */
+
+	public List<FriendDto> fetchFriends(long uid, FriendSearchDto friendSearchDto) {
+		return friendConverter.toDto(friendRepository.findAllBySourceIdAndCondition(uid, friendSearchDto));
+	}
+
+	public List<FriendBlockDto> fetchBlocks(long uid) {
+		return friendBlockConverter.toDto(friendBlockRepository.findAllBySourceId(uid));
 	}
 }

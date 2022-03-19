@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import xyz.jocn.chat.chat_space.entity.ThreadEntity;
+import xyz.jocn.chat.thread.ThreadEntity;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
-import xyz.jocn.chat.user.entity.UserEntity;
+import xyz.jocn.chat.user.UserEntity;
 
 @Repository
 public interface ThreadParticipantRepository

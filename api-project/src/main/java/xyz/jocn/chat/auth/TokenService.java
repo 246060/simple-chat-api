@@ -18,8 +18,8 @@ import xyz.jocn.chat.auth.dto.TokenResponseDto;
 import xyz.jocn.chat.common.exception.AuthenticationException;
 import xyz.jocn.chat.common.exception.TokenException;
 import xyz.jocn.chat.common.util.TokenUtil;
-import xyz.jocn.chat.user.entity.UserEntity;
-import xyz.jocn.chat.user.repo.user.UserRepository;
+import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.repo.UserRepository;
 
 @Slf4j
 @RequiredArgsConstructor

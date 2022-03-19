@@ -1,6 +1,6 @@
 package xyz.jocn.chat.message.service;
 
-import static xyz.jocn.chat.common.enums.ResourceType.*;
+import static xyz.jocn.chat.common.exception.ResourceType.*;
 import static xyz.jocn.chat.common.pubsub.EventTarget.*;
 import static xyz.jocn.chat.common.pubsub.EventType.*;
 
@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.chat_space.entity.ThreadEntity;
-import xyz.jocn.chat.chat_space.repo.thread.ThreadRepository;
+import xyz.jocn.chat.thread.ThreadEntity;
+import xyz.jocn.chat.thread.repo.ThreadRepository;
 import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.common.pubsub.EventDto;
@@ -30,7 +30,7 @@ import xyz.jocn.chat.message.repo.thread_message.ThreadMessageRepository;
 import xyz.jocn.chat.message.repo.thread_message_mark.ThreadMessageMarkRepository;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
 import xyz.jocn.chat.participant.repo.thread_participant.ThreadParticipantRepository;
-import xyz.jocn.chat.user.entity.UserEntity;
+import xyz.jocn.chat.user.UserEntity;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -52,8 +52,12 @@ public class ThreadMessageService {
 	public void send(ThreadMessageCreateDto dto) {
 
 		switch (dto.getType()) {
-			case SIMPLE:
+			case SHORT_TEXT:
 				sendSimpleMessageToThread(dto);
+				break;
+			case LONG_TEXT:
+				break;
+			case FILE:
 				break;
 			default:
 				throw new NotAvailableFeatureException();

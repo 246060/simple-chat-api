@@ -5,12 +5,12 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import xyz.jocn.chat.chat_space.dto.ThreadDto;
-import xyz.jocn.chat.chat_space.entity.RoomEntity;
-import xyz.jocn.chat.chat_space.entity.ThreadEntity;
+import xyz.jocn.chat.thread.ThreadConverter;
+import xyz.jocn.chat.thread.dto.ThreadDto;
+import xyz.jocn.chat.room.RoomEntity;
+import xyz.jocn.chat.thread.ThreadEntity;
 import xyz.jocn.chat.message.entity.RoomMessageEntity;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
-import xyz.jocn.chat.user.entity.UserEntity;
 
 class ThreadConverterTest {
 

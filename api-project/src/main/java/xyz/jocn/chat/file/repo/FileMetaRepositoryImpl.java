@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import xyz.jocn.chat.file.entity.QFileEntity;
+import xyz.jocn.chat.file.QFileEntity;
 
 @Repository
 public class FileMetaRepositoryImpl implements FileMetaRepositoryExt {

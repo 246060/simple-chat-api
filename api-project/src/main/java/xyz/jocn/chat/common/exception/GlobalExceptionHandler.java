@@ -1,5 +1,6 @@
 package xyz.jocn.chat.common.exception;
 
+import static org.springframework.http.HttpStatus.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
 import org.springframework.beans.ConversionNotSupportedException;
@@ -21,17 +22,42 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.chat_space.exception.RoomException;
 import xyz.jocn.chat.common.dto.ErrorResponse;
+import xyz.jocn.chat.room.RoomException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+	@ExceptionHandler(FileStorageException.class)
+	public ResponseEntity<?> handleFileStorageException(FileStorageException ex, WebRequest request) {
+		log.debug("exception handler : {}", new Object() {
+		}.getClass().getEnclosingMethod().getName());
+		log.error("exception message : {}", ex.getMessage());
+
+		HttpStatus status = EXPECTATION_FAILED;
+		ErrorResponse error = new ErrorResponse(status.value(), ex.getMessage());
+		return this.handleExceptionInternal(ex, fail(error), new HttpHeaders(), status, request);
+	}
+
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ResponseEntity<?> handleMaxUploadSizeExceededException(
+		MaxUploadSizeExceededException ex, WebRequest request
+	) {
+		log.debug("exception handler : {}", new Object() {
+		}.getClass().getEnclosingMethod().getName());
+		log.error("exception message : {}", ex.getMessage());
+
+		HttpStatus status = EXPECTATION_FAILED;
+		ErrorResponse error = new ErrorResponse(status.value(), "File too large!");
+		return this.handleExceptionInternal(ex, fail(error), new HttpHeaders(), status, request);
+	}
 
 	@ExceptionHandler(RoomException.class)
 	public ResponseEntity<?> handleRoomException(RoomException ex, WebRequest request) {
@@ -40,7 +66,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		log.error("exception message : {}", ex.getMessage());
 
 		HttpHeaders headers = new HttpHeaders();
-		HttpStatus status = HttpStatus.BAD_REQUEST;
+		HttpStatus status = BAD_REQUEST;
 		ErrorResponse error = new ErrorResponse(status.value(), ex.getMessage());
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
@@ -52,7 +78,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		log.error("exception message : {}", ex.getMessage());
 
 		HttpHeaders headers = new HttpHeaders();
-		HttpStatus status = HttpStatus.UNAUTHORIZED;
+		HttpStatus status = UNAUTHORIZED;
 		ErrorResponse error = new ErrorResponse(status.value(), ex.getMessage());
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
@@ -64,7 +90,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		log.error("exception message : {}", ex.getMessage());
 
 		HttpHeaders headers = new HttpHeaders();
-		HttpStatus status = HttpStatus.FORBIDDEN;
+		HttpStatus status = FORBIDDEN;
 		ErrorResponse error = new ErrorResponse(status.value(), ex.getMessage());
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
@@ -76,7 +102,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		log.error("exception message : {}", ex.getMessage());
 
 		HttpHeaders headers = new HttpHeaders();
-		HttpStatus status = HttpStatus.BAD_REQUEST;
+		HttpStatus status = BAD_REQUEST;
 		ErrorResponse error = new ErrorResponse(status.value(), ex.getDescription(), ex.getMessage());
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
@@ -88,7 +114,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		log.error("exception message : {}", ex.getMessage());
 
 		HttpHeaders headers = new HttpHeaders();
-		HttpStatus status = HttpStatus.BAD_REQUEST;
+		HttpStatus status = BAD_REQUEST;
 		ErrorResponse error = new ErrorResponse(status.value(), ex.getDescription(), ex.getMessage());
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}
@@ -111,7 +137,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		log.error(sb.toString());
 
 		HttpHeaders headers = new HttpHeaders();
-		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+		HttpStatus status = INTERNAL_SERVER_ERROR;
 		ErrorResponse error = new ErrorResponse(status.value(), "unknown server error", ex.getMessage());
 		return this.handleExceptionInternal(ex, fail(error), headers, status, request);
 	}

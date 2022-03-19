@@ -1,7 +1,5 @@
 package xyz.jocn.chat.common.exception;
 
-import xyz.jocn.chat.common.enums.ResourceType;
-
 public class ResourceAlreadyExistException extends RuntimeException {
 
 	private final String description = "%s already exist";

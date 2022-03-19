@@ -2,13 +2,13 @@ package xyz.jocn.chat.chat_space.converter;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import xyz.jocn.chat.chat_space.dto.RoomDto;
-import xyz.jocn.chat.chat_space.entity.RoomEntity;
-import xyz.jocn.chat.user.entity.UserEntity;
+import xyz.jocn.chat.room.RoomConverter;
+import xyz.jocn.chat.room.dto.RoomDto;
+import xyz.jocn.chat.room.RoomEntity;
+import xyz.jocn.chat.user.UserEntity;
 
 class RoomConverterTest {
 

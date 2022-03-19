@@ -1,6 +1,6 @@
 package xyz.jocn.chat.message.service;
 
-import static xyz.jocn.chat.common.enums.ResourceType.*;
+import static xyz.jocn.chat.common.exception.ResourceType.*;
 import static xyz.jocn.chat.common.pubsub.EventTarget.*;
 import static xyz.jocn.chat.common.pubsub.EventType.*;
 
@@ -19,6 +19,8 @@ import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.common.pubsub.EventDto;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
+import xyz.jocn.chat.file.repo.FileMetaRepository;
+import xyz.jocn.chat.file.repo.StorageRepository;
 import xyz.jocn.chat.message.converter.RoomMessageMarkConverter;
 import xyz.jocn.chat.message.dto.RoomMessageChangeDto;
 import xyz.jocn.chat.message.dto.RoomMessageDto;
@@ -43,35 +45,51 @@ public class RoomMessageService {
 	private final RoomMessageRepository roomMessageRepository;
 	private final RoomMessageMarkRepository roomMessageMarkRepository;
 
+	private final FileMetaRepository fileMetaRepository;
+	private final StorageRepository storageRepository;
+
 	private final RoomMessageMarkConverter roomMessageMarkConverter = RoomMessageMarkConverter.INSTANCE;
 
 	private final MessagePublisher publisher;
 
 	@Transactional
 	public void sendMessageToRoom(RoomMessageSendDto dto) {
+
 		switch (dto.getType()) {
-			case SIMPLE:
-				sendSimpleMessageToRoom(dto);
+			case SHORT_TEXT:
+				sendShortMessageToRoom(dto);
+				break;
+			case LONG_TEXT:
+				sendLongMessageToRoom(dto);
+				break;
+			case FILE:
+				sendFileMessageToRoom(dto);
 				break;
 			default:
 				throw new NotAvailableFeatureException();
 		}
 
 		{
-			publisher.emit(
-				EventDto.builder()
-					.target(ROOM_AREA)
-					.type(ROOM_MESSAGE_EVENT)
-					.spaceId(dto.getRoomId())
-					.build()
+			publisher.emit(EventDto.builder()
+				.target(ROOM_AREA)
+				.type(ROOM_MESSAGE_EVENT)
+				.spaceId(dto.getRoomId())
+				.build()
 			);
 		}
+	}
+
+	private void sendFileMessageToRoom(RoomMessageSendDto dto) {
 
 	}
 
-	private void sendSimpleMessageToRoom(RoomMessageSendDto dto) {
+	private void sendLongMessageToRoom(RoomMessageSendDto dto) {
 
-		RoomParticipantEntity roomParticipantEntity =
+	}
+
+	private void sendShortMessageToRoom(RoomMessageSendDto dto) {
+
+		RoomParticipantEntity participant =
 			roomParticipantRepository
 				.findByRoomIdAndUserId(dto.getRoomId(), dto.getUserId())
 				.orElseThrow(() -> new ResourceNotFoundException(ROOM_PARTICIPANT));
@@ -79,8 +97,8 @@ public class RoomMessageService {
 		roomMessageRepository.save(
 			RoomMessageEntity.builder()
 				.type(dto.getType())
-				.room(roomParticipantEntity.getRoom())
-				.sender(roomParticipantEntity)
+				.room(participant.getRoom())
+				.sender(participant)
 				.build()
 		);
 	}

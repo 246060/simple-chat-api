@@ -1,5 +1,7 @@
 package xyz.jocn.chat.common.config;
 
+import static org.springframework.http.HttpMethod.*;
+
 import java.util.Base64;
 
 import javax.crypto.SecretKey;
@@ -40,7 +42,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			.and()
 			.authorizeRequests()
-			.antMatchers(HttpMethod.POST, "/token", "/token/refresh", "/users").permitAll()
+			.antMatchers(GET, "/files/*/data", "/files/*/download").permitAll()
+			.antMatchers(POST, "/token", "/token/refresh", "/users").permitAll()
 			.anyRequest().authenticated()
 			.and().oauth2ResourceServer().jwt().decoder(jwtDecoder())
 		;

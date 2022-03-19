@@ -22,9 +22,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import xyz.jocn.chat.chat_space.entity.RoomEntity;
+import xyz.jocn.chat.room.RoomEntity;
 import xyz.jocn.chat.participant.enums.ParticipantState;
-import xyz.jocn.chat.user.entity.UserEntity;
+import xyz.jocn.chat.user.UserEntity;
 
 @ToString
 @Getter

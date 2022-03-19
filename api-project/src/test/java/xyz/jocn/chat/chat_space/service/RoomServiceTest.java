@@ -14,16 +14,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import xyz.jocn.chat.chat_space.dto.RoomCreateDto;
-import xyz.jocn.chat.chat_space.dto.RoomDto;
-import xyz.jocn.chat.chat_space.entity.RoomEntity;
-import xyz.jocn.chat.chat_space.repo.room.RoomRepository;
+import xyz.jocn.chat.room.dto.RoomCreateDto;
+import xyz.jocn.chat.room.dto.RoomDto;
+import xyz.jocn.chat.room.RoomEntity;
+import xyz.jocn.chat.room.RoomService;
+import xyz.jocn.chat.room.repo.RoomRepository;
 import xyz.jocn.chat.common.pubsub.EventDto;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
-import xyz.jocn.chat.user.entity.UserEntity;
-import xyz.jocn.chat.user.repo.user.UserRepository;
+import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.repo.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class RoomServiceTest {

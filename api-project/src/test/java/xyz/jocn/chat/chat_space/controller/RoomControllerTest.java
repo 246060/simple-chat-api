@@ -20,9 +20,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import xyz.jocn.chat.TestToken;
-import xyz.jocn.chat.chat_space.dto.RoomCreateDto;
-import xyz.jocn.chat.chat_space.dto.RoomDto;
-import xyz.jocn.chat.chat_space.service.RoomService;
+import xyz.jocn.chat.room.RoomController;
+import xyz.jocn.chat.room.dto.RoomCreateDto;
+import xyz.jocn.chat.room.dto.RoomDto;
+import xyz.jocn.chat.room.RoomService;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
 
 @WebMvcTest(RoomController.class)

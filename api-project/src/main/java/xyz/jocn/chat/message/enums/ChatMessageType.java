@@ -1,5 +1,5 @@
 package xyz.jocn.chat.message.enums;
 
 public enum ChatMessageType {
-	SIMPLE, LONG, FILE, IMAGE
+	SHORT_TEXT, LONG_TEXT, FILE
 }

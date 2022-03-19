@@ -24,7 +24,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import xyz.jocn.chat.chat_space.entity.RoomEntity;
+import xyz.jocn.chat.room.RoomEntity;
 import xyz.jocn.chat.message.enums.ChatMessageType;
 import xyz.jocn.chat.message.enums.RoomMessageState;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;

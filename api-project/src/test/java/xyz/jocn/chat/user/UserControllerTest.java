@@ -17,10 +17,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import xyz.jocn.chat.TestToken;
-import xyz.jocn.chat.user.controller.UserController;
 import xyz.jocn.chat.user.dto.UserDto;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
-import xyz.jocn.chat.user.service.UserService;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {

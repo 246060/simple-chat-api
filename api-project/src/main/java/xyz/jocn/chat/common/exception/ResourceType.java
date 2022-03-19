@@ -1,0 +1,9 @@
+package xyz.jocn.chat.common.exception;
+
+public enum ResourceType {
+	USER,
+	ROOM, ROOM_MESSAGE, ROOM_PARTICIPANT,
+	THREAD, THREAD_MESSAGE, THREAD_PARTICIPANT, THREAD_MESSAGE_MARK,
+	FRIEND, FRIEND_BLOCK,
+	FILE
+}

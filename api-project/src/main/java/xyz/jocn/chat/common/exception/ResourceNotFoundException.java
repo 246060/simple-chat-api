@@ -1,7 +1,5 @@
 package xyz.jocn.chat.common.exception;
 
-import xyz.jocn.chat.common.enums.ResourceType;
-
 public class ResourceNotFoundException extends RuntimeException {
 	private final String description = "%s not found";
 	private ResourceType resourceType;

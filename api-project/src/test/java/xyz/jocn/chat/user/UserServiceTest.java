@@ -16,10 +16,8 @@ import xyz.jocn.chat.common.exception.ResourceAlreadyExistException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.user.dto.UserDto;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
-import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.enums.UserState;
-import xyz.jocn.chat.user.repo.user.UserRepository;
-import xyz.jocn.chat.user.service.UserService;
+import xyz.jocn.chat.user.repo.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {

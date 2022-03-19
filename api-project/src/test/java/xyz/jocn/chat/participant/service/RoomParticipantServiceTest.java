@@ -6,11 +6,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import xyz.jocn.chat.chat_space.repo.room.RoomRepository;
-import xyz.jocn.chat.chat_space.repo.thread.ThreadRepository;
+import xyz.jocn.chat.room.repo.RoomRepository;
+import xyz.jocn.chat.thread.repo.ThreadRepository;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
 import xyz.jocn.chat.participant.repo.thread_participant.ThreadParticipantRepository;
-import xyz.jocn.chat.user.repo.user.UserRepository;
+import xyz.jocn.chat.user.repo.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class RoomParticipantServiceTest {

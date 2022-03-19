@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import xyz.jocn.chat.chat_space.entity.QRoomEntity;
 import xyz.jocn.chat.message.entity.QRoomMessageFileEntity;
 
 @Repository

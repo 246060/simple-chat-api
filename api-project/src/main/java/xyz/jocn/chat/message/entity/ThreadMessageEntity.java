@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import xyz.jocn.chat.message.enums.ChatMessageType;
 import xyz.jocn.chat.message.enums.ThreadMessageState;
-import xyz.jocn.chat.chat_space.entity.ThreadEntity;
+import xyz.jocn.chat.thread.ThreadEntity;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
 
 @ToString

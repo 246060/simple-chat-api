@@ -1,6 +1,6 @@
 package xyz.jocn.chat.participant.service;
 
-import static xyz.jocn.chat.common.enums.ResourceType.*;
+import static xyz.jocn.chat.common.exception.ResourceType.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.chat_space.entity.RoomEntity;
-import xyz.jocn.chat.chat_space.entity.ThreadEntity;
-import xyz.jocn.chat.chat_space.repo.room.RoomRepository;
-import xyz.jocn.chat.chat_space.repo.thread.ThreadRepository;
+import xyz.jocn.chat.room.RoomEntity;
+import xyz.jocn.chat.thread.ThreadEntity;
+import xyz.jocn.chat.room.repo.RoomRepository;
+import xyz.jocn.chat.thread.repo.ThreadRepository;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.participant.converter.RoomParticipantConverter;
 import xyz.jocn.chat.participant.dto.RoomExitDto;
@@ -22,8 +22,8 @@ import xyz.jocn.chat.participant.dto.RoomParticipantDto;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
 import xyz.jocn.chat.participant.repo.thread_participant.ThreadParticipantRepository;
-import xyz.jocn.chat.user.entity.UserEntity;
-import xyz.jocn.chat.user.repo.user.UserRepository;
+import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.repo.UserRepository;
 
 @Slf4j
 @RequiredArgsConstructor

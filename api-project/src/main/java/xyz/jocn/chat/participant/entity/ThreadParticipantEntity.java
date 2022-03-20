@@ -46,12 +46,12 @@ public class ThreadParticipantEntity {
 	private ThreadEntity thread;
 
 	@ManyToOne
-	private UserEntity user;
+	private RoomParticipantEntity roomParticipant;
 
 	private String name;
 
 	@Enumerated(EnumType.STRING)
-	private ParticipantState state = ParticipantState.ACTIVE;
+	private ParticipantState state = ParticipantState.JOIN;
 
 	public void exit() {
 		this.state = ParticipantState.EXIT;

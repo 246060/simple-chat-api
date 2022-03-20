@@ -1,5 +1,7 @@
 package xyz.jocn.chat.thread;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -21,4 +23,6 @@ public interface ThreadConverter {
 	@Mapping(target = "roomId", source = "thread.room.id")
 	@Mapping(target = "roomMessageId", source = "thread.roomMessage.id")
 	ThreadDto toDto(ThreadParticipantEntity threadParticipantEntity);
+
+	List<ThreadDto> toDto(List<ThreadEntity> entities);
 }

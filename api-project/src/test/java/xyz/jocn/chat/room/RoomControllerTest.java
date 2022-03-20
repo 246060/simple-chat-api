@@ -1,4 +1,4 @@
-package xyz.jocn.chat.chat_space.controller;
+package xyz.jocn.chat.room;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.HttpHeaders.*;
@@ -20,11 +20,11 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import xyz.jocn.chat.TestToken;
-import xyz.jocn.chat.room.RoomController;
-import xyz.jocn.chat.room.dto.RoomCreateDto;
-import xyz.jocn.chat.room.dto.RoomDto;
-import xyz.jocn.chat.room.RoomService;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
+import xyz.jocn.chat.room.RoomController;
+import xyz.jocn.chat.room.RoomService;
+import xyz.jocn.chat.room.dto.RoomCreateRequestDto;
+import xyz.jocn.chat.room.dto.RoomDto;
 
 @WebMvcTest(RoomController.class)
 class RoomControllerTest {
@@ -47,17 +47,17 @@ class RoomControllerTest {
 	void open() throws Exception {
 		// given
 		Long hostId = 1L;
+		Long inviteeId = 2L;
 		String token = testToken.generate(hostId);
-
-		RoomCreateDto dto = new RoomCreateDto();
-		dto.setInviteeId(2L);
-
-		String jsonStr = om.writeValueAsString(dto);
 
 		RoomDto roomDto = new RoomDto();
 		roomDto.setRoomId(1L);
 
-		given(roomService.open(any(RoomCreateDto.class))).willReturn(roomDto);
+		given(roomService.open(anyLong(), anyLong())).willReturn(roomDto);
+
+		RoomCreateRequestDto dto = new RoomCreateRequestDto();
+		dto.setInviteeId(inviteeId);
+		String jsonStr = om.writeValueAsString(dto);
 
 		// when
 		ResultActions actions =
@@ -88,7 +88,7 @@ class RoomControllerTest {
 
 		then(roomService)
 			.should(times(1))
-			.open(any(RoomCreateDto.class));
+			.open(anyLong(), anyLong());
 	}
 
 	@Test
@@ -104,7 +104,7 @@ class RoomControllerTest {
 			roomDtos.add(roomDto);
 		}
 
-		given(roomService.getRoomList(anyLong())).willReturn(roomDtos);
+		given(roomService.fetchMyRooms(anyLong())).willReturn(roomDtos);
 
 		// when
 		ResultActions actions =
@@ -134,6 +134,6 @@ class RoomControllerTest {
 
 		then(roomService)
 			.should(times(1))
-			.getRoomList(anyLong());
+			.fetchMyRooms(anyLong());
 	}
 }

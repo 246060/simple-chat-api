@@ -41,7 +41,7 @@ class RoomParticipantRepositoryTest {
 		System.out.println("user = " + user);
 
 		for (int i = 0; i < 3; i++) {
-			RoomEntity room = RoomEntity.builder().user(user).build();
+			RoomEntity room = RoomEntity.builder().build();
 			em.persist(room);
 
 			RoomParticipantEntity participant = RoomParticipantEntity.builder().room(room).user(user).build();
@@ -70,7 +70,7 @@ class RoomParticipantRepositoryTest {
 
 		Long roomId = 2L;
 		for (int i = 0; i < 3; i++) {
-			RoomEntity room = RoomEntity.builder().user(user).build();
+			RoomEntity room = RoomEntity.builder().build();
 			em.persist(room);
 			roomId = room.getId();
 
@@ -104,7 +104,7 @@ class RoomParticipantRepositoryTest {
 		Long roomId = 2L;
 
 		for (int i = 0; i < 3; i++) {
-			RoomEntity room = RoomEntity.builder().user(user).build();
+			RoomEntity room = RoomEntity.builder().build();
 			em.persist(room);
 			roomId = room.getId();
 

@@ -2,6 +2,7 @@ app:
   jwt-secret: jCIIGf7BKMMszsfSIXYS2v/CI1+aQ0fl4yZegXjVQLk=
   accessToken-expireInSec: 2592000
   refreshToken-expireInSec: 2592000
+  publish-event-trigger: false
 spring:
   security:
     oauth2:

@@ -3,6 +3,7 @@ app:
   accessToken-expireInSec: 2592000
   refreshToken-expireInSec: 2592000
   file-root-dir: C:\playground\file_dir\
+  publish-event-trigger: false
 spring:
   #security:
   #  filter:
@@ -23,14 +24,14 @@ spring:
     # url: jdbc:h2:tcp://localhost/~/chatDB
     # username: sa
     # password:
-    driver-class-name: org.h2.Driver
-    #    driver-class-name: com.mysql.cj.jdbc.Driver
-    #url: jdbc:mysql://localhost:3306/chat
-    #    username: root
-    #    password: root
-    url: jdbc:h2:mem:chatDB;DB_CLOSE_DELAY=-1;MODE=MYSQL
-    username: su
-    password:
+    # driver-class-name: org.h2.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/chat
+    username: root
+    password: root
+    #    url: jdbc:h2:mem:chatDB;DB_CLOSE_DELAY=-1;MODE=MYSQL
+#    username: su
+#    password:
     replica:
       - name: read-only-1
         url: jdbc:mysql://localhost:3307/chat
@@ -41,14 +42,14 @@ spring:
     #database-platform: org.hibernate.dialect.H2Dialect # MariaDB103Dialect
     # defer-datasource-initialization: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     #show-sql: true
     properties:
       hibernate:
-        hbm2ddl.auto: create # (= jpa.hibernate.ddl-auto)
+        hbm2ddl.auto: create-drop # (= jpa.hibernate.ddl-auto)
         format_sql: true
         show_sql: false
-        generate-ddl: false
+        generate-ddl: true
         jdbc.lob.non_contextual_creation: true
         physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
 
@@ -57,7 +58,7 @@ spring:
     # mode: always
   h2:
     console:
-      enabled: false
+      enabled: true
 
 logging:
   level:

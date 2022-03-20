@@ -6,6 +6,7 @@ import static xyz.jocn.chat.common.pubsub.EventType.*;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,9 @@ public class RoomMessageService {
 
 	private final MessagePublisher publisher;
 
+	@Value("${app.publish-event-trigger}")
+	public boolean isPublishEventTrigger;
+
 	@Transactional
 	public void sendMessageToRoom(RoomMessageSendDto dto) {
 
@@ -69,7 +73,7 @@ public class RoomMessageService {
 				throw new NotAvailableFeatureException();
 		}
 
-		{
+		if (isPublishEventTrigger) {
 			publisher.emit(EventDto.builder()
 				.target(ROOM_AREA)
 				.type(ROOM_MESSAGE_EVENT)
@@ -140,7 +144,7 @@ public class RoomMessageService {
 				.build()
 		);
 
-		{
+		if (isPublishEventTrigger) {
 			publisher.emit(
 				EventDto.builder()
 					.target(ROOM_AREA)
@@ -174,7 +178,7 @@ public class RoomMessageService {
 
 		roomMessageMarkRepository.delete(roomMessageMarkEntity);
 
-		{
+		if (isPublishEventTrigger) {
 			publisher.emit(
 				EventDto.builder()
 					.target(ROOM_AREA)
@@ -195,7 +199,7 @@ public class RoomMessageService {
 
 		roomMessageEntity.changeState(dto.getState());
 
-		{
+		if (isPublishEventTrigger) {
 			publisher.emit(
 				EventDto.builder()
 					.target(ROOM_AREA)

@@ -20,23 +20,22 @@ import xyz.jocn.chat.thread.dto.ThreadOpenDto;
 @RestController
 public class ThreadController {
 
-	private static final String USER_PK = JWT_CLAIM_FIELD_NAME_USER_KEY;
+	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
 	private final ThreadService threadService;
 
-	@PostMapping("/rooms/messages/{roomMessageId}/threads")
+	@PostMapping("/rooms/messages/{roomMessageId}/thread")
 	public ResponseEntity open(
 		@PathVariable Long roomMessageId,
-		@AuthenticationPrincipal(expression = USER_PK) String userId
+		@AuthenticationPrincipal(expression = UID) String uid
 	) {
 		ThreadOpenDto dto = new ThreadOpenDto();
 		dto.setRoomMessageId(roomMessageId);
-		dto.setUserId(Long.parseLong(userId));
-
+		dto.setUserId(Long.parseLong(uid));
 		return ok(success(threadService.open(dto)));
 	}
 
-	@GetMapping("/threads")
-	public ResponseEntity getRooms(@AuthenticationPrincipal(expression = USER_PK) String userId) {
-		return ok(success(threadService.getThreads(Long.parseLong(userId))));
+	@GetMapping("/me/threads")
+	public ResponseEntity fetchMyThreads(@AuthenticationPrincipal(expression = UID) String uid) {
+		return ok(success(threadService.fetchMyThreads(Long.parseLong(uid))));
 	}
 }

@@ -1,4 +1,4 @@
-package xyz.jocn.chat.chat_space.service;
+package xyz.jocn.chat.room;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -14,15 +14,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import xyz.jocn.chat.room.dto.RoomCreateDto;
-import xyz.jocn.chat.room.dto.RoomDto;
-import xyz.jocn.chat.room.RoomEntity;
-import xyz.jocn.chat.room.RoomService;
-import xyz.jocn.chat.room.repo.RoomRepository;
 import xyz.jocn.chat.common.pubsub.EventDto;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
+import xyz.jocn.chat.room.RoomEntity;
+import xyz.jocn.chat.room.RoomService;
+import xyz.jocn.chat.room.dto.RoomCreateRequestDto;
+import xyz.jocn.chat.room.dto.RoomDto;
+import xyz.jocn.chat.room.repo.RoomRepository;
 import xyz.jocn.chat.user.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
 
@@ -53,14 +53,13 @@ class RoomServiceTest {
 		given(roomRepository.save(any(RoomEntity.class))).willReturn(room);
 		given(roomParticipantRepository.save(any(RoomParticipantEntity.class))).willReturn(null);
 
-		willDoNothing().given(publisher).emit(any(EventDto.class));
+		// willDoNothing().given(publisher).emit(any(EventDto.class));
 
-		RoomCreateDto dto = new RoomCreateDto();
-		dto.setHostId(hostID);
+		RoomCreateRequestDto dto = new RoomCreateRequestDto();
 		dto.setInviteeId(inviteeId);
 
 		// when
-		RoomDto result = roomService.open(dto);
+		RoomDto result = roomService.open(hostID, inviteeId);
 
 		// then
 		then(userRepository).should().findById(anyLong());
@@ -86,7 +85,7 @@ class RoomServiceTest {
 		given(roomParticipantRepository.findAllByUserId(anyLong())).willReturn(entities);
 
 		// when
-		List<RoomDto> result = roomService.getRoomList(userId);
+		List<RoomDto> result = roomService.fetchMyRooms(userId);
 
 		// then
 		then(roomParticipantRepository).should().findAllByUserId(anyLong());

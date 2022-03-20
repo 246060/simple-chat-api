@@ -10,18 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.room.RoomEntity;
-import xyz.jocn.chat.thread.ThreadEntity;
-import xyz.jocn.chat.room.repo.RoomRepository;
-import xyz.jocn.chat.thread.repo.ThreadRepository;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.participant.converter.RoomParticipantConverter;
-import xyz.jocn.chat.participant.dto.RoomExitDto;
+import xyz.jocn.chat.participant.dto.RoomExitRequestDto;
 import xyz.jocn.chat.participant.dto.RoomInviteRequestDto;
 import xyz.jocn.chat.participant.dto.RoomParticipantDto;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
+import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
 import xyz.jocn.chat.participant.repo.thread_participant.ThreadParticipantRepository;
+import xyz.jocn.chat.room.RoomEntity;
+import xyz.jocn.chat.room.repo.RoomRepository;
+import xyz.jocn.chat.thread.repo.ThreadRepository;
 import xyz.jocn.chat.user.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
 
@@ -35,7 +35,6 @@ public class RoomParticipantService {
 	private final RoomRepository roomRepository;
 	private final RoomParticipantRepository roomParticipantRepository;
 	private final ThreadParticipantRepository threadParticipantRepository;
-	private final ThreadRepository threadRepository;
 
 	private final RoomParticipantConverter roomParticipantConverter = RoomParticipantConverter.INSTANCE;
 
@@ -67,16 +66,22 @@ public class RoomParticipantService {
 		// producer.emit(producerEvent);
 	}
 
-	public List<RoomParticipantDto> getParticipants(Long roomId) {
+	public List<RoomParticipantDto> fetchParticipants(Long roomId) {
 		return roomParticipantConverter.toDto(roomParticipantRepository.findAllByRoomId(roomId));
 	}
 
 	@Transactional
-	public void exit(RoomExitDto dto) {
-		roomParticipantRepository.deleteById(dto.getParticipantId());
+	public void exit(RoomExitRequestDto dto) {
 
-		List<ThreadEntity> threadEntities = threadRepository.findAllByRoomId(dto.getRoomId());
-		threadParticipantRepository.deleteAllByUserIdAndThreadIn(dto.getUserId(), threadEntities);
+		RoomParticipantEntity roomParticipantEntity = roomParticipantRepository
+			.findByIdAndUserId(dto.getParticipantId(), dto.getUserId())
+			.orElseThrow(() -> new ResourceNotFoundException(ROOM_PARTICIPANT));
+
+		roomParticipantEntity.exit();
+
+		threadParticipantRepository
+			.findAllByRoomParticipant(roomParticipantEntity)
+			.forEach(ThreadParticipantEntity::exit);
 
 		// ProducerEvent producerEvent = new ProducerEvent();
 		// producer.emit(producerEvent);

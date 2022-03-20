@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.participant.dto.RoomExitDto;
+import xyz.jocn.chat.participant.dto.RoomExitRequestDto;
 import xyz.jocn.chat.participant.dto.RoomInviteRequestDto;
 import xyz.jocn.chat.participant.service.RoomParticipantService;
 
@@ -23,32 +23,32 @@ import xyz.jocn.chat.participant.service.RoomParticipantService;
 @RequiredArgsConstructor
 @RestController
 public class RoomParticipantController {
-
-	private static final String USER_PK = JWT_CLAIM_FIELD_NAME_USER_KEY;
+	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
 	private final RoomParticipantService roomParticipantService;
 
 	@PostMapping("/rooms/{roomId}/participants")
-	public ResponseEntity invite(@PathVariable Long roomId, @RequestBody RoomInviteRequestDto dto) {
+	public ResponseEntity invite(
+		@PathVariable Long roomId,
+		@RequestBody RoomInviteRequestDto dto
+	) {
 		dto.setRoomId(roomId);
 		roomParticipantService.invite(dto);
 		return ok(success());
 	}
 
 	@GetMapping("/rooms/{roomId}/participants")
-	public ResponseEntity getParticipants(@PathVariable Long roomId) {
-		return ok(success(roomParticipantService.getParticipants(roomId)));
+	public ResponseEntity fetchParticipants(@PathVariable Long roomId) {
+		return ok(success(roomParticipantService.fetchParticipants(roomId)));
 	}
 
-	@DeleteMapping("/rooms/{roomId}/participants/{participantId}")
+	@DeleteMapping("/rooms/participants/{participantId}")
 	public ResponseEntity exit(
-		@PathVariable Long roomId,
 		@PathVariable Long participantId,
-		@AuthenticationPrincipal(expression = USER_PK) String userId
+		@AuthenticationPrincipal(expression = UID) String uid
 	) {
-		RoomExitDto dto = new RoomExitDto();
-		dto.setRoomId(roomId);
+		RoomExitRequestDto dto = new RoomExitRequestDto();
 		dto.setParticipantId(participantId);
-		dto.setUserId(Long.parseLong(userId));
+		dto.setUserId(Long.parseLong(uid));
 
 		roomParticipantService.exit(dto);
 		return ok(success());

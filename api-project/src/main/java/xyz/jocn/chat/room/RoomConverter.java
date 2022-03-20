@@ -4,10 +4,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import xyz.jocn.chat.participant.converter.RoomParticipantConverter;
 import xyz.jocn.chat.room.dto.RoomDto;
 
-@Mapper
-	// (uses = {RoomParticipantConverter.class})
+@Mapper(uses = {RoomParticipantConverter.class})
 public interface RoomConverter {
 
 	RoomConverter INSTANCE = Mappers.getMapper(RoomConverter.class);

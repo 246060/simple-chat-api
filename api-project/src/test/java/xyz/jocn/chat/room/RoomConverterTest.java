@@ -1,4 +1,4 @@
-package xyz.jocn.chat.chat_space.converter;
+package xyz.jocn.chat.room;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -24,7 +24,6 @@ class RoomConverterTest {
 		RoomEntity room =
 			RoomEntity.builder()
 				.id(roomId)
-				.user(new UserEntity(userId))
 				.build();
 
 		// when

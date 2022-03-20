@@ -1,4 +1,4 @@
-package xyz.jocn.chat.chat_space.service;
+package xyz.jocn.chat.thread;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

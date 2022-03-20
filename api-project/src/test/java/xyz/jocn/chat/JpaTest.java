@@ -18,18 +18,4 @@ class JpaTest {
 	@Autowired
 	EntityManager em;
 
-	@DisplayName("id 값만 있는 걸로 fk 값이 들어가는지 확인")
-	@Test
-	void test1() {
-		UserEntity user = UserEntity.builder().email("hello1111111@test.com").build();
-		em.persist(user);
-
-		Long userId = user.getId();
-
-		RoomEntity r = RoomEntity.builder().user(new UserEntity(userId)).build();
-		em.persist(r);
-		em.flush();
-		em.clear();
-	}
-
 }

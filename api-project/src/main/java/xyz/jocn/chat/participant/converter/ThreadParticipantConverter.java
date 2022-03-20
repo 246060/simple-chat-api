@@ -1,5 +1,7 @@
 package xyz.jocn.chat.participant.converter;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -11,4 +13,6 @@ public interface ThreadParticipantConverter {
 	ThreadParticipantConverter INSTANCE = Mappers.getMapper(ThreadParticipantConverter.class);
 
 	ThreadParticipantDto toDto(ThreadParticipantEntity entity);
+
+	List<ThreadParticipantDto> toDto(List<ThreadParticipantEntity> entities);
 }

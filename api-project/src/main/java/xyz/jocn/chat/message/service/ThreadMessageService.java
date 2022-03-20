@@ -6,13 +6,12 @@ import static xyz.jocn.chat.common.pubsub.EventType.*;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.thread.ThreadEntity;
-import xyz.jocn.chat.thread.repo.ThreadRepository;
 import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.common.pubsub.EventDto;
@@ -30,6 +29,8 @@ import xyz.jocn.chat.message.repo.thread_message.ThreadMessageRepository;
 import xyz.jocn.chat.message.repo.thread_message_mark.ThreadMessageMarkRepository;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
 import xyz.jocn.chat.participant.repo.thread_participant.ThreadParticipantRepository;
+import xyz.jocn.chat.thread.ThreadEntity;
+import xyz.jocn.chat.thread.repo.ThreadRepository;
 import xyz.jocn.chat.user.UserEntity;
 
 @Slf4j
@@ -48,6 +49,9 @@ public class ThreadMessageService {
 
 	private final MessagePublisher publisher;
 
+	@Value("${app.publish-event-trigger}")
+	public boolean isPublishEventTrigger;
+
 	@Transactional
 	public void send(ThreadMessageCreateDto dto) {
 
@@ -63,7 +67,7 @@ public class ThreadMessageService {
 				throw new NotAvailableFeatureException();
 		}
 
-		{ // pub event
+		if (isPublishEventTrigger) {
 			publisher.emit(
 				EventDto.builder()
 					.target(THREAD_AREA)
@@ -126,7 +130,7 @@ public class ThreadMessageService {
 				.build()
 		);
 
-		{ // pub event
+		if (isPublishEventTrigger) {
 			publisher.emit(
 				EventDto.builder()
 					.target(THREAD_AREA)
@@ -159,7 +163,7 @@ public class ThreadMessageService {
 
 		threadMessageMarkRepository.delete(threadMessageMarkEntity);
 
-		{ // pub event
+		if (isPublishEventTrigger) {
 			publisher.emit(
 				EventDto.builder()
 					.target(THREAD_AREA)
@@ -181,7 +185,7 @@ public class ThreadMessageService {
 
 		threadMessageEntity.changeState(dto.getState());
 
-		{ // pub event
+		if (isPublishEventTrigger) {
 			publisher.emit(
 				EventDto.builder()
 					.target(THREAD_AREA)

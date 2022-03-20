@@ -1,4 +1,4 @@
-package xyz.jocn.chat.chat_space.converter;
+package xyz.jocn.chat.thread;
 
 import static org.assertj.core.api.Assertions.*;
 

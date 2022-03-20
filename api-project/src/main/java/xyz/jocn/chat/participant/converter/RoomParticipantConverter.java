@@ -16,7 +16,7 @@ public interface RoomParticipantConverter {
 
 	@Mapping(target = "userId", source = "user.id")
 	@Mapping(target = "name", source = "user.name")
-	@Mapping(target = "id", ignore = true)
+	// @Mapping(target = "id", ignore = true)
 	RoomParticipantDto toDto(RoomParticipantEntity entity);
 
 	List<RoomParticipantDto> toDto(List<RoomParticipantEntity> entities);

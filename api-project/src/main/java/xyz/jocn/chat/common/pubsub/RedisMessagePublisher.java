@@ -11,8 +11,7 @@ public class RedisMessagePublisher implements MessagePublisher {
 	private final RedisTemplate<String, String> redisTemplate;
 	private final ChannelTopic topic;
 
-	public RedisMessagePublisher(
-		RedisTemplate<String, String> redisTemplate, ChannelTopic topic) {
+	public RedisMessagePublisher(RedisTemplate<String, String> redisTemplate, ChannelTopic topic) {
 		this.redisTemplate = redisTemplate;
 		this.topic = topic;
 	}

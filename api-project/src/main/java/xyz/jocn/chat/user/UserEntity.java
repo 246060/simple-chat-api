@@ -60,7 +60,7 @@ public class UserEntity {
 	@Enumerated(EnumType.STRING)
 	private UserRole role = UserRole.USER;
 
-	private String profileImg;
+	private String profileImgUrl;
 	private String stateMessage;
 
 	private Instant lastLoginTime;
@@ -82,14 +82,6 @@ public class UserEntity {
 		this.state = UserState.DELETED;
 	}
 
-	public void reactivate() {
-		this.state = UserState.ACTIVE;
-	}
-
-	public void changePassword(String password) {
-		this.password = password;
-	}
-
 	public void changeName(String name) {
 		this.name = name;
 	}
@@ -98,7 +90,7 @@ public class UserEntity {
 		this.stateMessage = stateMessage;
 	}
 
-	public void changeProfileImg(String profileImg) {
-		this.profileImg = profileImg;
+	public void changeProfileImgUrl(String profileImgUrl) {
+		this.profileImgUrl = profileImgUrl;
 	}
 }

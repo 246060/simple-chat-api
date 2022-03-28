@@ -9,5 +9,4 @@ public class FriendRequestDto {
 
 	@Email
 	private String targetEmail;
-	private Long targetUid;
 }

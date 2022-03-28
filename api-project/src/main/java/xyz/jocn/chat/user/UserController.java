@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,6 +38,11 @@ public class UserController {
 		userService.signUp(userSignUpRequestDto);
 		URI uri = fromCurrentRequest().path("/me").buildAndExpand().toUri();
 		return created(uri).body(success());
+	}
+
+	@GetMapping("/users")
+	public ResponseEntity fetchUsers(@AuthenticationPrincipal(expression = UID) String uid) {
+		return ok(success(userService.fetchUsers()));
 	}
 
 	@GetMapping("/users/me")

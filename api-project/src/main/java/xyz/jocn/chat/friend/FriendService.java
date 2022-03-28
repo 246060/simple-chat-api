@@ -10,19 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.common.exception.ResourceAlreadyExistException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
-import xyz.jocn.chat.friend.converter.FriendBlockConverter;
-import xyz.jocn.chat.friend.converter.FriendConverter;
-import xyz.jocn.chat.friend.dto.FriendBlockDto;
 import xyz.jocn.chat.friend.dto.FriendDto;
 import xyz.jocn.chat.friend.dto.FriendRequestDto;
 import xyz.jocn.chat.friend.dto.FriendSearchDto;
-import xyz.jocn.chat.friend.dto.FriendUidsDto;
-import xyz.jocn.chat.friend.entity.FriendBlockEntity;
-import xyz.jocn.chat.friend.entity.FriendEntity;
-import xyz.jocn.chat.friend.repo.friend.FriendRepository;
-import xyz.jocn.chat.friend.repo.friend_block.FriendBlockRepository;
+import xyz.jocn.chat.friend.repo.FriendRepository;
 import xyz.jocn.chat.user.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
 
@@ -33,12 +25,9 @@ import xyz.jocn.chat.user.repo.UserRepository;
 public class FriendService {
 
 	private final FriendRepository friendRepository;
-	private final FriendBlockRepository friendBlockRepository;
 	private final UserRepository userRepository;
 
 	private final FriendConverter friendConverter = FriendConverter.INSTANCE;
-	private final FriendBlockConverter friendBlockConverter = FriendBlockConverter.INSTANCE;
-
 
 	/*
 	 * Command =============================================================================
@@ -62,42 +51,19 @@ public class FriendService {
 	}
 
 	@Transactional
-	public void deleteFriends(long uid, FriendUidsDto dto) {
-		friendRepository.deleteAllBySourceIdAndTargetIdIn(uid, dto.getTargets());
+	public void deleteFriend(long uid, long friendId) {
+		FriendEntity friendEntity = friendRepository
+			.findByIdAndSourceId(friendId, uid)
+			.orElseThrow(() -> new ResourceNotFoundException(FRIEND));
+
+		friendRepository.delete(friendEntity);
 	}
 
 	@Transactional
-	public long addBlock(long uid, FriendRequestDto dto) {
-
-		UserEntity target =
-			userRepository
-				.findById(dto.getTargetUid())
-				.orElseThrow(() -> new ResourceNotFoundException(FRIEND_BLOCK));
-
-		friendBlockRepository
-			.findBySourceIdAndTargetId(uid, dto.getTargetUid())
-			.ifPresent(friendBlockEntity -> new ResourceAlreadyExistException(FRIEND_BLOCK));
-
-		FriendBlockEntity friendBlockEntity = FriendBlockEntity.builder()
-			.source(UserEntity.builder().id(uid).build())
-			.target(target)
-			.build();
-
-		friendBlockRepository.save(friendBlockEntity);
-
-		return friendBlockEntity.getId();
-	}
-
-	@Transactional
-	public void cancelBlock(long uid, FriendUidsDto dto) {
-		friendBlockRepository.deleteAllBySourceIdAndTargetIdIn(uid, dto.getTargets());
-	}
-
-	@Transactional
-	public FriendDto updateFriend(long uid, FriendDto dto) {
+	public FriendDto updateFriend(long uid, long friendId, FriendDto dto) {
 
 		FriendEntity friend = friendRepository
-			.findByIdAndSourceId(dto.getId(), uid)
+			.findByIdAndSourceId(friendId, uid)
 			.orElseThrow(() -> new ResourceNotFoundException(FRIEND));
 
 		if (Objects.nonNull(dto.getFavorite())) {
@@ -113,6 +79,7 @@ public class FriendService {
 		return friendConverter.toDto(friend);
 	}
 
+
 	/*
 	 * Query ===============================================================================
 	 * */
@@ -121,17 +88,12 @@ public class FriendService {
 		return friendConverter.toDto(friendRepository.findAllBySourceIdAndCondition(uid, friendSearchDto));
 	}
 
-	public List<FriendBlockDto> fetchBlocks(long uid) {
-		return friendBlockConverter.toDto(
-			friendBlockRepository.findAllBySourceId(uid)
-		);
-	}
-
-	public FriendDto fetchOne(long uid, Long friendId) {
+	public FriendDto fetchOne(long uid, long friendId) {
 		return friendConverter.toDto(
 			friendRepository
 				.findByIdAndSourceId(friendId, uid)
 				.orElseThrow(() -> new ResourceNotFoundException(FRIEND))
 		);
 	}
+
 }

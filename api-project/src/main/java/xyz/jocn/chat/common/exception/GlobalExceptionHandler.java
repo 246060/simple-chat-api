@@ -29,7 +29,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.common.dto.ErrorResponse;
-import xyz.jocn.chat.room.RoomException;
+import xyz.jocn.chat.channel.ChannelException;
 
 @Slf4j
 @RestControllerAdvice
@@ -59,8 +59,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return this.handleExceptionInternal(ex, fail(error), new HttpHeaders(), status, request);
 	}
 
-	@ExceptionHandler(RoomException.class)
-	public ResponseEntity<?> handleRoomException(RoomException ex, WebRequest request) {
+	@ExceptionHandler(ChannelException.class)
+	public ResponseEntity<?> handleRoomException(ChannelException ex, WebRequest request) {
 		log.debug("exception handler : {}", new Object() {
 		}.getClass().getEnclosingMethod().getName());
 		log.error("exception message : {}", ex.getMessage());

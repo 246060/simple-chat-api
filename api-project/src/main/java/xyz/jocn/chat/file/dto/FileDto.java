@@ -8,6 +8,7 @@ import lombok.Data;
 
 @Data
 public class FileDto {
+
 	private Long id;
 	private String originName;
 	private String contentType;

@@ -7,6 +7,6 @@ public class UserDto {
 	private Long id;
 	private String email;
 	private String name;
-	private String profileImageUrl;
+	private String profileImgUrl;
 	private String stateMessage;
 }

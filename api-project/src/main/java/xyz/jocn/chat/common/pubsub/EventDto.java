@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class EventDto {
+
 	private Long id;
 	private Long spaceId;
 	private EventTarget target;

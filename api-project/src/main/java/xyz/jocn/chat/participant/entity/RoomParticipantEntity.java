@@ -22,8 +22,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import xyz.jocn.chat.room.RoomEntity;
 import xyz.jocn.chat.participant.enums.ParticipantState;
+import xyz.jocn.chat.room.RoomEntity;
 import xyz.jocn.chat.user.UserEntity;
 
 @ToString
@@ -40,8 +40,8 @@ public class RoomParticipantEntity {
 	@Id
 	private long id;
 
-	@CreatedDate
-	private Instant createdAt;
+	@Enumerated(EnumType.STRING)
+	private ParticipantState state = ParticipantState.JOIN;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private RoomEntity room;
@@ -49,10 +49,8 @@ public class RoomParticipantEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private UserEntity user;
 
-	private String name;
-
-	@Enumerated(EnumType.STRING)
-	private ParticipantState state = ParticipantState.JOIN;
+	@CreatedDate
+	private Instant createdAt;
 
 	public void exit() {
 		this.state = ParticipantState.EXIT;

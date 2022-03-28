@@ -24,7 +24,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.Value;
 import xyz.jocn.chat.user.enums.UserRole;
 import xyz.jocn.chat.user.enums.UserState;
 
@@ -61,7 +60,7 @@ public class UserEntity {
 	@Enumerated(EnumType.STRING)
 	private UserRole role = UserRole.USER;
 
-	private String photo;
+	private String profileImg;
 	private String stateMessage;
 
 	private Instant lastLoginTime;
@@ -99,7 +98,7 @@ public class UserEntity {
 		this.stateMessage = stateMessage;
 	}
 
-	public void changePhoto(String photo) {
-		this.photo = photo;
+	public void changeProfileImg(String profileImg) {
+		this.profileImg = profileImg;
 	}
 }

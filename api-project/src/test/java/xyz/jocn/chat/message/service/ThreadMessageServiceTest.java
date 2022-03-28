@@ -6,11 +6,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import xyz.jocn.chat.thread.repo.ThreadRepository;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.message.repo.thread_message.ThreadMessageRepository;
-import xyz.jocn.chat.message.repo.thread_message_mark.ThreadMessageMarkRepository;
+import xyz.jocn.chat.message.repo.thread_message_reaction.ThreadMessageReactionRepository;
 import xyz.jocn.chat.participant.repo.thread_participant.ThreadParticipantRepository;
+import xyz.jocn.chat.thread.repo.ThreadRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ThreadMessageServiceTest {
@@ -22,7 +22,7 @@ class ThreadMessageServiceTest {
 	@Mock
 	ThreadMessageRepository threadMessageRepository;
 	@Mock
-	ThreadMessageMarkRepository threadMessageMarkRepository;
+	ThreadMessageReactionRepository threadMessageReactionRepository;
 	@Mock
 	MessagePublisher publisher;
 	@InjectMocks

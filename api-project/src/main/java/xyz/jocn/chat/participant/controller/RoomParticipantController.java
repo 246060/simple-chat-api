@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.participant.dto.RoomExitRequestDto;
+import xyz.jocn.chat.participant.dto.RoomExitDto;
 import xyz.jocn.chat.participant.dto.RoomInviteRequestDto;
 import xyz.jocn.chat.participant.service.RoomParticipantService;
 
@@ -23,6 +23,7 @@ import xyz.jocn.chat.participant.service.RoomParticipantService;
 @RequiredArgsConstructor
 @RestController
 public class RoomParticipantController {
+
 	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
 	private final RoomParticipantService roomParticipantService;
 
@@ -31,8 +32,7 @@ public class RoomParticipantController {
 		@PathVariable Long roomId,
 		@RequestBody RoomInviteRequestDto dto
 	) {
-		dto.setRoomId(roomId);
-		roomParticipantService.invite(dto);
+		roomParticipantService.invite(roomId, dto);
 		return ok(success());
 	}
 
@@ -41,12 +41,14 @@ public class RoomParticipantController {
 		return ok(success(roomParticipantService.fetchParticipants(roomId)));
 	}
 
-	@DeleteMapping("/rooms/participants/{participantId}")
+	@DeleteMapping("/rooms/{roomId}/participants/{participantId}")
 	public ResponseEntity exit(
+		@PathVariable Long roomId,
 		@PathVariable Long participantId,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
-		RoomExitRequestDto dto = new RoomExitRequestDto();
+		RoomExitDto dto = new RoomExitDto();
+		dto.setRoomId(roomId);
 		dto.setParticipantId(participantId);
 		dto.setUserId(Long.parseLong(uid));
 

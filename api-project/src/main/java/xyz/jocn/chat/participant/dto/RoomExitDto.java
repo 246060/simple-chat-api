@@ -3,7 +3,8 @@ package xyz.jocn.chat.participant.dto;
 import lombok.Data;
 
 @Data
-public class ThreadJoinRequestDto {
-	private Long threadId;
+public class RoomExitDto {
+	private Long roomId;
 	private Long userId;
+	private Long participantId;
 }

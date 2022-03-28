@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import xyz.jocn.chat.room.dto.RoomCreateRequestDto;
+import xyz.jocn.chat.room.dto.RoomOpenRequestDto;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,14 +26,14 @@ public class RoomController {
 	@PostMapping("/rooms")
 	public ResponseEntity open(
 		@AuthenticationPrincipal(expression = UID) String uid,
-		@RequestBody RoomCreateRequestDto dto
+		@RequestBody RoomOpenRequestDto dto
 	) {
 		long hostId = Long.parseLong(uid);
 		long inviteeId = dto.getInviteeId();
 		return ok(success(roomService.open(hostId, inviteeId)));
 	}
 
-	@GetMapping("/me/rooms")
+	@GetMapping("/rooms")
 	public ResponseEntity fetchMyRooms(@AuthenticationPrincipal(expression = UID) String uid) {
 		return ok(success(roomService.fetchMyRooms(Long.parseLong(uid))));
 	}

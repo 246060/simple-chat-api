@@ -21,9 +21,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import xyz.jocn.chat.thread.ThreadEntity;
 import xyz.jocn.chat.participant.enums.ParticipantState;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.thread.ThreadEntity;
 
 @ToString
 @Getter
@@ -39,8 +38,8 @@ public class ThreadParticipantEntity {
 	@Id
 	private long id;
 
-	@CreatedDate
-	private Instant createdAt;
+	@Enumerated(EnumType.STRING)
+	private ParticipantState state = ParticipantState.JOIN;
 
 	@ManyToOne
 	private ThreadEntity thread;
@@ -48,10 +47,8 @@ public class ThreadParticipantEntity {
 	@ManyToOne
 	private RoomParticipantEntity roomParticipant;
 
-	private String name;
-
-	@Enumerated(EnumType.STRING)
-	private ParticipantState state = ParticipantState.JOIN;
+	@CreatedDate
+	private Instant createdAt;
 
 	public void exit() {
 		this.state = ParticipantState.EXIT;

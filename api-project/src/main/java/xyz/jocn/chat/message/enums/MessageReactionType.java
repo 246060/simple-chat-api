@@ -1,5 +1,5 @@
 package xyz.jocn.chat.message.enums;
 
-public enum MessageMarkFlag {
+public enum MessageReactionType {
 	Like, Dislike, Agree, Disagree
 }

@@ -16,16 +16,10 @@ import xyz.jocn.chat.user.enums.UserState;
 public interface ThreadParticipantRepository
 	extends JpaRepository<ThreadParticipantEntity, Long>, ThreadParticipantRepositoryExt {
 
-	Optional<ThreadParticipantEntity> findByThreadAndUser(ThreadEntity thread, UserEntity userEntity);
-
-	List<ThreadParticipantEntity> findAllByUserId(Long userId);
-
 	List<ThreadParticipantEntity> findAllByRoomParticipantIn(List<RoomParticipantEntity> entities);
 
 	List<ThreadParticipantEntity> findAllByRoomParticipant(RoomParticipantEntity roomParticipantEntity);
 
 	List<ThreadParticipantEntity> findAllByThreadId(Long threadId);
-
-	int deleteAllByUserIdAndThreadIn(Long userId, List<ThreadEntity> threadEntities);
 
 }

@@ -42,6 +42,10 @@ public class RoomService {
 	@Value("${app.publish-event-trigger}")
 	public boolean isPublishEventTrigger;
 
+	/*
+	 * Command =============================================================================
+	 * */
+
 	@Transactional
 	public RoomDto open(Long hostId, Long inviteeId) {
 
@@ -55,11 +59,9 @@ public class RoomService {
 		RoomEntity room = roomRepository.save(RoomEntity.builder().build());
 
 		RoomParticipantEntity participant1 = RoomParticipantEntity.builder()
-			.name(host.getName())
 			.user(host)
 			.build();
 		RoomParticipantEntity participant2 = RoomParticipantEntity.builder()
-			.name(invitee.getName())
 			.user(invitee)
 			.build();
 
@@ -82,6 +84,10 @@ public class RoomService {
 
 		return roomConverter.toDto(room);
 	}
+
+	/*
+	 * Query ===============================================================================
+	 * */
 
 	public List<RoomDto> fetchMyRooms(long uid) {
 		return roomParticipantRepository

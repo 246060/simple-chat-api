@@ -35,11 +35,10 @@ public class TokenService {
 	@Transactional
 	public TokenResponseDto generateToken(TokenCreateRequestDto tokenCreateRequestDto) {
 
-		UserEntity userEntity =
-			userRepository
-				.findByEmail(tokenCreateRequestDto.getEmail())
-				.filter(user -> passwordEncoder.matches(tokenCreateRequestDto.getPassword(), user.getPassword()))
-				.orElseThrow(AuthenticationException::new);
+		UserEntity userEntity = userRepository
+			.findByEmail(tokenCreateRequestDto.getEmail())
+			.filter(user -> passwordEncoder.matches(tokenCreateRequestDto.getPassword(), user.getPassword()))
+			.orElseThrow(AuthenticationException::new);
 
 		JwtClaimsSetDto claims = JwtClaimsSetDto.builder()
 			.subject(String.valueOf(userEntity.getId()))
@@ -64,10 +63,9 @@ public class TokenService {
 	@Transactional
 	public TokenResponseDto refresh(TokenRefreshRequestDto tokenRefreshRequestDto) {
 
-		TokenEntity tokenEntity =
-			tokenRepository.findByRefreshTokenAndRefreshExpireTimeAfter(
-				tokenRefreshRequestDto.getRefreshToken(), now()
-			).orElseThrow(() -> new TokenException(NotExistRefreshToken));
+		TokenEntity tokenEntity = tokenRepository
+			.findByRefreshTokenAndRefreshExpireTimeAfter(tokenRefreshRequestDto.getRefreshToken(), now())
+			.orElseThrow(() -> new TokenException(NotExistRefreshToken));
 
 		JwtClaimsSetDto claims = JwtClaimsSetDto.builder()
 			.subject(String.valueOf(tokenEntity.getUser().getId()))
@@ -79,4 +77,5 @@ public class TokenService {
 			.expiresIn(tokenUtil.getAccessTokenExpireInSec())
 			.build();
 	}
+
 }

@@ -5,7 +5,6 @@ import static org.springframework.http.MediaType.*;
 import static org.springframework.http.ResponseEntity.*;
 import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
-import static xyz.jocn.chat.file.ReqType.*;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +31,7 @@ public class FileController {
 	private final FileService fileService;
 	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
 
-	@PostMapping(value = "/upload", consumes = MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity upload(MultipartFile file, @AuthenticationPrincipal(expression = UID) String uid) {
 		return ok(success(fileService.save(Long.parseLong(uid), file)));
 	}
@@ -43,23 +42,30 @@ public class FileController {
 	}
 
 	@GetMapping("/{fileId}/data")
-	public ResponseEntity fetchFile(@PathVariable Long fileId, @RequestParam(defaultValue = "data") ReqType type) {
+	public ResponseEntity fetchFile(
+		@PathVariable Long fileId,
+		@RequestParam(required = false, defaultValue = "false") Boolean download
+	) {
 
 		FileDto dto = fileService.loadAsResource(fileId);
 		BodyBuilder ok = ok();
 
-		if (data == type) {
-			MediaType mediaType = parseMediaType(dto.getContentType());
-			if (mediaType == IMAGE_GIF || mediaType == IMAGE_JPEG || mediaType == IMAGE_PNG) {
-				ok.contentType(mediaType);
+		if (download) {
+			String contentDisposition = String.format("attachment; filename=\"%s\"", dto.getOriginName());
+			ok.header(CONTENT_DISPOSITION, contentDisposition);
+
+		} else {
+			if (isImage(parseMediaType(dto.getContentType()))) {
+				ok.contentType(parseMediaType(dto.getContentType()));
 			} else {
 				throw new FileStorageException("only serve image file. try to download type");
 			}
-		} else {
-			String contentDisposition = String.format("attachment; filename=\"%s\"", dto.getOriginName());
-			ok.header(CONTENT_DISPOSITION, contentDisposition);
 		}
 
 		return ok.body(dto.getResource());
+	}
+
+	private boolean isImage(MediaType mediaType) {
+		return mediaType == IMAGE_GIF || mediaType == IMAGE_JPEG || mediaType == IMAGE_PNG;
 	}
 }

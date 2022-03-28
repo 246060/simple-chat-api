@@ -10,5 +10,5 @@ import xyz.jocn.chat.message.entity.ThreadMessageEntity;
 
 @Repository
 public interface ThreadMessageRepository extends JpaRepository<ThreadMessageEntity, Long>, ThreadMessageRepositoryExt {
-	List<ThreadMessageEntity> findByThread(ThreadEntity thread);
+	List<ThreadMessageEntity> findAllByThread(ThreadEntity thread);
 }

@@ -1,4 +1,4 @@
-package xyz.jocn.chat.message.repo.room_message_mark;
+package xyz.jocn.chat.message.repo.room_message_reaction;
 
 import javax.persistence.EntityManager;
 
@@ -9,13 +9,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 //@Rollback(false)
 //@AutoConfigureTestDatabase(replace = NONE)
 @DataJpaTest
-class RoomMessageMarkRepositoryImplTest {
+class RoomMessageReactionRepositoryImplTest {
 
 	@Autowired
 	EntityManager em;
 
 	@Autowired
-	RoomMessageMarkRepository repo;
+	RoomMessageReactionRepository repo;
 
 	@BeforeEach
 	void setUp() {

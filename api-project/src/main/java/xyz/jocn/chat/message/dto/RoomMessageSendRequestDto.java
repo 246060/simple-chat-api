@@ -8,7 +8,7 @@ import lombok.Data;
 import xyz.jocn.chat.message.enums.ChatMessageType;
 
 @Data
-public class RoomMessageSendDto {
+public class RoomMessageSendRequestDto {
 	private Long userId;
 	private ChatMessageType type;
 	private Long participantId;

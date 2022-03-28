@@ -6,6 +6,8 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
+import java.net.URI;
+
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -26,38 +28,38 @@ import xyz.jocn.chat.user.dto.UserUpdateRequestDto;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/users")
 @RestController
 public class UserController {
 
 	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
 	private final UserService userService;
 
-	@PostMapping
+	@PostMapping("/users")
 	public ResponseEntity signUp(@RequestBody @Valid UserSignUpRequestDto userSignUpRequestDto) {
-		long id = userService.signUp(userSignUpRequestDto);
-		return created(fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri()).body(success());
+		userService.signUp(userSignUpRequestDto);
+		URI uri = fromCurrentRequest().path("/me").buildAndExpand().toUri();
+		return created(uri).body(success());
 	}
 
-	@GetMapping("/me")
+	@GetMapping("/users/me")
 	public ResponseEntity fetchMe(@AuthenticationPrincipal(expression = UID) String uid) {
 		return ok(success(userService.fetchMe(Long.parseLong(uid))));
 	}
 
-	@PatchMapping(value = "/me")
+	@PatchMapping("/users/me")
 	public ResponseEntity updateMe(UserUpdateRequestDto dto, @AuthenticationPrincipal(expression = UID) String uid) {
 		return ok(success(userService.updateMe(Long.parseLong(uid), dto)));
 	}
 
-	@DeleteMapping("/me")
+	@DeleteMapping("/users/me")
 	public ResponseEntity exit(@AuthenticationPrincipal(expression = UID) String uid) {
 		userService.exit(Long.parseLong(uid));
 		return ok(success());
 	}
 
-	@PatchMapping(value = "/me/photo", consumes = MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity updatePhoto(MultipartFile file, @AuthenticationPrincipal(expression = UID) String uid) {
-		userService.changePhoto(Long.parseLong(uid), file);
+	@PatchMapping(value = "/users/me/profile-image", consumes = MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity updateProfileImg(MultipartFile file, @AuthenticationPrincipal(expression = UID) String uid) {
+		userService.updateProfileImg(Long.parseLong(uid), file);
 		return ok(success());
 	}
 

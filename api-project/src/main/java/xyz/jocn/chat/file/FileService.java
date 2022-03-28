@@ -33,6 +33,10 @@ public class FileService {
 
 	private FileConverter fileConverter = FileConverter.INSTANCE;
 
+	/*
+	 * Command =============================================================================
+	 * */
+
 	@Transactional
 	public FileDto save(long uid, MultipartFile multipartFile) {
 
@@ -54,7 +58,6 @@ public class FileService {
 			.originName(multipartFile.getOriginalFilename())
 			.savedName(savedName)
 			.savedDir(savedDir.toString())
-			.originName(multipartFile.getOriginalFilename())
 			.byteSize(multipartFile.getSize())
 			.contentType(multipartFile.getContentType())
 			.user(UserEntity.builder().id(uid).build())
@@ -70,6 +73,11 @@ public class FileService {
 
 		return fileConverter.toDto(fileEntity);
 	}
+
+
+	/*
+	 * Query ===============================================================================
+	 * */
 
 	public FileDto loadAsResource(Long fileId) {
 		FileEntity fileEntity = fileRepository

@@ -14,14 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import xyz.jocn.chat.common.pubsub.EventDto;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
-import xyz.jocn.chat.room.RoomEntity;
-import xyz.jocn.chat.room.RoomService;
-import xyz.jocn.chat.room.dto.RoomCreateRequestDto;
 import xyz.jocn.chat.room.dto.RoomDto;
+import xyz.jocn.chat.room.dto.RoomOpenRequestDto;
 import xyz.jocn.chat.room.repo.RoomRepository;
 import xyz.jocn.chat.user.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
@@ -55,7 +52,7 @@ class RoomServiceTest {
 
 		// willDoNothing().given(publisher).emit(any(EventDto.class));
 
-		RoomCreateRequestDto dto = new RoomCreateRequestDto();
+		RoomOpenRequestDto dto = new RoomOpenRequestDto();
 		dto.setInviteeId(inviteeId);
 
 		// when

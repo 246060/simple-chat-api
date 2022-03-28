@@ -28,8 +28,6 @@ public class StorageLocalRepository implements StorageRepository {
 
 	@Override
 	public void save(InputStream in, FileEntity fileEntity) {
-		log.info("{}", new Object() {
-		}.getClass().getEnclosingMethod().getName());
 
 		try {
 			Path filePath = fileRootDir
@@ -42,6 +40,7 @@ public class StorageLocalRepository implements StorageRepository {
 			}
 
 			Files.copy(in, filePath, REPLACE_EXISTING);
+
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			throw new FileStorageException("Could not store the file. Error: " + fileEntity.getOriginName());
@@ -50,8 +49,6 @@ public class StorageLocalRepository implements StorageRepository {
 
 	@Override
 	public Resource loadAsResource(FileEntity fileEntity) {
-		log.info("{}", new Object() {
-		}.getClass().getEnclosingMethod().getName());
 
 		try {
 			Path file = fileRootDir
@@ -71,9 +68,4 @@ public class StorageLocalRepository implements StorageRepository {
 		}
 	}
 
-	@Override
-	public void delete() {
-		log.info("{}", new Object() {
-		}.getClass().getEnclosingMethod().getName());
-	}
 }

@@ -38,12 +38,15 @@ public class UserService {
 	private final FriendRepository friendRepository;
 	private final FriendBlockRepository friendBlockRepository;
 	private final RoomParticipantRepository roomParticipantRepository;
-	private final ThreadParticipantRepository threadParticipantRepository;
 
 	private final FileService fileService;
 
 	private final PasswordEncoder passwordEncoder;
 	private final UserConverter userConverter = UserConverter.INSTANCE;
+
+	/*
+	 * Command =============================================================================
+	 * */
 
 	@Transactional
 	public long signUp(UserSignUpRequestDto userSignUpRequestDto) {
@@ -73,25 +76,13 @@ public class UserService {
 		}
 	}
 
-	public UserDto fetchMe(Long userId) {
-		return userConverter.toDto(
-			userRepository
-				.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(USER))
-		);
-	}
-
 	@Transactional
 	public void exit(Long userId) {
 		roomParticipantRepository.findAllByUserId(userId).forEach(RoomParticipantEntity::exit);
-		threadParticipantRepository.findAllByUserId(userId).forEach(ThreadParticipantEntity::exit);
 
 		friendBlockRepository.deleteAllBySourceId(userId);
 		friendRepository.deleteAllBySourceId(userId);
 		userRepository.deleteById(userId);
-
-		// TODO : 파일 삭제
-		// 메시지 파일 남겨두고, 그외는 스케줄러로 삭제
 	}
 
 	@Transactional
@@ -112,12 +103,24 @@ public class UserService {
 	}
 
 	@Transactional
-	public void changePhoto(long uid, MultipartFile file) {
+	public void updateProfileImg(long uid, MultipartFile file) {
 		UserEntity userEntity = userRepository
 			.findById(uid)
 			.orElseThrow(() -> new ResourceNotFoundException(USER));
 
 		FileDto fileDto = fileService.save(uid, file);
-		userEntity.changePhoto(fileDto.getPath());
+		userEntity.changeProfileImg(fileDto.getPath());
+	}
+
+	/*
+	 * Query ===============================================================================
+	 * */
+
+	public UserDto fetchMe(Long userId) {
+		return userConverter.toDto(
+			userRepository
+				.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException(USER))
+		);
 	}
 }

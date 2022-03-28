@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.message.repo.room_message.RoomMessageRepository;
-import xyz.jocn.chat.message.repo.room_message_mark.RoomMessageMarkRepository;
+import xyz.jocn.chat.message.repo.room_message_reaction.RoomMessageReactionRepository;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -18,7 +18,7 @@ class RoomMessageServiceTest {
 	@Mock
 	RoomMessageRepository roomMessageRepository;
 	@Mock
-	RoomMessageMarkRepository roomMessageMarkRepository;
+	RoomMessageReactionRepository roomMessageReactionRepository;
 	@Mock
 	MessagePublisher publisher;
 	@InjectMocks

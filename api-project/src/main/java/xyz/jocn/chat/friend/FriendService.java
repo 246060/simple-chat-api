@@ -47,10 +47,9 @@ public class FriendService {
 	@Transactional
 	public Long addFriend(long uid, FriendRequestDto dto) {
 
-		UserEntity target =
-			userRepository
-				.findByEmail(dto.getTargetEmail())
-				.orElseThrow(() -> new ResourceNotFoundException(USER));
+		UserEntity target = userRepository
+			.findByEmail(dto.getTargetEmail())
+			.orElseThrow(() -> new ResourceNotFoundException(USER));
 
 		FriendEntity friendEntity = FriendEntity.builder()
 			.source(UserEntity.builder().id(uid).build())
@@ -95,7 +94,7 @@ public class FriendService {
 	}
 
 	@Transactional
-	public FriendDto update(long uid, FriendDto dto) {
+	public FriendDto updateFriend(long uid, FriendDto dto) {
 
 		FriendEntity friend = friendRepository
 			.findByIdAndSourceId(dto.getId(), uid)
@@ -123,6 +122,16 @@ public class FriendService {
 	}
 
 	public List<FriendBlockDto> fetchBlocks(long uid) {
-		return friendBlockConverter.toDto(friendBlockRepository.findAllBySourceId(uid));
+		return friendBlockConverter.toDto(
+			friendBlockRepository.findAllBySourceId(uid)
+		);
+	}
+
+	public FriendDto fetchOne(long uid, Long friendId) {
+		return friendConverter.toDto(
+			friendRepository
+				.findByIdAndSourceId(friendId, uid)
+				.orElseThrow(() -> new ResourceNotFoundException(FRIEND))
+		);
 	}
 }

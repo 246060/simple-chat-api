@@ -22,8 +22,9 @@ import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
 import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
 import xyz.jocn.chat.participant.repo.room_participant.RoomParticipantRepository;
 import xyz.jocn.chat.participant.repo.thread_participant.ThreadParticipantRepository;
+import xyz.jocn.chat.room.RoomEntity;
 import xyz.jocn.chat.thread.dto.ThreadDto;
-import xyz.jocn.chat.thread.dto.ThreadOpenDto;
+import xyz.jocn.chat.thread.dto.ThreadOpenRequestDto;
 import xyz.jocn.chat.thread.repo.ThreadRepository;
 
 @Slf4j
@@ -44,11 +45,15 @@ public class ThreadService {
 
 	private final MessagePublisher publisher;
 
+	/*
+	 * Command =============================================================================
+	 * */
+
 	@Transactional
-	public ThreadDto open(ThreadOpenDto threadOpenDto) {
+	public ThreadDto open(ThreadOpenRequestDto threadOpenRequestDto) {
 
 		RoomMessageEntity roomMessage = roomMessageRepository
-			.findById(threadOpenDto.getRoomMessageId())
+			.findById(threadOpenRequestDto.getRoomMessageId())
 			.orElseThrow(() -> new ResourceAlreadyExistException(ROOM_MESSAGE));
 
 		if (roomMessage.hasThread()) {
@@ -56,21 +61,24 @@ public class ThreadService {
 		}
 		roomMessage.openThread();
 
-		ThreadEntity threadEntity = threadRepository.save(
-			ThreadEntity.builder().roomMessage(roomMessage).room(roomMessage.getRoom()).build()
-		);
+		ThreadEntity threadEntity = ThreadEntity.builder()
+			.roomMessage(roomMessage)
+			.room(RoomEntity.builder().id(threadOpenRequestDto.getRoomId()).build())
+			.build();
 
-		RoomParticipantEntity threadOpener = roomParticipantRepository
-			.findByRoomIdAndUserId(roomMessage.getRoom().getId(), threadOpenDto.getUserId())
-			.orElseThrow(() -> new ResourceNotFoundException(ROOM_PARTICIPANT));
-
-		RoomParticipantEntity roomMessageSender = roomParticipantRepository
-			.findByRoomIdAndUserId(roomMessage.getRoom().getId(), roomMessage.getSender().getUser().getId())
-			.orElseThrow(() -> new ResourceNotFoundException(ROOM_PARTICIPANT));
+		threadRepository.save(threadEntity);
 
 		List<RoomParticipantEntity> roomParticipantEntities = new ArrayList<>();
-		roomParticipantEntities.add(threadOpener);
-		roomParticipantEntities.add(roomMessageSender);
+		roomParticipantEntities.add(
+			roomParticipantRepository
+				.findByRoomIdAndUserId(threadOpenRequestDto.getRoomId(), threadOpenRequestDto.getUserId())
+				.orElseThrow(() -> new ResourceNotFoundException(ROOM_PARTICIPANT))
+		);
+		roomParticipantEntities.add(
+			roomParticipantRepository
+				.findByRoomIdAndUserId(threadOpenRequestDto.getRoomId(), roomMessage.getSender().getUser().getId())
+				.orElseThrow(() -> new ResourceNotFoundException(ROOM_PARTICIPANT))
+		);
 
 		for (RoomParticipantEntity roomParticipantEntity : roomParticipantEntities) {
 			threadParticipantRepository.save(
@@ -95,6 +103,10 @@ public class ThreadService {
 
 		return threadConverter.toDto(threadEntity);
 	}
+
+	/*
+	 * Query ===============================================================================
+	 * */
 
 	public List<ThreadDto> fetchMyThreads(long uid) {
 

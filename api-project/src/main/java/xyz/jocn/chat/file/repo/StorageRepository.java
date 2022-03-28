@@ -11,6 +11,4 @@ public interface StorageRepository {
 	void save(InputStream in, FileEntity fileEntity);
 
 	Resource loadAsResource(FileEntity fileEntity);
-
-	void delete();
 }

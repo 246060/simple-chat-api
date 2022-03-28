@@ -13,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,14 +30,14 @@ import xyz.jocn.chat.friend.dto.FriendUidsDto;
 @Slf4j
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/friends")
+@RequestMapping
 @RestController
 public class FriendController {
 
 	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
 	private final FriendService friendService;
 
-	@PostMapping
+	@PostMapping("/friends")
 	public ResponseEntity addFriend(
 		@RequestBody @Valid FriendRequestDto dto,
 		@AuthenticationPrincipal(expression = UID) String uid
@@ -45,7 +46,15 @@ public class FriendController {
 		return created(fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri()).body(success());
 	}
 
-	@GetMapping
+	@GetMapping("/friends/{friendId}")
+	public ResponseEntity fetchOne(
+		@PathVariable Long friendId,
+		@AuthenticationPrincipal(expression = UID) String uid
+	) {
+		return ok(success(friendService.fetchOne(Long.parseLong(uid),friendId)));
+	}
+
+	@GetMapping("/friends")
 	public ResponseEntity fetchFriends(
 		@RequestParam(required = false, defaultValue = "false") Boolean hidden,
 		@RequestParam(required = false, defaultValue = "false") Boolean favorite,
@@ -54,19 +63,18 @@ public class FriendController {
 		FriendSearchDto dto = new FriendSearchDto();
 		dto.setFavorite(favorite);
 		dto.setHidden(hidden);
-
 		return ok(success(friendService.fetchFriends(Long.parseLong(uid), dto)));
 	}
 
-	@PatchMapping("/{id}")
+	@PatchMapping("/friends/{id}")
 	public ResponseEntity updateFriend(
 		@RequestBody @Valid FriendDto dto,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
-		return ok(success(friendService.update(Long.parseLong(uid), dto)));
+		return ok(success(friendService.updateFriend(Long.parseLong(uid), dto)));
 	}
 
-	@DeleteMapping
+	@DeleteMapping("/friends")
 	public ResponseEntity deleteFriends(
 		@RequestBody @Valid FriendUidsDto dto,
 		@AuthenticationPrincipal(expression = UID) String uid
@@ -75,21 +83,21 @@ public class FriendController {
 		return ok(success());
 	}
 
-	@PostMapping("/block")
+	@PostMapping("/friends/blocks")
 	public ResponseEntity addBlock(
 		@RequestBody @Valid FriendRequestDto dto,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
-		long id = friendService.addBlock(Long.parseLong(uid), dto);
-		return created(fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri()).body(success());
+		friendService.addBlock(Long.parseLong(uid), dto);
+		return ok(success());
 	}
 
-	@GetMapping("/block")
+	@GetMapping("/friends/blocks")
 	public ResponseEntity fetchBlocks(@AuthenticationPrincipal(expression = UID) String uid) {
 		return ok(success(friendService.fetchBlocks(Long.parseLong(uid))));
 	}
 
-	@DeleteMapping("/block")
+	@DeleteMapping("/friends/blocks")
 	public ResponseEntity cancelBlock(
 		@RequestBody @Valid FriendUidsDto dto,
 		@AuthenticationPrincipal(expression = UID) String uid

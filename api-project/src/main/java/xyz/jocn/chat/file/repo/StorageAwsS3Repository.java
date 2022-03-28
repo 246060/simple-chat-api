@@ -25,9 +25,4 @@ public class StorageAwsS3Repository implements StorageRepository {
 		return null;
 	}
 
-	@Override
-	public void delete() {
-		log.info("{}", new Object() {
-		}.getClass().getEnclosingMethod().getName());
-	}
 }

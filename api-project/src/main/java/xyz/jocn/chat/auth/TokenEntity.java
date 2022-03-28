@@ -40,6 +40,7 @@ public class TokenEntity {
 	private UserEntity user;
 
 	private String refreshToken;
+
 	private Instant refreshExpireTime;
 
 	@CreatedDate

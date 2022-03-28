@@ -8,10 +8,7 @@ import lombok.Data;
 import xyz.jocn.chat.message.enums.ChatMessageType;
 
 @Data
-public class ThreadMessageCreateDto {
-
-	private Long userId;
-	private Long threadId;
+public class ThreadMessageSendRequestDto {
 
 	private ChatMessageType type;
 	private List<MultipartFile> files;

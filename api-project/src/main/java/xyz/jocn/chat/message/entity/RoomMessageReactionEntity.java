@@ -22,8 +22,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import xyz.jocn.chat.message.enums.MessageMarkFlag;
-import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
+import xyz.jocn.chat.message.enums.MessageReactionType;
+import xyz.jocn.chat.participant.entity.RoomParticipantEntity;
 
 @ToString
 @Getter
@@ -31,24 +31,23 @@ import xyz.jocn.chat.participant.entity.ThreadParticipantEntity;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "thread_message_mark")
+@Table(name = "room_message_reaction")
 @Entity
-public class ThreadMessageMarkEntity {
+public class RoomMessageReactionEntity {
 
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Id
 	private long id;
 
 	@Enumerated(EnumType.STRING)
-	private MessageMarkFlag flag;
+	private MessageReactionType type;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private RoomMessageEntity roomMessage;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	private RoomParticipantEntity roomParticipant;
 
 	@CreatedDate
 	private Instant createdAt;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	private ThreadMessageEntity threadMessage;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	private ThreadParticipantEntity threadParticipant;
-
 }

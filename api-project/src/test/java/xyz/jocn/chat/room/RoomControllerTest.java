@@ -21,10 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import xyz.jocn.chat.TestToken;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
-import xyz.jocn.chat.room.RoomController;
-import xyz.jocn.chat.room.RoomService;
-import xyz.jocn.chat.room.dto.RoomCreateRequestDto;
 import xyz.jocn.chat.room.dto.RoomDto;
+import xyz.jocn.chat.room.dto.RoomOpenRequestDto;
 
 @WebMvcTest(RoomController.class)
 class RoomControllerTest {
@@ -55,7 +53,7 @@ class RoomControllerTest {
 
 		given(roomService.open(anyLong(), anyLong())).willReturn(roomDto);
 
-		RoomCreateRequestDto dto = new RoomCreateRequestDto();
+		RoomOpenRequestDto dto = new RoomOpenRequestDto();
 		dto.setInviteeId(inviteeId);
 		String jsonStr = om.writeValueAsString(dto);
 

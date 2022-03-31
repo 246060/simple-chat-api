@@ -2,9 +2,6 @@
 - 간단한 채팅 서버
 - 유저 클라이언트 제외 
 
-## TODO
-1. redis local test 환경 구축
-
 ## Tech stack 
 1. api server 
     - spring boot mvc 
@@ -32,7 +29,6 @@
     - nginx * 2
 
 ## 아키텍처 설계
-현재 구상중..
 - websocekt + redis 는 event 신호 정도만 전달 
 ![architecture](docs/arch-smp-chat.png) 
 
@@ -45,7 +41,6 @@
 6. api server 부하 테스트 jmeter? ngrinder? 
 
 ## ERD
-현재 구상중..
 ![erd](docs/erd-smp-cht.png)
 
 ### 고려사항
@@ -67,38 +62,40 @@
 - 친구 
   - 추가 ⭕ 
   - 삭제 ⭕  
-  - 차단  
-    - 추가 ⭕
-    - 취소(삭제) ⭕
-    - 차단 목록 ⭕
-  - 숨긴 (친구 정보 수정으로 처리)
+  - 숨긴 
     - 추가 ⭕
     - 취소 ⭕
-    - 숨긴 목록 ⭕ 
+    - 목록 ⭕ 
   - 즐겨찾기 ⭕  
     - 추가 ⭕
     - 취소 ⭕
-    - 즐겨찾기 목록 ⭕ 
-  - 친구 이름 변경 (친구 정보 수정으로 처리) ⭕ 
+    - 목록 ⭕ 
   - 톡하기
-    - 대화방 열기
+    - 대화방 열기 ⭕ 
   
 - 방
   - 만들기 ⭕
-  - 나가기
-  - 친구 초대
-    - 차단된 친구의 초대는 허용하지 않음
+  - 나가기 ⭕ 
+  - 친구 초대 ⭕ 
   - 메시지 
     - 발송
-      - 단문/장문/파일(문서,이미지,음성,영상)
-      - 내가 보낸 메시지 삭제 
+      - 단문 ⭕ 
+      - 장문 ⭕ 
+      - 파일
+        - 문서 ⭕
+        - 이미지 ⭕
+        - 음성
+        - 영상
+      - 내가 보낸 메시지 삭제 ⭕
+      - mention
+      - reply to target parent message 
     - 수신
       - 접근 기기의 마지막 메시지 번호로 부터 가장 최신 메시지들 수신
       - 확인하지 않은 새로운 메시지 개수 표시  
     - reaction 표시
     - 알림
       - 방마다 알림 차단 설정
-   
+  - thread  
  
 ## event message 
 
@@ -119,7 +116,7 @@
 - to.all
 - to.user
 
-## eventMessage
+## push event message
 
 ```json
 {
@@ -130,8 +127,9 @@
 	"message" : {
 		"eventType" : "channel.participant.join | channel.participant.exit",
 		"channelId" : 123,
-		"participantId" : 123,
-		"username" : "홍길동"
+    "users" : [
+      {"id" : 123, "name" : "홍길동"}
+    ]
 	}
 }
 ```

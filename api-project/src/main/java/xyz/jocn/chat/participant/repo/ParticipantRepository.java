@@ -14,7 +14,7 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
 
 	List<ParticipantEntity> findAllByUserId(long userId);
 
-	Optional<ParticipantEntity> findByChannelIdAndUserId(long channelId, long userId);
+	Optional<ParticipantEntity> findByChannelIdAndUserIdAndState(long channelId, long userId, ParticipantState state);
 
-	Optional<ParticipantEntity> findByIdAndUserId(long id, long userId);
+	Optional<ParticipantEntity> findByIdAndChannelId(long id, long channelId);
 }

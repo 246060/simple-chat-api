@@ -33,7 +33,7 @@ class ParticipantRepositoryImplTest {
 	}
 
 	@Test
-	void findAllCurrentParticipants() {
+	void findCurrentParticipantsInChannel() {
 		// given
 		UserEntity user = UserEntity.builder().name("user01").build();
 		em.persist(user);
@@ -60,4 +60,5 @@ class ParticipantRepositoryImplTest {
 			.extracting(ParticipantDto::getUser)
 			.allMatch(userDto -> userDto.getId() == user.getId());
 	}
+
 }

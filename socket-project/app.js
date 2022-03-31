@@ -21,13 +21,43 @@ const io = new Server();
 app.io = io;
 app.io.use(checkSocketToken);
 
-app.io.on("connection", function (socket) {
-  console.log("New Socket Connected");
+/**
+ * socket.io emit : event.chat.server
+ * socket.io listen : event.chat.client
+ * redis listen : event.api.server
+ */
 
-  socket.on("event.client", function (msg) {
-    let token = socket.handshake.headers.authorization.split(" ")[1];
-    let decoded = jwt.decode(token);
-    join(socket, { type: msg.type, userId: decoded.sub, roomId: msg.roomId });
+app.io.on("connection", function (socket) {
+  let token = socket.handshake.headers.authorization.split(" ")[1];
+  let decoded = jwt.decode(token);
+  console.log(`User(${decoded.sub}) Socket Connection Success`);
+
+  //socket.join("all");
+  socket.emit("event.chat.server", {
+    message: `Socket Connection Success`,
+  });
+
+  socket.on("event.chat.client", function (req) {
+    /**
+     * req : {
+         "type" : "channel | user",
+         "targetId" : channelId | userId
+       }
+     */
+    if ("channel" == req.type || "user" == req.type) {
+
+      /**
+       * join("channel" + channelId) 
+       * or
+       * join("user" + userId)
+       */
+      console.log(`${req.type}(${req.targetId}) Socket Connection Success`)
+
+      socket.join(req.type + req.targetId);
+      socket.emit("event.chat.server", {
+        message: `${req.type} Socket Connection Success`,
+      });
+    }
   });
 
   socket.on("disconnect", (reason) => {
@@ -38,18 +68,29 @@ app.io.on("connection", function (socket) {
 (async () => {
   const client = createClient();
   const subscriber = client.duplicate();
+
   await subscriber.connect();
-
-  await subscriber.subscribe("relay", (event) => {
+  await subscriber.subscribe("event.api.server", (event) => {
     console.log(event);
-    const reply = JSON.parse(event);
 
-    if (reply.type == "chat") {
-      app.io.to(reply.roomId).emit("event.server", reply);
-    } else if (reply.type == "person") {
-      app.io.to(reply.userId).emit("event.server", reply);
-    } else if (reply.type == "all") {
-      app.io.to("all").emit("event.server", reply);
+    const data = JSON.parse(event);
+    let routing = data.routing;
+    let message = data.message;
+
+    if (routing.type == "to.all") {
+      app.io.emit("event.chat.server", message);
+    } else {
+      if (routing.type == "to.channel" || routing.type == "to.user") {
+        let routingKey;
+
+        if (routing.type == "to.channel") {
+          routingKey = "channel" + routing.targetId;
+        } else {
+          routingKey = "user" + routing.targetId;
+        }
+
+        app.io.to(routingKey).emit("event.chat.server", message);
+      }
     }
   });
 })();

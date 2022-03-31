@@ -1,31 +1,35 @@
 package xyz.jocn.chat.message;
 
 import static xyz.jocn.chat.common.exception.ResourceType.*;
-import static xyz.jocn.chat.common.pubsub.EventTarget.*;
-import static xyz.jocn.chat.common.pubsub.EventType.*;
+import static xyz.jocn.chat.message.enums.ChatMessageType.FILE;
+import static xyz.jocn.chat.message.enums.ChatMessageType.*;
+import static xyz.jocn.chat.message.enums.MessageState.*;
+import static xyz.jocn.chat.participant.ParticipantState.*;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import java.util.Objects;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.channel.ChannelEntity;
+import xyz.jocn.chat.channel.repo.ChannelRepository;
 import xyz.jocn.chat.common.dto.PageDto;
-import xyz.jocn.chat.common.dto.PageMeta;
-import xyz.jocn.chat.common.exception.NotAvailableFeatureException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
-import xyz.jocn.chat.common.pubsub.EventDto;
-import xyz.jocn.chat.common.pubsub.MessagePublisher;
+import xyz.jocn.chat.common.util.StringUtil;
+import xyz.jocn.chat.file.FileEntity;
+import xyz.jocn.chat.file.FileService;
 import xyz.jocn.chat.message.dto.MessageDto;
 import xyz.jocn.chat.message.dto.MessageSendRequestDto;
 import xyz.jocn.chat.message.entity.MessageEntity;
-import xyz.jocn.chat.message.enums.MessageState;
-import xyz.jocn.chat.message.repo.message.MessageRepository;
+import xyz.jocn.chat.message.entity.MessageFileEntity;
+import xyz.jocn.chat.message.repo.MessageRepository;
+import xyz.jocn.chat.message.repo.message_file.MessageFileRepository;
+import xyz.jocn.chat.notification.ChatPushService;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.participant.ParticipantService;
+import xyz.jocn.chat.participant.repo.ParticipantRepository;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,12 +38,27 @@ import xyz.jocn.chat.participant.ParticipantService;
 public class MessageService {
 
 	private final MessageRepository messageRepository;
+	private final MessageFileRepository messageFileRepository;
+	private final ParticipantRepository participantRepository;
+	private final ChannelRepository channelRepository;
+
 	private final ParticipantService participantService;
+	private final FileService fileService;
+	private final ChatPushService chatPushService;
 
-	private final MessagePublisher publisher;
+	private final int MESSAGE_LIMIT_LENGTH = 500;
 
-	@Value("${app.publish-event-trigger}")
-	public boolean isPublishEventTrigger;
+	private boolean haveFile(MessageSendRequestDto dto) {
+		if (Objects.isNull(dto.getFile())) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	private boolean isShortTextMessage(String message) {
+		return StringUtil.isNotBlank(message) && message.length() <= MESSAGE_LIMIT_LENGTH;
+	}
 
 	/*
 	 * Command =============================================================================
@@ -50,49 +69,70 @@ public class MessageService {
 
 		participantService.checkParticipant(channelId, uid);
 
-		switch (dto.getType()) {
-			case SHORT_TEXT:
+		if (haveFile(dto)) {
+			sendFileMessage(uid, channelId, dto);
+		} else {
+			if (isShortTextMessage(dto.getMessage())) {
 				sendShortMessage(uid, channelId, dto);
-				break;
-			case LONG_TEXT:
+			} else {
 				sendLongMessage(uid, channelId, dto);
-				break;
-			case FILE:
-				sendFileMessage(uid, channelId, dto);
-				break;
-			default:
-				throw new NotAvailableFeatureException();
-		}
-
-		if (isPublishEventTrigger) {
-			publisher.emit(EventDto.builder()
-				.target(ROOM_AREA)
-				.type(ROOM_MESSAGE_EVENT)
-				.spaceId(channelId)
-				.build()
-			);
+			}
 		}
 	}
 
 	private void sendShortMessage(long uid, long channelId, MessageSendRequestDto dto) {
 
-		ParticipantEntity participant = participantService.fetchParticipant(channelId, uid);
+		ParticipantEntity participant = participantRepository
+			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
+			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
-		messageRepository.save(
-			MessageEntity.builder()
-				.type(dto.getType())
-				.channel(ChannelEntity.builder().id(channelId).build())
-				.sender(participant)
-				.build()
-		);
-	}
+		ChannelEntity channelEntity = channelRepository
+			.findById(channelId)
+			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
 
-	private void sendFileMessage(long uid, long channelId, MessageSendRequestDto dto) {
+		MessageEntity messageEntity = MessageEntity.builder()
+			.channel(channelEntity)
+			.message(dto.getMessage())
+			.sender(participant)
+			.type(SHORT_TEXT)
+			.build();
 
+		messageRepository.save(messageEntity);
+		channelEntity.registerPivotMessage(messageEntity.getId());
+		chatPushService.pushChannelNewMessageEvent(channelId, messageEntity.getId(), SHORT_TEXT);
 	}
 
 	private void sendLongMessage(long uid, long channelId, MessageSendRequestDto dto) {
 
+		ParticipantEntity participant = participantService.fetchParticipant(channelId, uid);
+
+		MessageEntity messageEntity = MessageEntity.builder()
+			.channel(ChannelEntity.builder().id(channelId).build())
+			.message(String.format("%s...", dto.getMessage().substring(0, MESSAGE_LIMIT_LENGTH)))
+			.sender(participant)
+			.type(LONG_TEXT)
+			.build();
+
+		messageRepository.save(messageEntity);
+		FileEntity fileEntity = fileService.save(uid, dto.getMessage());
+		messageFileRepository.save(MessageFileEntity.builder().message(messageEntity).file(fileEntity).build());
+		chatPushService.pushChannelNewMessageEvent(channelId, messageEntity.getId(), LONG_TEXT);
+	}
+
+	private void sendFileMessage(long uid, long channelId, MessageSendRequestDto dto) {
+		ParticipantEntity participant = participantService.fetchParticipant(channelId, uid);
+
+		MessageEntity messageEntity = MessageEntity.builder()
+			.channel(ChannelEntity.builder().id(channelId).build())
+			.message(null)
+			.sender(participant)
+			.type(FILE)
+			.build();
+
+		messageRepository.save(messageEntity);
+		FileEntity fileEntity = fileService.save(dto.getFile(), uid);
+		messageFileRepository.save(MessageFileEntity.builder().message(messageEntity).file(fileEntity).build());
+		chatPushService.pushChannelNewMessageEvent(channelId, messageEntity.getId(), FILE);
 	}
 
 	@Transactional
@@ -102,41 +142,31 @@ public class MessageService {
 
 		MessageEntity messageEntity = messageRepository
 			.findByIdAndSenderId(messageId, participantEntity.getId())
-			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL_MESSAGE));
+			.orElseThrow(() -> new ResourceNotFoundException(MESSAGE));
 
-		messageEntity.changeState(MessageState.DELETED);
-
-		if (isPublishEventTrigger) {
-			publisher.emit(
-				EventDto.builder()
-					.target(ROOM_AREA)
-					.type(ROOM_MESSAGE_EVENT)
-					.spaceId(messageEntity.getChannel().getId())
-					.build()
-			);
-		}
+		messageEntity.changeState(DELETED);
+		chatPushService.pushChannelMessageDeletedEvent(channelId, messageEntity.getId());
 	}
 
 	/*
 	 * Query ===============================================================================
 	 * */
 
-	public PageDto<MessageDto> fetchMessages(long uid, long channelId, PageMeta pageMeta) {
+	public PageDto<MessageDto> fetchMessages(long uid, long channelId) {
 
 		participantService.checkParticipant(channelId, uid);
 
-		PageRequest pageRequest = PageRequest.of(pageMeta.getPageIndex(), pageMeta.getSizePerPage());
-		Page<MessageEntity> page = messageRepository.findAllByChannelId(channelId, pageRequest);
+		// PageMeta meta = new PageMeta();
+		// meta.setPageIndex(page.getNumber());
+		// meta.setSizePerPage(page.getNumberOfElements());
+		// meta.setHasNext(page.hasNext());
+		// meta.setHasPrev(page.hasPrevious());
+		// meta.setTotalItems(page.getTotalElements());
+		// meta.setTotalPages(page.getTotalPages());
+		//
+		// return new PageDto(meta, page.getContent());
 
-		PageMeta meta = new PageMeta();
-		meta.setPageIndex(page.getNumber());
-		meta.setSizePerPage(page.getNumberOfElements());
-		meta.setHasNext(page.hasNext());
-		meta.setHasPrev(page.hasPrevious());
-		meta.setTotalItems(page.getTotalElements());
-		meta.setTotalPages(page.getTotalPages());
-
-		return new PageDto(meta, page.getContent());
+		return null;
 	}
 
 }

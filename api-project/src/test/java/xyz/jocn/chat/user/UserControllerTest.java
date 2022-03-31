@@ -7,32 +7,41 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import xyz.jocn.chat.TestToken;
 import xyz.jocn.chat.user.dto.UserDto;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
+import xyz.jocn.chat.user.dto.UserUpdateRequestDto;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
-
 	@Autowired
 	private MockMvc mockMvc;
-
 	@MockBean
 	UserService userService;
-
 	@Autowired
 	ObjectMapper om;
 
 	TestToken testToken = new TestToken();
+
+	@BeforeEach
+	void setUp() {
+	}
 
 	@Test
 	void signUp() throws Exception {
@@ -78,7 +87,7 @@ class UserControllerTest {
 	}
 
 	@Test
-	void me() throws Exception {
+	void fetchMe() throws Exception {
 		// given
 		Long userId = 1L;
 		String token = testToken.generate(userId);
@@ -100,7 +109,7 @@ class UserControllerTest {
 		actions
 			.andExpect(status().isOk())
 			.andExpect(handler().handlerType(UserController.class))
-			.andExpect(handler().methodName("me"))
+			.andExpect(handler().methodName("fetchMe"))
 
 			.andExpect(header().stringValues(CONTENT_TYPE, APPLICATION_JSON_VALUE))
 
@@ -129,7 +138,7 @@ class UserControllerTest {
 
 		// when
 		ResultActions actions = mockMvc.perform(
-			delete("/users/{id}", userId)
+			delete("/users/me")
 				.header(AUTHORIZATION, token)
 				.contentType(APPLICATION_JSON)
 				.accept(APPLICATION_JSON)
@@ -139,7 +148,7 @@ class UserControllerTest {
 		actions
 			.andExpect(status().isOk())
 			.andExpect(handler().handlerType(UserController.class))
-			.andExpect(handler().methodName("leave"))
+			.andExpect(handler().methodName("exit"))
 
 			.andExpect(header().stringValues(CONTENT_TYPE, APPLICATION_JSON_VALUE))
 
@@ -156,46 +165,105 @@ class UserControllerTest {
 	}
 
 	@Test
-	void exit_ApiAccessDenyException() throws Exception {
+	void updateMe() throws Exception {
 		// given
 		Long userId = 1L;
-		String token = testToken.generate(2L);
+		String token = testToken.generate(userId);
 
-		willDoNothing().given(userService).exit(anyLong());
+		UserDto userDto = new UserDto();
+		userDto.setId(userId);
+		userDto.setEmail("user@test.org");
+		userDto.setName("user02");
+		userDto.setProfileImgUrl("/files/1");
+		userDto.setStateMessage("change message");
+
+		given(userService.updateMe(anyLong(), any(UserUpdateRequestDto.class))).willReturn(userDto);
+
+		UserUpdateRequestDto dto = new UserUpdateRequestDto();
+		dto.setName("user02");
+		dto.setStateMessage("change message");
+		String jsonStr = om.writeValueAsString(dto);
 
 		// when
 		ResultActions actions = mockMvc.perform(
-			delete("/users/{id}", userId)
+			patch("/users/me")
 				.header(AUTHORIZATION, token)
 				.contentType(APPLICATION_JSON)
+				.accept(APPLICATION_JSON)
+				.content(jsonStr)
+		).andDo(print());
+
+		// then
+		actions
+			.andExpect(status().isOk())
+			.andExpect(handler().handlerType(UserController.class))
+			.andExpect(handler().methodName("updateMe"))
+			.andExpect(header().stringValues(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+
+			.andExpect(jsonPath("$.meta").doesNotExist())
+			.andExpect(jsonPath("$.error").doesNotExist())
+
+			.andExpect(jsonPath("$.success").exists())
+			.andExpect(jsonPath("$.success").isBoolean())
+			.andExpect(jsonPath("$.success").value(true))
+
+			.andExpect(jsonPath("$.data").exists())
+			.andExpect(jsonPath("$.data.id").exists())
+			.andExpect(jsonPath("$.data.email").exists())
+			.andExpect(jsonPath("$.data.name").exists())
+			.andExpect(jsonPath("$.data.profileImgUrl").exists())
+			.andExpect(jsonPath("$.data.stateMessage").exists())
+		;
+
+		then(userService).should(times(1)).updateMe(anyLong(), any(UserUpdateRequestDto.class));
+	}
+
+	@Test
+	void updateProfileImg() throws Exception {
+		// given
+		Long userId = 1L;
+		String token = testToken.generate(userId);
+
+		MockMultipartFile file = new MockMultipartFile(
+			"file",
+			"hello.txt",
+			MediaType.TEXT_PLAIN_VALUE,
+			"Hello, World!".getBytes()
+		);
+
+		willDoNothing().given(userService).updateProfileImg(anyLong(), any(MultipartFile.class));
+
+		// when
+		ResultActions actions = mockMvc.perform(
+			multipart("/users/me/profile-image")
+				.file(file)
+				.with(request -> {
+					request.setMethod(HttpMethod.PATCH.name());
+					return request;
+				})
+				.header(AUTHORIZATION, token)
+				.contentType(MULTIPART_FORM_DATA)
 				.accept(APPLICATION_JSON)
 		).andDo(print());
 
 		// then
 		actions
-			.andExpect(status().isForbidden())
+			.andExpect(status().isOk())
 			.andExpect(handler().handlerType(UserController.class))
-			.andExpect(handler().methodName("leave"))
-
+			.andExpect(handler().methodName("updateProfileImg"))
 			.andExpect(header().stringValues(CONTENT_TYPE, APPLICATION_JSON_VALUE))
 
 			.andExpect(jsonPath("$.meta").doesNotExist())
+			.andExpect(jsonPath("$.error").doesNotExist())
 			.andExpect(jsonPath("$.data").doesNotExist())
 
 			.andExpect(jsonPath("$.success").exists())
 			.andExpect(jsonPath("$.success").isBoolean())
-			.andExpect(jsonPath("$.success").value(false))
-
-			.andExpect(jsonPath("$.error").exists())
-			.andExpect(jsonPath("$.error.code").exists())
-			.andExpect(jsonPath("$.error.code").isNumber())
-			.andExpect(jsonPath("$.error.code").value(403))
-			.andExpect(jsonPath("$.error.description").exists())
-			.andExpect(jsonPath("$.error.description").isString())
-			.andExpect(jsonPath("$.error.description").value("only leave own account"))
-			.andExpect(jsonPath("$.error.detail").doesNotExist())
+			.andExpect(jsonPath("$.success").value(true))
 		;
 
-		then(userService).should(times(0)).exit(anyLong());
+		then(userService)
+			.should(times(1))
+			.updateProfileImg(anyLong(), any(MultipartFile.class));
 	}
 }

@@ -1,4 +1,4 @@
-package xyz.jocn.chat.message.repo.message;
+package xyz.jocn.chat.message.repo;
 
 import java.util.Optional;
 
@@ -12,7 +12,6 @@ import xyz.jocn.chat.message.entity.MessageEntity;
 @Repository
 public interface MessageRepository extends JpaRepository<MessageEntity, Long>, MessageRepositoryExt {
 
-	Page<MessageEntity> findAllByChannelId(long channelId, Pageable pageable);
 
 	Optional<MessageEntity> findByIdAndSenderId(long id, long participantId);
 }

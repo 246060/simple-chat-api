@@ -52,7 +52,7 @@ public class ReactionController {
 		@PathVariable Long reactionId,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
-		reactionService.cancelReaction(Long.parseLong(uid), channelId, reactionId);
+		reactionService.cancelReaction(Long.parseLong(uid), channelId, messageId, reactionId);
 		return ok(success());
 	}
 }

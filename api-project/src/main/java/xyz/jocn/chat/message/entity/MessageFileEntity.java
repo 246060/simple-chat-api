@@ -44,9 +44,9 @@ public class MessageFileEntity {
 	@CreatedBy
 	private Instant createdBy;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	private FileEntity file;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	private MessageEntity roomMessage;
+	private MessageEntity message;
 }

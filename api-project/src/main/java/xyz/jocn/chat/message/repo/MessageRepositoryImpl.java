@@ -1,4 +1,4 @@
-package xyz.jocn.chat.message.repo.message;
+package xyz.jocn.chat.message.repo;
 
 import javax.persistence.EntityManager;
 

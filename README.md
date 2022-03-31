@@ -98,19 +98,69 @@
     - reaction 표시
     - 알림
       - 방마다 알림 차단 설정
-- 쓰레드
-  - 만들기
-  - 나가기
-  - 참여하기(초대 없음)
-  - 메시지
-    - 발송
-      - 단문/장문/파일(문서,이미지,음성,영상)
-      - 내가 보낸 메시지 삭제 
-    - 수신
-      - 접근 기기의 마지막 메시지 번호로 부터 가장 최신 메시지들 수신
-      - 확인하지 않은 새로운 메시지 개수 표시
-    - reaction 표시
-    - 알림
-      - 방마다 알림 차단 설정
    
-  
+ 
+## event message 
+
+# chat event naming 
+
+## listener naming
+- event.api.server
+- event.chat.server
+- event.chat.client
+
+## chat server space_key naming
+- all
+- channel_xxxx
+- user_xxxx
+
+## routing type
+- to.channel
+- to.all
+- to.user
+
+## eventMessage
+
+```json
+{
+	"routing" : {
+		"type" : "to.channel",
+		"targetId" : 123
+	}, 
+	"message" : {
+		"eventType" : "channel.participant.join | channel.participant.exit",
+		"channelId" : 123,
+		"participantId" : 123,
+		"username" : "홍길동"
+	}
+}
+```
+
+```json
+{
+	"routing" : {
+		"type" : "to.channel",
+		"targetId" : 123
+	}, 
+	"message" : {
+		"eventType" : "channel.message.new", 
+		"channelId" : 123,
+		"messageId" : 123,
+		"type" : "short | long | file | link"
+	}
+}
+```
+
+```json
+{
+	"routing" : {
+		"type" : "to.channel",
+		"targetId" : 123
+	}, 
+	"message" : {
+		"eventType" : "channel.message.deleted | channel.message.reaction",
+		"channelId": 123,
+		"messageId": 123
+	}
+}
+```

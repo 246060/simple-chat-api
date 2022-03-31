@@ -21,21 +21,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import xyz.jocn.chat.TestToken;
 import xyz.jocn.chat.channel.dto.ChannelDto;
-import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.channel.dto.ChannelOpenRequestDto;
+import xyz.jocn.chat.common.pubsub.MessagePublisher;
+import xyz.jocn.chat.participant.dto.ParticipantDto;
+import xyz.jocn.chat.user.dto.UserDto;
 
 @WebMvcTest(ChannelController.class)
 class ChannelControllerTest {
-
 	@Autowired
 	private MockMvc mockMvc;
-
 	@MockBean
 	MessagePublisher messagePublisher;
-
 	@MockBean
 	ChannelService roomService;
-
 	@Autowired
 	ObjectMapper om;
 
@@ -68,38 +66,49 @@ class ChannelControllerTest {
 
 		// then
 		actions
-			.andExpect(status().isOk())
+			.andExpect(status().isCreated())
 			.andExpect(handler().handlerType(ChannelController.class))
 			.andExpect(handler().methodName("open"))
 
 			.andExpect(jsonPath("$.meta").doesNotExist())
 			.andExpect(jsonPath("$.error").doesNotExist())
+			.andExpect(jsonPath("$.data").doesNotExist())
 
 			.andExpect(jsonPath("$.success").exists())
 			.andExpect(jsonPath("$.success").isBoolean())
 			.andExpect(jsonPath("$.success").value(true))
-
-			.andExpect(jsonPath("$.data").exists())
-			.andExpect(jsonPath("$.data.roomId").exists())
-			.andExpect(jsonPath("$.data.roomId").value(channelDto.getId()))
 		;
 
-		then(roomService)
-			.should(times(1))
-			.open(anyLong(), anyLong());
+		then(roomService).should(times(1)).open(anyLong(), anyLong());
 	}
 
 	@Test
-	void getRooms() throws Exception {
+	void fetchMyChannels() throws Exception {
 		// given
 		Long hostId = 1L;
 		String token = testToken.generate(hostId);
 
 		List<ChannelDto> channelDtos = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 2; i++) {
 			ChannelDto channelDto = new ChannelDto();
 			channelDto.setId(1L + i);
 			channelDtos.add(channelDto);
+
+			List<ParticipantDto> participantDtos = new ArrayList<>();
+			for (int j = 0; j < 3; j++) {
+				UserDto userDto = new UserDto();
+				userDto.setId(1L + i);
+				userDto.setName(String.format("user%d", 1L + i));
+				userDto.setEmail(String.format("user%d@test.org", 1L + i));
+
+				ParticipantDto participantDto = new ParticipantDto();
+				participantDto.setId(1L + i);
+				participantDto.setUser(userDto);
+
+				participantDtos.add(participantDto);
+			}
+
+			channelDto.setParticipants(participantDtos);
 		}
 
 		given(roomService.fetchMyChannels(anyLong())).willReturn(channelDtos);
@@ -116,7 +125,7 @@ class ChannelControllerTest {
 		actions
 			.andExpect(status().isOk())
 			.andExpect(handler().handlerType(ChannelController.class))
-			.andExpect(handler().methodName("getRooms"))
+			.andExpect(handler().methodName("fetchMyChannels"))
 
 			.andExpect(jsonPath("$.meta").doesNotExist())
 			.andExpect(jsonPath("$.error").doesNotExist())
@@ -127,7 +136,16 @@ class ChannelControllerTest {
 
 			.andExpect(jsonPath("$.data").exists())
 			.andExpect(jsonPath("$.data").isArray())
-			.andExpect(jsonPath("$.data[*].roomId").exists())
+			.andExpect(jsonPath("$.data[*].id").exists())
+			.andExpect(jsonPath("$.data[*].participants").exists())
+			.andExpect(jsonPath("$.data[*].participants").isArray())
+			.andExpect(jsonPath("$.data[*].participants[*].id").exists())
+			.andExpect(jsonPath("$.data[*].participants[*].user").exists())
+			.andExpect(jsonPath("$.data[*].participants[*].user.id").exists())
+			.andExpect(jsonPath("$.data[*].participants[*].user.name").exists())
+			.andExpect(jsonPath("$.data[*].participants[*].user.email").exists())
+			.andExpect(jsonPath("$.data[*].participants[*].user.profileImgUrl").exists())
+			.andExpect(jsonPath("$.data[*].participants[*].user.stateMessage").exists())
 		;
 
 		then(roomService)

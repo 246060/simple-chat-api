@@ -7,5 +7,5 @@ import xyz.jocn.chat.friend.FriendEntity;
 
 public interface FriendRepositoryExt {
 
-	List<FriendEntity> findAllBySourceIdAndCondition(Long sourceId, FriendSearchDto condition);
+	List<FriendEntity> findAllBySourceIdAndCondition(long sourceId, FriendSearchDto condition);
 }

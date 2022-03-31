@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 
 router.post("/relay", function (req, res, next) {
   console.log(req.body);
+
   const io = req.app.io;
   let event;
 
@@ -11,9 +12,11 @@ router.post("/relay", function (req, res, next) {
     console.log("chat");
     req.body.timestamp = new Date().toISOString();
     event = io.to(req.body.data.roomId);
+
   } else if (req.body.meta.type == "person") {
     console.log("person");
     event = io.to(req.body.data.userId);
+
   } else if (req.body.meta.type == "all") {
     console.log("all");
     event = io;
@@ -29,6 +32,7 @@ router.post("/token", function (req, res, next) {
   let payload = { sub: "user-01" };
   let secret = "password";
   let token = jwt.sign(payload, secret, { expiresIn: "10h" });
+
   console.log(jwt.verify(token, secret));
 
   res.json({

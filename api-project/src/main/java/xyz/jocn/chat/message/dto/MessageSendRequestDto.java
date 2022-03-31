@@ -5,14 +5,12 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.Data;
-import xyz.jocn.chat.message.enums.ChatMessageType;
 
 @Data
 public class MessageSendRequestDto {
-	private Long userId;
-	private ChatMessageType type;
-	private Long participantId;
-	private Long roomId;
-	private List<MultipartFile> files;
+	private MultipartFile file;
 	private String message;
+	private Long parentId;
+
+	// private List<Long>  mentionedUsers;
 }

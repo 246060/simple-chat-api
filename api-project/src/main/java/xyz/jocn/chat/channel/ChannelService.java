@@ -1,6 +1,7 @@
 package xyz.jocn.chat.channel;
 
 import static xyz.jocn.chat.common.exception.ResourceType.*;
+import static xyz.jocn.chat.participant.ParticipantState.*;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import xyz.jocn.chat.channel.dto.ChannelDto;
 import xyz.jocn.chat.channel.repo.ChannelRepository;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.participant.ParticipantEntity;
+import xyz.jocn.chat.participant.ParticipantState;
 import xyz.jocn.chat.participant.repo.ParticipantRepository;
 import xyz.jocn.chat.user.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
@@ -27,8 +29,6 @@ public class ChannelService {
 	private final ChannelRepository channelRepository;
 	private final ParticipantRepository participantRepository;
 
-	private final ChannelConverter channelConverter = ChannelConverter.INSTANCE;
-
 	/*
 	 * Command =============================================================================
 	 * */
@@ -39,11 +39,10 @@ public class ChannelService {
 		UserEntity invitee = userRepository.findById(inviteeId).orElseThrow(() -> new ResourceNotFoundException(USER));
 		UserEntity host = userRepository.findById(hostId).orElseThrow(() -> new ResourceNotFoundException(USER));
 
-		ChannelEntity channel = ChannelEntity.builder().build();
-		channelRepository.save(channel);
+		ChannelEntity channel = channelRepository.save(ChannelEntity.builder().build());
 
-		ParticipantEntity participant1 = ParticipantEntity.builder().user(invitee).build();
-		ParticipantEntity participant2 = ParticipantEntity.builder().user(host).build();
+		ParticipantEntity participant1 = ParticipantEntity.builder().user(host).build();
+		ParticipantEntity participant2 = ParticipantEntity.builder().user(invitee).build();
 		participant1.join(channel);
 		participant2.join(channel);
 		participantRepository.save(participant1);
@@ -60,7 +59,13 @@ public class ChannelService {
 		return channelRepository.findAllMyChannels(uid);
 	}
 
-	public List<ChannelDto> fetchMyChannel(long uid, long channelId) {
-		return channelRepository.findMyChannelById(channelId, uid);
+	public ChannelDto fetchMyChannel(long uid, long channelId) {
+		participantRepository
+			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
+			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
+
+		return channelRepository
+			.findMyChannelById(channelId)
+			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
 	}
 }

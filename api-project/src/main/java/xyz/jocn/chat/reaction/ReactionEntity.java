@@ -31,7 +31,7 @@ import xyz.jocn.chat.participant.ParticipantEntity;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "room_message_reaction")
+@Table(name = "reaction")
 @Entity
 public class ReactionEntity {
 

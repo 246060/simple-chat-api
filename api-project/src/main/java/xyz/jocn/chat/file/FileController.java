@@ -3,8 +3,11 @@ package xyz.jocn.chat.file;
 import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.http.ResponseEntity.*;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.*;
 import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
+
+import java.net.URI;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +36,9 @@ public class FileController {
 
 	@PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity upload(MultipartFile file, @AuthenticationPrincipal(expression = UID) String uid) {
-		return ok(success(fileService.save(Long.parseLong(uid), file)));
+		FileDto fileDto = fileService.save(Long.parseLong(uid), file);
+		URI uri = fromCurrentRequest().path("/{id}").buildAndExpand(fileDto.getId()).toUri();
+		return created(uri).body(success());
 	}
 
 	@GetMapping("/{fileId}")
@@ -46,7 +51,6 @@ public class FileController {
 		@PathVariable Long fileId,
 		@RequestParam(required = false, defaultValue = "false") Boolean download
 	) {
-
 		FileDto dto = fileService.loadAsResource(fileId);
 		BodyBuilder ok = ok();
 

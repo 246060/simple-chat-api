@@ -1,9 +1,10 @@
 package xyz.jocn.chat.common.pubsub;
 
-import org.springframework.data.redis.listener.ChannelTopic;
+import xyz.jocn.chat.notification.dto.EventDto;
 
 public interface MessagePublisher {
+
 	void emit(EventDto event);
 
-	void emit(ChannelTopic topic, EventDto event);
+	void emit(TopicType topicType, EventDto event);
 }

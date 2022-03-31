@@ -1,18 +1,21 @@
 package xyz.jocn.chat.message.entity;
 
+import static javax.persistence.FetchType.*;
+import static javax.persistence.GenerationType.*;
+import static xyz.jocn.chat.message.enums.MessageState.*;
+
 import java.time.Instant;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -25,9 +28,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import xyz.jocn.chat.channel.ChannelEntity;
+import xyz.jocn.chat.file.FileEntity;
+import xyz.jocn.chat.message.enums.ChatMessageType;
 import xyz.jocn.chat.message.enums.MessageState;
 import xyz.jocn.chat.participant.ParticipantEntity;
-import xyz.jocn.chat.message.enums.ChatMessageType;
 
 @ToString
 @Getter
@@ -35,11 +39,11 @@ import xyz.jocn.chat.message.enums.ChatMessageType;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "room_message")
+@Table(name = "message")
 @Entity
 public class MessageEntity {
 
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = AUTO)
 	@Id
 	private long id;
 
@@ -51,7 +55,7 @@ public class MessageEntity {
 
 	@Builder.Default
 	@Column(nullable = false, length = 10)
-	private MessageState state = MessageState.ACTIVE;
+	private MessageState state = ACTIVE;
 
 	private boolean hasReaction = false;
 
@@ -64,10 +68,10 @@ public class MessageEntity {
 	@LastModifiedBy
 	private long updatedBy;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = LAZY)
 	private ParticipantEntity sender;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = LAZY)
 	private ChannelEntity channel;
 
 	public MessageEntity(long id) {

@@ -1,8 +1,7 @@
 package xyz.jocn.chat.reaction;
 
 import static xyz.jocn.chat.common.exception.ResourceType.*;
-import static xyz.jocn.chat.common.pubsub.EventTarget.*;
-import static xyz.jocn.chat.common.pubsub.EventType.*;
+import static xyz.jocn.chat.notification.enums.RoutingType.*;
 
 import java.util.List;
 
@@ -13,10 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
-import xyz.jocn.chat.common.pubsub.EventDto;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
+import xyz.jocn.chat.notification.dto.EventDto;
+import xyz.jocn.chat.notification.dto.EvtRoutingDto;
+import xyz.jocn.chat.notification.dto.EvtReactionDto;
 import xyz.jocn.chat.message.entity.MessageEntity;
-import xyz.jocn.chat.message.repo.message.MessageRepository;
+import xyz.jocn.chat.message.repo.MessageRepository;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.participant.ParticipantService;
 import xyz.jocn.chat.reaction.dto.ReactionAddRequestDto;
@@ -52,7 +53,7 @@ public class ReactionService {
 
 		MessageEntity messageEntity = messageRepository
 			.findById(messageId)
-			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL_MESSAGE));
+			.orElseThrow(() -> new ResourceNotFoundException(MESSAGE));
 
 		reactionRepository.save(
 			ReactionEntity.builder()
@@ -63,35 +64,29 @@ public class ReactionService {
 		);
 
 		if (isPublishEventTrigger) {
-			publisher.emit(
-				EventDto.builder()
-					.target(ROOM_AREA)
-					.type(ROOM_MESSAGE_EVENT)
-					.spaceId(messageEntity.getChannel().getId())
-					.build()
-			);
+			EventDto chatEvent = new EventDto();
+			chatEvent.setRouting(new EvtRoutingDto(channel, String.valueOf(channelId)));
+			chatEvent.setMessage(new EvtReactionDto(channelId, messageId));
+			publisher.emit(chatEvent);
 		}
 	}
 
 	@Transactional
-	public void cancelReaction(long uid, long channelId, long reactionId) {
+	public void cancelReaction(long uid, long channelId, long messageId, long reactionId) {
 
-		ParticipantEntity roomParticipantEntity = participantService.fetchParticipant(channelId, uid);
+		ParticipantEntity participantEntity = participantService.fetchParticipant(channelId, uid);
 
-		ReactionEntity roomMessageReactionEntity = reactionRepository
-			.findByIdAndParticipant(reactionId, roomParticipantEntity)
-			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL_MESSAGE_REACTION));
+		ReactionEntity reactionEntity = reactionRepository
+			.findByIdAndParticipant(reactionId, participantEntity)
+			.orElseThrow(() -> new ResourceNotFoundException(REACTION));
 
-		reactionRepository.delete(roomMessageReactionEntity);
+		reactionRepository.delete(reactionEntity);
 
 		if (isPublishEventTrigger) {
-			publisher.emit(
-				EventDto.builder()
-					.target(ROOM_AREA)
-					.type(ROOM_MESSAGE_EVENT)
-					.spaceId(channelId)
-					.build()
-			);
+			EventDto chatEvent = new EventDto();
+			chatEvent.setRouting(new EvtRoutingDto(channel, String.valueOf(channelId)));
+			chatEvent.setMessage(new EvtReactionDto(channelId, messageId));
+			publisher.emit(chatEvent);
 		}
 	}
 
@@ -105,7 +100,7 @@ public class ReactionService {
 
 		MessageEntity messageEntity = messageRepository
 			.findById(messageId)
-			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL_MESSAGE));
+			.orElseThrow(() -> new ResourceNotFoundException(MESSAGE));
 
 		return reactionConverter.toDto(
 			reactionRepository.findAllByMessage(messageEntity)

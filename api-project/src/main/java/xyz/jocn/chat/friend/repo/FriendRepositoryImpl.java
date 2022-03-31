@@ -26,7 +26,7 @@ public class FriendRepositoryImpl implements FriendRepositoryExt {
 	}
 
 	@Override
-	public List<FriendEntity> findAllBySourceIdAndCondition(Long sourceId, FriendSearchDto condition) {
+	public List<FriendEntity> findAllBySourceIdAndCondition(long sourceId, FriendSearchDto condition) {
 		return queryFactory.selectFrom(friend)
 			.where(friend.source().id.eq(sourceId))
 			.where(eqFavorite(condition.getFavorite()))

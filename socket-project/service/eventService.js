@@ -9,7 +9,12 @@ function isValidJwt(authorization) {
   console.log("token :", token);
 
   try {
-    let decoded = jwt.verify(token, "password");
+    //let secret = Buffer.from("jCIIGf7BKMMszsfSIXYS2v/CI1+aQ0fl4yZegXjVQLk=", "base64").toString('utf8');
+    let secret = Buffer.from(
+      "jCIIGf7BKMMszsfSIXYS2v/CI1+aQ0fl4yZegXjVQLk=",
+      "base64"
+    );
+    let decoded = jwt.verify(token, secret);
     return true;
   } catch (error) {
     console.error("socket connection fail", error);
@@ -43,6 +48,7 @@ module.exports = {
 
   checkSocketToken: function (socket, next) {
     let authorization = socket.handshake.headers.authorization;
+
     if (isValidJwt(authorization)) {
       next();
     } else {
@@ -50,32 +56,4 @@ module.exports = {
     }
   },
 
-  join: function (socket, args) {
-    let response;
-
-    if ("person" == args.type) {
-      socket.join(args.userId);
-      response = {
-        meta: { type: "person" },
-        data: { msg: `Person Socket Connection Success` },
-      };
-      socket.emit("event.server", response);
-    } else if ("chat" == args.type) {
-      socket.join(args.roomId);
-      response = {
-        meta: { type: "chat" },
-        data: { msg: `Chat Socket Connection Success` },
-      };
-      socket.emit("event.server", response);
-    }else if("all" == args.type){
-      socket.join("all");
-      response = {
-        meta: { type: "all" },
-        data: { msg: `all Socket Connection Success` },
-      };
-      socket.emit("event.server", response);
-    }
-
-    return response;
-  },
 };

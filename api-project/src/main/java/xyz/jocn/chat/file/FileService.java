@@ -1,22 +1,23 @@
 package xyz.jocn.chat.file;
 
+import static java.nio.charset.StandardCharsets.*;
 import static xyz.jocn.chat.common.exception.ResourceType.*;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.common.exception.FileStorageException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
+import xyz.jocn.chat.common.util.FileUtil;
 import xyz.jocn.chat.file.dto.FileDto;
 import xyz.jocn.chat.file.repo.FileMetaRepository;
 import xyz.jocn.chat.file.repo.StorageRepository;
@@ -39,25 +40,17 @@ public class FileService {
 
 	@Transactional
 	public FileDto save(long uid, MultipartFile multipartFile) {
+		FileEntity fileEntity = this.save(multipartFile, uid);
+		return fileConverter.toDto(fileEntity);
+	}
 
-		LocalDate now = LocalDate.now(ZoneOffset.UTC);
-
-		Path savedDir = Path
-			.of(Integer.toString(now.getYear()))
-			.resolve(Integer.toString(now.getMonth().getValue()))
-			.resolve(Integer.toString(now.getDayOfMonth()))
-			.normalize();
-
-		String savedName = new StringBuilder()
-			.append(UUID.randomUUID().toString().replaceAll("-", ""))
-			.append(".")
-			.append(StringUtils.getFilenameExtension(multipartFile.getOriginalFilename()))
-			.toString();
+	@Transactional
+	public FileEntity save(MultipartFile multipartFile, long uid) {
 
 		FileEntity fileEntity = FileEntity.builder()
 			.originName(multipartFile.getOriginalFilename())
-			.savedName(savedName)
-			.savedDir(savedDir.toString())
+			.savedName(FileUtil.generateSavedFileName(multipartFile.getOriginalFilename()))
+			.savedDir(FileUtil.getSavedDir().toString())
 			.byteSize(multipartFile.getSize())
 			.contentType(multipartFile.getContentType())
 			.user(UserEntity.builder().id(uid).build())
@@ -71,9 +64,39 @@ public class FileService {
 			throw new FileStorageException("Could not store the file. Error: " + e.getMessage());
 		}
 
-		return fileConverter.toDto(fileEntity);
+		return fileEntity;
 	}
 
+	@Transactional
+	public FileEntity save(long uid, String text) {
+
+		try {
+			Path tempFilePath = FileUtil.generateTempFile("txt");
+			Files.writeString(tempFilePath, text, UTF_8);
+
+			FileEntity fileEntity = FileEntity.builder()
+				.originName(tempFilePath.getFileName().toString())
+				.savedName(tempFilePath.getFileName().toString())
+				.savedDir(FileUtil.getSavedDir().toString())
+				.byteSize(Files.size(tempFilePath))
+				.contentType(Files.probeContentType(tempFilePath))
+				.user(UserEntity.builder().id(uid).build())
+				.build();
+
+			storageRepository.save(Files.newInputStream(tempFilePath), fileEntity);
+			fileRepository.save(fileEntity);
+
+			Files.deleteIfExists(tempFilePath);
+
+			return fileEntity;
+
+		} catch (IOException e) {
+			log.error(e.getMessage());
+			throw new FileStorageException(
+				"Could not store the file for channel long message. Error: " + e.getMessage()
+			);
+		}
+	}
 
 	/*
 	 * Query ===============================================================================

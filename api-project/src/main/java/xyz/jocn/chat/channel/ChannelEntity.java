@@ -44,6 +44,8 @@ public class ChannelEntity {
 	@CreatedDate
 	private Instant createdAt;
 
+	private Long firstMessageId;
+
 	public ChannelEntity(long id) {
 		this.id = id;
 	}
@@ -53,5 +55,11 @@ public class ChannelEntity {
 			participants = new ArrayList<>();
 		}
 		participants.add(participant);
+	}
+
+	public void registerPivotMessage(Long channelFirstMessageId) {
+		if (Objects.isNull(this.firstMessageId) || this.firstMessageId == 0L) {
+			this.firstMessageId = channelFirstMessageId;
+		}
 	}
 }

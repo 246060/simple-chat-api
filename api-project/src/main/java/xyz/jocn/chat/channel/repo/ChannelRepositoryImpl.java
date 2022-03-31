@@ -1,8 +1,11 @@
 package xyz.jocn.chat.channel.repo;
 
 import static com.querydsl.core.group.GroupBy.*;
+import static xyz.jocn.chat.participant.ParticipantState.*;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
@@ -36,7 +39,8 @@ public class ChannelRepositoryImpl implements ChannelRepositoryExt {
 
 		return queryFactory.from(channel)
 			.innerJoin(participant).on(channel.id.eq(participant.channel().id))
-			.innerJoin(user).on(participant.user().id.eq(user.id))
+			.innerJoin(user).on(participant.user().id.eq(user.id), participant.state.eq(JOIN))
+			.where(user.id.eq(uid))
 			.transform(
 				groupBy(channel.id).list(
 					Projections.fields(
@@ -61,35 +65,45 @@ public class ChannelRepositoryImpl implements ChannelRepositoryExt {
 	}
 
 	@Override
-	public List<ChannelDto> findMyChannelById(long id, long uid) {
+	public Optional<ChannelDto> findMyChannelById(long id) {
 		QParticipantEntity participant = QParticipantEntity.participantEntity;
 		QUserEntity user = QUserEntity.userEntity;
 
-		return queryFactory.from(channel)
-			.innerJoin(participant).on(channel.id.eq(participant.channel().id))
-			.innerJoin(user).on(participant.user().id.eq(user.id))
+		ChannelDto channelDto = queryFactory
+			.select(
+				Projections.fields(
+					ChannelDto.class,
+					channel.id))
+			.from(channel)
 			.where(channel.id.eq(id))
-			.transform(
-				groupBy(channel.id).list(
+			.fetchOne();
+
+		if (Objects.isNull(channelDto)) {
+			return Optional.empty();
+		}
+
+		List<ParticipantDto> participantDtos = queryFactory
+			.select(
+				Projections.fields(
+					ParticipantDto.class,
+					participant.id,
 					Projections.fields(
-						ChannelDto.class,
-						channel.id,
-						list(
-							Projections.fields(
-								ParticipantDto.class,
-								participant.id,
-								Projections.fields(
-									UserDto.class,
-									user.id,
-									user.name,
-									user.email,
-									user.profileImgUrl
-								).as("user")
-							)
-						).as("participants")
-					)
+						UserDto.class,
+						user.id,
+						user.name,
+						user.email,
+						user.profileImgUrl
+					).as("user")
 				)
-			);
+			)
+			.from(participant)
+			.innerJoin(user).on(participant.user().id.eq(user.id), participant.state.eq(JOIN))
+			.where(participant.channel().id.eq(id))
+			.fetchJoin()
+			.fetch();
+
+		channelDto.setParticipants(participantDtos);
+		return Optional.of(channelDto);
 	}
 
 }

@@ -29,15 +29,28 @@ public class ParticipantController {
 	@PostMapping("/channels/{channelId}/participants")
 	public ResponseEntity invite(
 		@PathVariable Long channelId,
-		@RequestBody ChannelInviteRequestDto dto
+		@RequestBody ChannelInviteRequestDto dto,
+		@AuthenticationPrincipal(expression = UID) String uid
 	) {
-		participantService.invite(channelId, dto);
+		participantService.invite(Long.parseLong(uid), channelId, dto);
 		return ok(success());
 	}
 
 	@GetMapping("/channels/{channelId}/participants")
-	public ResponseEntity fetchCurrentParticipantsInChannel(@PathVariable Long channelId) {
-		return ok(success(participantService.fetchCurrentParticipantsInChannel(channelId)));
+	public ResponseEntity fetchCurrentParticipantsInChannel(
+		@PathVariable Long channelId,
+		@AuthenticationPrincipal(expression = UID) String uid
+	) {
+		return ok(success(participantService.fetchCurrentParticipantsInChannel(Long.parseLong(uid), channelId)));
+	}
+
+	@GetMapping("/channels/{channelId}/participants/{participantId}")
+	public ResponseEntity fetchOneInChannel(
+		@PathVariable Long channelId,
+		@PathVariable Long participantId,
+		@AuthenticationPrincipal(expression = UID) String uid
+	) {
+		return ok(success(participantService.fetchOneInChannel(Long.parseLong(uid), channelId, participantId)));
 	}
 
 	@DeleteMapping("/channels/{channelId}/participants/{participantId}")
@@ -47,6 +60,7 @@ public class ParticipantController {
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
 		ChannelExitDto dto = new ChannelExitDto();
+		dto.setChannelId(channelId);
 		dto.setParticipantId(participantId);
 		dto.setUserId(Long.parseLong(uid));
 

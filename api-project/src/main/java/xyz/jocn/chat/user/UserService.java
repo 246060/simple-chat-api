@@ -48,7 +48,9 @@ public class UserService {
 
 		userRepository
 			.findByEmail(userSignUpRequestDto.getEmail())
-			.ifPresent(userEntity -> new ResourceAlreadyExistException(USER));
+			.ifPresent(userEntity -> {
+				throw new ResourceAlreadyExistException(USER);
+			});
 
 		UserEntity userEntity = UserEntity.builder()
 			.email(userSignUpRequestDto.getEmail())

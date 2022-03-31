@@ -1,6 +1,7 @@
 package xyz.jocn.chat.participant.repo;
 
 import static org.assertj.core.api.Assertions.*;
+import static xyz.jocn.chat.participant.ParticipantState.*;
 
 import java.util.List;
 
@@ -13,7 +14,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import xyz.jocn.chat.channel.ChannelEntity;
 import xyz.jocn.chat.participant.ParticipantEntity;
+import xyz.jocn.chat.participant.ParticipantState;
 import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.enums.UserState;
 
 //@Rollback(false)
 //@AutoConfigureTestDatabase(replace = NONE)
@@ -29,30 +32,6 @@ class ParticipantRepositoryTest {
 	@BeforeEach
 	void setUp() {
 
-	}
-
-	@Test
-	void findByIdAndUserId() {
-		// given
-		UserEntity user = UserEntity.builder().email("hello@g.com").build();
-		em.persist(user);
-		em.flush();
-
-		ChannelEntity channel = ChannelEntity.builder().build();
-		ParticipantEntity participant = ParticipantEntity.builder().channel(channel).user(user).build();
-		participant.join(channel);
-
-		em.persist(channel);
-		em.persist(participant);
-		em.flush();
-		em.clear();
-
-		// when
-		ParticipantEntity participantEntity = repo.findByIdAndUserId(participant.getId(), user.getId()).get();
-		System.out.println("participantEntity = " + participantEntity);
-
-		// then
-		assertThat(participantEntity).extracting(ParticipantEntity::getId).isEqualTo(participant.getId());
 	}
 
 	@Test
@@ -86,7 +65,7 @@ class ParticipantRepositoryTest {
 	}
 
 	@Test
-	void findByRoomIdAndUserId() {
+	void findByIdAndChannelId() {
 		// given
 		UserEntity user = UserEntity.builder().email("hello@g.com").build();
 		em.persist(user);
@@ -109,7 +88,7 @@ class ParticipantRepositoryTest {
 		em.clear();
 
 		// when
-		ParticipantEntity entity = repo.findByChannelIdAndUserId(channelId, userId).get();
+		ParticipantEntity entity = repo.findByChannelIdAndUserIdAndState(channelId, userId, JOIN).get();
 
 		// then
 		assertThat(entity)
@@ -120,4 +99,36 @@ class ParticipantRepositoryTest {
 			.extracting(ParticipantEntity::getUser)
 			.extracting(UserEntity::getId).isEqualTo(userId);
 	}
+
+	@Test
+	void findByChannelIdAndUserIdAndState() {
+		// given
+		UserEntity user1 = UserEntity.builder().email("hello1@g.com").build();
+		ChannelEntity channel = ChannelEntity.builder().build();
+		ParticipantEntity participant = ParticipantEntity.builder().channel(channel).user(user1).build();
+
+		em.persist(user1);
+		em.persist(channel);
+		em.persist(participant);
+		em.flush();
+		em.clear();
+
+		long participantId = participant.getId();
+		long channelId = channel.getId();
+		long userId = user1.getId();
+		ParticipantState state = JOIN;
+
+		// when
+		ParticipantEntity result = repo.findByChannelIdAndUserIdAndState(channelId, userId, state).get();
+		System.out.println("result = " + result);
+
+		// then
+		assertThat(result).extracting(ParticipantEntity::getId).isEqualTo(participantId);
+		assertThat(result)
+			.extracting(ParticipantEntity::getChannel)
+			.extracting(ChannelEntity::getId)
+			.isEqualTo(channelId);
+		assertThat(result).extracting(ParticipantEntity::getUser).extracting(UserEntity::getId).isEqualTo(userId);
+	}
+
 }

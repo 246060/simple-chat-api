@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
-import xyz.jocn.chat.message.repo.message.MessageRepository;
+import xyz.jocn.chat.message.repo.MessageRepository;
 import xyz.jocn.chat.reaction.repo.ReactionRepository;
 import xyz.jocn.chat.participant.repo.ParticipantRepository;
 

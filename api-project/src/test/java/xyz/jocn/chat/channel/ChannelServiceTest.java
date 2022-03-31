@@ -17,23 +17,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import xyz.jocn.chat.channel.dto.ChannelDto;
 import xyz.jocn.chat.channel.dto.ChannelOpenRequestDto;
 import xyz.jocn.chat.channel.repo.ChannelRepository;
-import xyz.jocn.chat.common.pubsub.MessagePublisher;
 import xyz.jocn.chat.participant.ParticipantEntity;
+import xyz.jocn.chat.participant.ParticipantState;
+import xyz.jocn.chat.participant.dto.ParticipantDto;
 import xyz.jocn.chat.participant.repo.ParticipantRepository;
 import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.dto.UserDto;
 import xyz.jocn.chat.user.repo.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelServiceTest {
-
 	@Mock
 	ChannelRepository channelRepository;
 	@Mock
 	UserRepository userRepository;
 	@Mock
 	ParticipantRepository participantRepository;
-	@Mock
-	MessagePublisher publisher;
 	@InjectMocks
 	ChannelService channelService;
 
@@ -42,57 +41,163 @@ class ChannelServiceTest {
 		// given
 		Long hostID = 1L;
 		Long inviteeId = 2L;
+		Long channelId = 1L;
+
+		UserEntity host = UserEntity.builder().id(hostID).build();
 		UserEntity invitee = UserEntity.builder().id(inviteeId).build();
-		ChannelEntity room = ChannelEntity.builder().id(1L).build();
+		given(userRepository.findById(hostID)).willReturn(Optional.of(host));
+		given(userRepository.findById(inviteeId)).willReturn(Optional.of(invitee));
 
-		given(userRepository.findById(anyLong())).willReturn(Optional.of(invitee));
-
-		given(channelRepository.save(any(ChannelEntity.class))).willReturn(room);
-		given(participantRepository.save(any(ParticipantEntity.class))).willReturn(null);
+		ChannelEntity channelEntity = ChannelEntity.builder().id(channelId).build();
+		System.out.println("channelEntity = " + channelEntity);
+		given(channelRepository.save(any(ChannelEntity.class))).willReturn(channelEntity);
 
 		// willDoNothing().given(publisher).emit(any(EventDto.class));
 
-		ChannelOpenRequestDto dto = new ChannelOpenRequestDto();
-		dto.setInviteeId(inviteeId);
-
 		// when
-		Long id = channelService.open(hostID, inviteeId);
+		Long result = channelService.open(hostID, inviteeId);
+		System.out.println("result = " + result);
 
 		// then
-		then(userRepository).should().findById(anyLong());
-		then(channelRepository).should().save(any(ChannelEntity.class));
-		then(participantRepository).should(times(2)).save(any(ParticipantEntity.class));
+		assertThat(result).isNotNull();
+		assertThat(result).isGreaterThan(0L);
 
-		assertThat(id).isNotNull();
-		assertThat(id).isEqualTo(room.getId());
+		then(userRepository).should(times(2)).findById(anyLong());
+		then(channelRepository).should().save(any(ChannelEntity.class));
 	}
 
 	@Test
-	void getRoomList() {
+	void fetchMyChannels() {
 		// given
-		Long userId = 1L;
-		List<ParticipantEntity> entities = new ArrayList<>();
-		for (int i = 0; i < 3; i++) {
-			entities.add(ParticipantEntity.builder()
-				.id(1L + i)
-				.channel(ChannelEntity.builder().id(1L + i).build())
-				.build());
+		long channelId = 1L;
+		long participantId = 1L;
+		long uid = 1L;
+
+		List<ParticipantDto> participantDtos = new ArrayList<>();
+
+		UserDto userDto = new UserDto();
+		userDto.setId(uid);
+		userDto.setEmail(String.format("user%d@test.org", uid));
+		userDto.setName(String.format("user%d", uid));
+
+		ParticipantDto participantDto = new ParticipantDto();
+		participantDto.setId(participantId);
+		participantDto.setUser(userDto);
+
+		participantDtos.add(participantDto);
+
+		for (int i = 10; i < 13; i++) {
+			long userId = (i + 1);
+			UserDto user = new UserDto();
+			user.setId(userId);
+			user.setEmail(String.format("user%d@test.org", userId));
+			user.setName(String.format("user%d", userId));
+
+			ParticipantDto participant = new ParticipantDto();
+			participant.setId(1L + i);
+			participant.setUser(user);
+
+			participantDtos.add(participant);
 		}
-		given(participantRepository.findAllByUserId(anyLong())).willReturn(entities);
+
+		ChannelDto channelDto = new ChannelDto();
+		channelDto.setId(channelId);
+		channelDto.setParticipants(participantDtos);
+
+		List<ChannelDto> channelDtos = new ArrayList<>();
+		channelDtos.add(channelDto);
+
+		given(channelRepository.findAllMyChannels(uid)).willReturn(channelDtos);
 
 		// when
-		List<ChannelDto> result = channelService.fetchMyChannels(userId);
+		List<ChannelDto> result = channelService.fetchMyChannels(uid);
+		System.out.println("result = " + result);
 
 		// then
-		then(participantRepository).should().findAllByUserId(anyLong());
-
 		assertThat(result).isNotEmpty();
-		assertThat(result).extracting(ChannelDto::getId)
-			.containsAll(entities.stream()
-				.map(ParticipantEntity::getChannel)
-				.map(ChannelEntity::getId)
-				.collect(Collectors.toList())
-			);
+
+		for (ChannelDto channel : result) {
+			assertThat(channel).extracting(ChannelDto::getId).isEqualTo(channelId);
+			assertThat(channel).extracting(ChannelDto::getParticipants).isNotNull();
+
+			assertThat(channel.getParticipants())
+				.extracting(ParticipantDto::getId)
+				.contains(participantId);
+
+			assertThat(channel.getParticipants())
+				.extracting(ParticipantDto::getUser)
+				.extracting(UserDto::getId)
+				.contains(uid);
+		}
+
+		then(channelRepository).should(times(1)).findAllMyChannels(anyLong());
+	}
+
+	@Test
+	void fetchMyChannel() {
+		// given
+		long channelId = 1L;
+		long participantId = 1L;
+		long uid = 1L;
+
+		List<ParticipantDto> participantDtos = new ArrayList<>();
+
+		UserDto userDto = new UserDto();
+		userDto.setId(uid);
+		userDto.setEmail(String.format("user%d@test.org", uid));
+		userDto.setName(String.format("user%d", uid));
+
+		ParticipantDto participantDto = new ParticipantDto();
+		participantDto.setId(participantId);
+		participantDto.setUser(userDto);
+
+		participantDtos.add(participantDto);
+
+		for (int i = 10; i < 13; i++) {
+			long userId = (i + 1);
+			UserDto user = new UserDto();
+			user.setId(userId);
+			user.setEmail(String.format("user%d@test.org", userId));
+			user.setName(String.format("user%d", userId));
+
+			ParticipantDto participant = new ParticipantDto();
+			participant.setId(1L + i);
+			participant.setUser(user);
+
+			participantDtos.add(participant);
+		}
+
+		ChannelDto channelDto = new ChannelDto();
+		channelDto.setId(channelId);
+		channelDto.setParticipants(participantDtos);
+
+		given(participantRepository.findByChannelIdAndUserIdAndState(anyLong(), anyLong(), any(ParticipantState.class)))
+			.willReturn(Optional.of(ParticipantEntity.builder().build()));
+
+		given(channelRepository.findMyChannelById(anyLong())).willReturn(Optional.of(channelDto));
+
+		// when
+		ChannelDto result = channelService.fetchMyChannel(uid, channelId);
+		System.out.println("result = " + result);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result).extracting(ChannelDto::getId).isEqualTo(channelId);
+		assertThat(result).extracting(ChannelDto::getParticipants).isNotNull();
+
+		assertThat(result.getParticipants())
+			.extracting(ParticipantDto::getId)
+			.contains(participantId);
+
+		assertThat(result.getParticipants())
+			.extracting(ParticipantDto::getUser)
+			.extracting(UserDto::getId)
+			.contains(uid);
+
+		then(participantRepository).should(times(1))
+			.findByChannelIdAndUserIdAndState(anyLong(), anyLong(), any(ParticipantState.class));
+
+		then(channelRepository).should(times(1)).findMyChannelById(anyLong());
 
 	}
 }

@@ -69,4 +69,5 @@ class UserRepositoryTest {
 		assertThat(users).hasSize(3);
 		assertThat(users).extracting(UserEntity::getId).containsAll(ids);
 	}
+
 }

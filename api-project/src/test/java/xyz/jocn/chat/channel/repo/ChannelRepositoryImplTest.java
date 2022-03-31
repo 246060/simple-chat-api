@@ -36,7 +36,7 @@ class ChannelRepositoryImplTest {
 
 	@DisplayName("나의 채널 리스트")
 	@Test
-	void fetchChannels() {
+	void findAllMyChannels() {
 		// given
 		UserEntity user = UserEntity.builder().name("user00").email("user00@jocn.xyz").build();
 		em.persist(user);
@@ -72,4 +72,37 @@ class ChannelRepositoryImplTest {
 		}
 	}
 
+	@Test
+	void findMyChannelById() {
+		// given
+		UserEntity user = UserEntity.builder().name("user00").email("user00@jocn.xyz").build();
+		ChannelEntity channel = ChannelEntity.builder().build();
+		ParticipantEntity participant = ParticipantEntity.builder()
+			.channel(channel)
+			.user(user)
+			.build();
+
+		em.persist(user);
+		em.persist(channel);
+		em.persist(ChannelEntity.builder().build());
+		em.persist(ChannelEntity.builder().build());
+		em.persist(participant);
+		em.flush();
+		em.clear();
+
+		// when
+		ChannelDto channelDto = channelRepository.findMyChannelById(channel.getId()).get();
+		System.out.println("channelDto = " + channelDto);
+
+		// then
+		assertThat(channelDto).extracting(ChannelDto::getId).isEqualTo(channel.getId());
+		assertThat(channelDto).extracting(ChannelDto::getParticipants).isNotNull();
+
+		for (ParticipantDto participantDto : channelDto.getParticipants()) {
+			assertThat(participantDto).extracting(ParticipantDto::getId).isEqualTo(participant.getId());
+			assertThat(participantDto).extracting(ParticipantDto::getUser).isNotNull();
+			UserDto userDto = participantDto.getUser();
+			assertThat(userDto).extracting(UserDto::getId).isEqualTo(user.getId());
+		}
+	}
 }

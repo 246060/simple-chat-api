@@ -38,7 +38,7 @@ import xyz.jocn.chat.user.UserEntity;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "file")
 @Entity
-public class FileEntity {
+public class FileMetaEntity {
 
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Id

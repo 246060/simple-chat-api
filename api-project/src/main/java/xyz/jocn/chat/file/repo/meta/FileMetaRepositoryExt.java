@@ -1,4 +1,4 @@
-package xyz.jocn.chat.file.repo;
+package xyz.jocn.chat.file.repo.meta;
 
 public interface FileMetaRepositoryExt {
 }

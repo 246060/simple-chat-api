@@ -17,8 +17,8 @@ import xyz.jocn.chat.common.exception.FileStorageException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.common.util.FileUtil;
 import xyz.jocn.chat.file.dto.FileDto;
-import xyz.jocn.chat.file.repo.FileMetaRepository;
-import xyz.jocn.chat.file.repo.StorageRepository;
+import xyz.jocn.chat.file.repo.meta.FileMetaRepository;
+import xyz.jocn.chat.file.repo.storage.StorageRepository;
 import xyz.jocn.chat.user.UserEntity;
 
 @Slf4j
@@ -38,14 +38,14 @@ public class FileService {
 
 	@Transactional
 	public FileDto save(long uid, MultipartFile multipartFile) {
-		FileEntity fileEntity = this.save(multipartFile, uid);
-		return fileConverter.toDto(fileEntity);
+		FileMetaEntity fileMetaEntity = this.save(multipartFile, uid);
+		return fileConverter.toDto(fileMetaEntity);
 	}
 
 	@Transactional
-	public FileEntity save(MultipartFile multipartFile, long uid) {
+	public FileMetaEntity save(MultipartFile multipartFile, long uid) {
 
-		FileEntity fileEntity = FileEntity.builder()
+		FileMetaEntity fileMetaEntity = FileMetaEntity.builder()
 			.originName(multipartFile.getOriginalFilename())
 			.savedName(FileUtil.generateSavedFileName(multipartFile.getOriginalFilename()))
 			.savedDir(FileUtil.getSavedDir().toString())
@@ -55,24 +55,24 @@ public class FileService {
 			.build();
 
 		try {
-			storageRepository.save(multipartFile.getInputStream(), fileEntity);
-			fileRepository.save(fileEntity);
+			storageRepository.save(multipartFile.getInputStream(), fileMetaEntity);
+			fileRepository.save(fileMetaEntity);
 		} catch (IOException e) {
 			log.error(e.getMessage());
 			throw new FileStorageException("Could not store the file. Error: " + e.getMessage());
 		}
 
-		return fileEntity;
+		return fileMetaEntity;
 	}
 
 	@Transactional
-	public FileEntity save(long uid, String text) {
+	public FileMetaEntity save(long uid, String text) {
 
 		try {
 			Path tempFilePath = FileUtil.generateTempFile("txt");
 			Files.writeString(tempFilePath, text, UTF_8);
 
-			FileEntity fileEntity = FileEntity.builder()
+			FileMetaEntity fileMetaEntity = FileMetaEntity.builder()
 				.originName(tempFilePath.getFileName().toString())
 				.savedName(tempFilePath.getFileName().toString())
 				.savedDir(FileUtil.getSavedDir().toString())
@@ -81,12 +81,12 @@ public class FileService {
 				.user(UserEntity.builder().id(uid).build())
 				.build();
 
-			storageRepository.save(Files.newInputStream(tempFilePath), fileEntity);
-			fileRepository.save(fileEntity);
+			storageRepository.save(Files.newInputStream(tempFilePath), fileMetaEntity);
+			fileRepository.save(fileMetaEntity);
 
 			Files.deleteIfExists(tempFilePath);
 
-			return fileEntity;
+			return fileMetaEntity;
 
 		} catch (IOException e) {
 			log.error(e.getMessage());
@@ -101,12 +101,12 @@ public class FileService {
 	 * */
 
 	public FileDto loadAsResource(Long fileId) {
-		FileEntity fileEntity = fileRepository
+		FileMetaEntity fileMetaEntity = fileRepository
 			.findById(fileId)
 			.orElseThrow(() -> new ResourceNotFoundException(FILE));
 
-		FileDto fileDto = fileConverter.toDto(fileEntity);
-		fileDto.setResource(storageRepository.loadAsResource(fileEntity));
+		FileDto fileDto = fileConverter.toDto(fileMetaEntity);
+		fileDto.setResource(storageRepository.loadAsResource(fileMetaEntity));
 		return fileDto;
 	}
 

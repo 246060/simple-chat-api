@@ -18,7 +18,7 @@ import xyz.jocn.chat.channel.repo.ChannelRepository;
 import xyz.jocn.chat.common.dto.PageDto;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.common.util.StringUtil;
-import xyz.jocn.chat.file.FileEntity;
+import xyz.jocn.chat.file.FileMetaEntity;
 import xyz.jocn.chat.file.FileService;
 import xyz.jocn.chat.message.dto.MessageDto;
 import xyz.jocn.chat.message.dto.MessageSendRequestDto;
@@ -57,7 +57,7 @@ public class MessageService {
 	}
 
 	private boolean isShortTextMessage(String message) {
-		return StringUtil.isNotBlank(message) && message.length() <= MESSAGE_LIMIT_LENGTH;
+		return message.length() <= MESSAGE_LIMIT_LENGTH;
 	}
 
 	/*
@@ -71,12 +71,17 @@ public class MessageService {
 
 		if (haveFile(dto)) {
 			sendFileMessage(uid, channelId, dto);
+			return;
+		}
+
+		if (StringUtil.isBlank(dto.getMessage())) {
+			throw new IllegalArgumentException("if message type is not file, must have text");
+		}
+
+		if (isShortTextMessage(dto.getMessage())) {
+			sendShortMessage(uid, channelId, dto);
 		} else {
-			if (isShortTextMessage(dto.getMessage())) {
-				sendShortMessage(uid, channelId, dto);
-			} else {
-				sendLongMessage(uid, channelId, dto);
-			}
+			sendLongMessage(uid, channelId, dto);
 		}
 	}
 
@@ -98,7 +103,8 @@ public class MessageService {
 			.build();
 
 		messageRepository.save(messageEntity);
-		channelEntity.registerPivotMessage(messageEntity.getId());
+		channelEntity.saveFirstMessageId(messageEntity.getId());
+
 		chatPushService.pushChannelNewMessageEvent(channelId, messageEntity.getId(), SHORT_TEXT);
 	}
 
@@ -106,32 +112,46 @@ public class MessageService {
 
 		ParticipantEntity participant = participantService.fetchParticipant(channelId, uid);
 
+		ChannelEntity channelEntity = channelRepository
+			.findById(channelId)
+			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
+
 		MessageEntity messageEntity = MessageEntity.builder()
-			.channel(ChannelEntity.builder().id(channelId).build())
+			.channel(channelEntity)
 			.message(String.format("%s...", dto.getMessage().substring(0, MESSAGE_LIMIT_LENGTH)))
 			.sender(participant)
 			.type(LONG_TEXT)
 			.build();
 
 		messageRepository.save(messageEntity);
-		FileEntity fileEntity = fileService.save(uid, dto.getMessage());
-		messageFileRepository.save(MessageFileEntity.builder().message(messageEntity).file(fileEntity).build());
+		channelEntity.saveFirstMessageId(messageEntity.getId());
+
+		FileMetaEntity fileMetaEntity = fileService.save(uid, dto.getMessage());
+		messageFileRepository.save(MessageFileEntity.builder().message(messageEntity).file(fileMetaEntity).build());
+
 		chatPushService.pushChannelNewMessageEvent(channelId, messageEntity.getId(), LONG_TEXT);
 	}
 
 	private void sendFileMessage(long uid, long channelId, MessageSendRequestDto dto) {
 		ParticipantEntity participant = participantService.fetchParticipant(channelId, uid);
 
+		ChannelEntity channelEntity = channelRepository
+			.findById(channelId)
+			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
+
 		MessageEntity messageEntity = MessageEntity.builder()
-			.channel(ChannelEntity.builder().id(channelId).build())
+			.channel(channelEntity)
 			.message(null)
 			.sender(participant)
 			.type(FILE)
 			.build();
 
 		messageRepository.save(messageEntity);
-		FileEntity fileEntity = fileService.save(dto.getFile(), uid);
-		messageFileRepository.save(MessageFileEntity.builder().message(messageEntity).file(fileEntity).build());
+		channelEntity.saveFirstMessageId(messageEntity.getId());
+
+		FileMetaEntity fileMetaEntity = fileService.save(dto.getFile(), uid);
+		messageFileRepository.save(MessageFileEntity.builder().message(messageEntity).file(fileMetaEntity).build());
+
 		chatPushService.pushChannelNewMessageEvent(channelId, messageEntity.getId(), FILE);
 	}
 

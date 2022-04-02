@@ -9,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.data.annotation.CreatedBy;
@@ -22,7 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import xyz.jocn.chat.file.FileEntity;
+import xyz.jocn.chat.file.FileMetaEntity;
 
 @ToString
 @Getter
@@ -45,7 +44,7 @@ public class MessageFileEntity {
 	private Instant createdBy;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	private FileEntity file;
+	private FileMetaEntity file;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private MessageEntity message;

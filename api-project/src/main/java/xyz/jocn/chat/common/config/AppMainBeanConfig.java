@@ -14,8 +14,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
-import xyz.jocn.chat.file.repo.StorageLocalRepository;
-import xyz.jocn.chat.file.repo.StorageRepository;
 
 @Slf4j
 @Configuration
@@ -66,8 +64,4 @@ public class AppMainBeanConfig {
 		return om;
 	}
 
-	@Bean
-	public StorageRepository storageRepository() {
-		return new StorageLocalRepository();
-	}
 }

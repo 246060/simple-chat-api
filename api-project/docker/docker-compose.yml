@@ -1,12 +1,38 @@
 version: '3'
+
 networks:
-  net-mysql:
+  chat-net:
     driver: bridge
 
 services:
+  nginx-api-proxy:
+    image: nginx:latest
+    container_name: nginx-api-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/api-proxy/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/api-proxy/conf/conf.d:/etc/nginx/conf.d
+      - ./nginx/api-proxy/log:/var/log/nginx
+  # extra_hosts: # linux
+  #  - "host.docker.internal:host-gateway"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    # command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmx
+    volumes:
+      - ./redis/data:/data
+      #- ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+
   mysql_primary:
-    container_name: mysql_primary
     image: mysql:8.0.28
+    container_name: mysql_primary
     restart: always
     command: >
       bash -c "chmod 644 /etc/mysql/conf.d/*.cnf && /entrypoint.sh mysqld"
@@ -22,7 +48,7 @@ services:
     ports:
       - "3306:3306"
     networks:
-      - net-mysql
+      - chat-net
 
   mysql_replica:
     container_name: mysql_replica
@@ -44,4 +70,5 @@ services:
     ports:
       - "3307:3306"
     networks:
-      - net-mysql
+      - chat-net
+

@@ -3,6 +3,9 @@ app:
   accessToken-expireInSec: 2592000
   refreshToken-expireInSec: 2592000
   publish-event-trigger: false
+  storage:
+    local:
+      upload-root-path: upload
 spring:
   security:
     oauth2:

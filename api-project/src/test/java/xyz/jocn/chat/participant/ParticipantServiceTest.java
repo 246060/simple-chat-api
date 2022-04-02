@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import xyz.jocn.chat.channel.ChannelEntity;
 import xyz.jocn.chat.channel.repo.ChannelRepository;
+import xyz.jocn.chat.notification.ChatPushService;
 import xyz.jocn.chat.participant.dto.ChannelExitDto;
 import xyz.jocn.chat.participant.dto.ChannelInviteRequestDto;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
@@ -35,6 +36,8 @@ class ParticipantServiceTest {
 	ChannelRepository channelRepository;
 	@Mock
 	ParticipantRepository participantRepository;
+	@Mock
+	ChatPushService chatPushService;
 
 	@InjectMocks
 	ParticipantService service;

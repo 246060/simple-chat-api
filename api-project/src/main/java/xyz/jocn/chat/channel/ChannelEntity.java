@@ -57,9 +57,9 @@ public class ChannelEntity {
 		participants.add(participant);
 	}
 
-	public void registerPivotMessage(Long channelFirstMessageId) {
-		if (Objects.isNull(this.firstMessageId) || this.firstMessageId == 0L) {
-			this.firstMessageId = channelFirstMessageId;
+	public void saveFirstMessageId(Long firstMessageId) {
+		if (this.firstMessageId == null || this.firstMessageId == 0L) {
+			this.firstMessageId = firstMessageId;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package xyz.jocn.chat.file.repo;
+package xyz.jocn.chat.file.repo.meta;
 
 import javax.persistence.EntityManager;
 
@@ -12,10 +12,10 @@ import xyz.jocn.chat.file.QFileEntity;
 public class FileMetaRepositoryImpl implements FileMetaRepositoryExt {
 
 	private final JPAQueryFactory queryFactory;
-	private final QFileEntity file;
+	private final QFileEntity fileMeta;
 
 	public FileMetaRepositoryImpl(EntityManager entityManager) {
 		this.queryFactory = new JPAQueryFactory(entityManager);
-		this.file = QFileEntity.fileEntity;
+		this.fileMeta = QFileEntity.fileEntity;
 	}
 }

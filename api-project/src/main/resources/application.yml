@@ -2,12 +2,17 @@ app:
   jwt-secret: ${jwt_secret}
   accessToken-expireInSec: 2592000
   refreshToken-expireInSec: 2592000
-  file-root-dir: C:\playground\file_dir\
   publish-event-trigger: false
-spring:
+  storage:
+    local:
+      upload-root-path: upload
+    #ftp:
+    #aws-s3:
+
   #security:
   #  filter:
   #    order: 10
+spring:
   security:
     oauth2:
       resourceserver:

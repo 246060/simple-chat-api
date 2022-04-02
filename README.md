@@ -28,6 +28,7 @@
     - redis
     - nginx * 2
 
+
 ## 아키텍처 설계
 - websocekt + redis 는 event 신호 정도만 전달 
 ![architecture](docs/arch-smp-chat.png) 

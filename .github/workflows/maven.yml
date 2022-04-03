@@ -5,7 +5,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ main, dev ]
   pull_request:
     branches: [ main ]
 
@@ -23,5 +23,5 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mkdir ~/chat-upload-root && mvn -B package --file pom.xml
       working-directory: ./api-project

@@ -2,6 +2,9 @@
 - 간단한 채팅 서버
 - 유저 클라이언트 제외 
 
+## To do
+[LINK](https://github.com/blackcocoon/simple-chat-api/projects/1)
+
 ## Tech stack 
 1. api server 
     - spring boot mvc 
@@ -55,3 +58,4 @@
 
 ## socket server 
 [READ](docs/socket-server/README.md)
+

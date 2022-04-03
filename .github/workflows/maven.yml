@@ -26,13 +26,21 @@ jobs:
 
     - name: Cache Maven packages
       uses: actions/cache@v2
+      id: cache
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
+
+    - name: Cache Hit Check
+      #if: steps.cache.outputs.cache-hit != 'true'
+      run: echo "cache hit = ${{steps.cache.outputs.cache-hit}}"
 
     - name: Build with Maven
       run: |
         mkdir ~/chat-upload-root
         mvn -B clean package --file pom.xml
       working-directory: ./api-project
+
+    - name: current datetime
+      run: echo "NOW::$(TZ="Asia/Seoul" date -Is)"

@@ -42,5 +42,5 @@ jobs:
         mvn -B clean package --file pom.xml
       working-directory: ./api-project
 
-    - name: current datetime
-      run: echo "NOW::$(TZ="Asia/Seoul" date -Is)"
+    - name: Build Time
+      run: echo "NOW::$(TZ="Asia/Seoul" date +"%Y-%m-%d %H:%M:%S.%N %z %Z")"

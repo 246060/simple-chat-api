@@ -5,7 +5,6 @@ import static javax.persistence.GenerationType.*;
 import static xyz.jocn.chat.message.enums.MessageState.*;
 
 import java.time.Instant;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +12,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -28,7 +26,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import xyz.jocn.chat.channel.ChannelEntity;
-import xyz.jocn.chat.file.FileEntity;
 import xyz.jocn.chat.message.enums.ChatMessageType;
 import xyz.jocn.chat.message.enums.MessageState;
 import xyz.jocn.chat.participant.ParticipantEntity;

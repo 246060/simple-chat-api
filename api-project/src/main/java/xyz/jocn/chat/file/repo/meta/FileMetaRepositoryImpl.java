@@ -6,16 +6,16 @@ import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import xyz.jocn.chat.file.QFileEntity;
+import xyz.jocn.chat.file.QFileMetaEntity;
 
 @Repository
 public class FileMetaRepositoryImpl implements FileMetaRepositoryExt {
 
 	private final JPAQueryFactory queryFactory;
-	private final QFileEntity fileMeta;
+	private final QFileMetaEntity fileMeta;
 
 	public FileMetaRepositoryImpl(EntityManager entityManager) {
 		this.queryFactory = new JPAQueryFactory(entityManager);
-		this.fileMeta = QFileEntity.fileEntity;
+		this.fileMeta = QFileMetaEntity.fileMetaEntity;
 	}
 }

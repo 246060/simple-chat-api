@@ -1,6 +1,7 @@
 package xyz.jocn.chat.message.repo;
 
 import java.util.List;
+import java.util.Optional;
 
 import xyz.jocn.chat.common.dto.SliceCriteria;
 import xyz.jocn.chat.message.MessageEntity;
@@ -12,5 +13,5 @@ public interface MessageRepositoryExt {
 
 	List<MessageDto> findMessageDtosInChannel(long channelId, SliceCriteria<Long> criteria);
 
-	Long findLastMessageIdInChannel(long channelId);
+	Optional<Long> findLastMessageIdInChannel(long channelId);
 }

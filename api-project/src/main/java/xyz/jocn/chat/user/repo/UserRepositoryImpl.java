@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import xyz.jocn.chat.user.QUserEntity;
+import xyz.jocn.chat.user.entity.QUserEntity;
 
 @Repository
 public class UserRepositoryImpl implements UserRepositoryExt {

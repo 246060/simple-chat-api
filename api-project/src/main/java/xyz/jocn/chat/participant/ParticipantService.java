@@ -70,7 +70,7 @@ public class ParticipantService {
 			.findById(channelId)
 			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
 
-		final Long lastMessageIdBeforeJoin = messageRepository.findLastMessageIdInChannel(channelId);
+		Long lastMessageIdBeforeJoin = messageRepository.findLastMessageIdInChannel(channelId).orElseGet(() -> null);
 
 		List<ParticipantEntity> newParticipants = invitees.stream()
 			.map(user ->

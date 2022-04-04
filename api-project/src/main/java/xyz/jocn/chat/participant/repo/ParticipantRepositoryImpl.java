@@ -11,11 +11,10 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import xyz.jocn.chat.participant.ParticipantState;
 import xyz.jocn.chat.participant.QParticipantEntity;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
-import xyz.jocn.chat.user.QUserEntity;
 import xyz.jocn.chat.user.dto.UserDto;
+import xyz.jocn.chat.user.entity.QUserEntity;
 
 @Repository
 public class ParticipantRepositoryImpl implements ParticipantRepositoryExt {

@@ -20,8 +20,8 @@ import xyz.jocn.chat.message.QMessageEntity;
 import xyz.jocn.chat.message.dto.MessageDto;
 import xyz.jocn.chat.participant.QParticipantEntity;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
-import xyz.jocn.chat.user.QUserEntity;
 import xyz.jocn.chat.user.dto.UserDto;
+import xyz.jocn.chat.user.entity.QUserEntity;
 
 @Repository
 public class MessageRepositoryImpl implements MessageRepositoryExt {
@@ -106,13 +106,15 @@ public class MessageRepositoryImpl implements MessageRepositoryExt {
 	}
 
 	@Override
-	public Long findLastMessageIdInChannel(long channelId) {
-		return queryFactory
-			.select(message.id)
-			.from(message)
-			.where(message.channel().id.eq(channelId))
-			.orderBy(message.id.desc())
-			.fetchFirst();
+	public Optional<Long> findLastMessageIdInChannel(long channelId) {
+		return Optional.ofNullable(
+			queryFactory
+				.select(message.id)
+				.from(message)
+				.where(message.channel().id.eq(channelId))
+				.orderBy(message.id.desc())
+				.fetchOne()
+		);
 	}
 
 	private BooleanExpression upOrDown(Long pivotMessageId, SliceDirection direction) {

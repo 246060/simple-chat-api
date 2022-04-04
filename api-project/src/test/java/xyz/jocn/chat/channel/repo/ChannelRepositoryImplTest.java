@@ -41,9 +41,7 @@ class ChannelRepositoryImplTest {
 	void findAllMyChannels() {
 		// given
 		UserEntity user = FakeUser.generateUser("user01");
-		em.persist(UserSettingEntity.builder().id(user.getId()));
 		em.persist(user);
-
 
 		ChannelEntity channel = ChannelEntity.builder().build();
 		em.persist(channel);

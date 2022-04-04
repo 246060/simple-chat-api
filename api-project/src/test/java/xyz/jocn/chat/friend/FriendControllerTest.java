@@ -22,7 +22,7 @@ import org.springframework.util.MultiValueMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import xyz.jocn.chat.TestToken;
+import xyz.jocn.chat.FakeToken;
 import xyz.jocn.chat.friend.dto.FriendDto;
 import xyz.jocn.chat.friend.dto.FriendRequestDto;
 import xyz.jocn.chat.friend.dto.FriendSearchDto;
@@ -37,7 +37,7 @@ class FriendControllerTest {
 	@Autowired
 	ObjectMapper om;
 
-	TestToken testToken = new TestToken();
+	FakeToken testToken = new FakeToken();
 
 	@BeforeEach
 	void setUp() {

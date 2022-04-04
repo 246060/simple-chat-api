@@ -9,13 +9,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import xyz.jocn.chat.FakeUser;
 import xyz.jocn.chat.channel.ChannelEntity;
 import xyz.jocn.chat.channel.repo.ChannelRepository;
 import xyz.jocn.chat.notification.ChatPushService;
@@ -23,7 +23,7 @@ import xyz.jocn.chat.participant.dto.ChannelExitDto;
 import xyz.jocn.chat.participant.dto.ChannelInviteRequestDto;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
 import xyz.jocn.chat.participant.repo.ParticipantRepository;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.dto.UserDto;
 import xyz.jocn.chat.user.repo.UserRepository;
 
@@ -103,7 +103,11 @@ class ParticipantServiceTest {
 		dto.setParticipantId(1L);
 		dto.setUserId(1L);
 
-		ParticipantEntity participantEntity = ParticipantEntity.builder().build();
+		UserEntity user = FakeUser.generateUser("user00");
+		ParticipantEntity participantEntity = ParticipantEntity.builder()
+			.user(user)
+			.build();
+
 		given(participantRepository.findByChannelIdAndUserIdAndState(dto.getChannelId(), dto.getUserId(), JOIN))
 			.willReturn(Optional.of(participantEntity));
 
@@ -139,7 +143,7 @@ class ParticipantServiceTest {
 		List<ParticipantDto> participantDtos = new ArrayList<>();
 		participantDtos.add(participantDto);
 
-		given(participantRepository.findCurrentParticipantsInChannel(channelId))
+		given(participantRepository.findParticipantsInChannel(channelId))
 			.willReturn(participantDtos);
 
 		// when
@@ -152,7 +156,7 @@ class ParticipantServiceTest {
 		assertThat(result).extracting(ParticipantDto::getUser).extracting(UserDto::getId).contains(uid);
 
 		then(participantRepository).should().findByChannelIdAndUserIdAndState(channelId, uid, JOIN);
-		then(participantRepository).should().findCurrentParticipantsInChannel(channelId);
+		then(participantRepository).should().findParticipantsInChannel(channelId);
 	}
 
 	@Test

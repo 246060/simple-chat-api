@@ -1,7 +1,6 @@
 package xyz.jocn.chat.reaction;
 
 import static xyz.jocn.chat.common.exception.ResourceType.*;
-import static xyz.jocn.chat.notification.enums.RoutingType.*;
 
 import java.util.List;
 
@@ -12,12 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
-import xyz.jocn.chat.common.pubsub.MessagePublisher;
-import xyz.jocn.chat.notification.dto.EventDto;
-import xyz.jocn.chat.notification.dto.EvtRoutingDto;
-import xyz.jocn.chat.notification.dto.EvtReactionDto;
-import xyz.jocn.chat.message.entity.MessageEntity;
+import xyz.jocn.chat.message.MessageEntity;
 import xyz.jocn.chat.message.repo.MessageRepository;
+import xyz.jocn.chat.notification.ChatPushService;
+import xyz.jocn.chat.notification.dto.EventDto;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.participant.ParticipantService;
 import xyz.jocn.chat.reaction.dto.ReactionAddRequestDto;
@@ -32,11 +29,11 @@ public class ReactionService {
 
 	private final ReactionRepository reactionRepository;
 	private final MessageRepository messageRepository;
+
 	private final ParticipantService participantService;
+	private final ChatPushService chatPushService;
 
 	private final ReactionConverter reactionConverter = ReactionConverter.INSTANCE;
-
-	private final MessagePublisher publisher;
 
 	@Value("${app.publish-event-trigger}")
 	public boolean isPublishEventTrigger;
@@ -63,12 +60,11 @@ public class ReactionService {
 				.build()
 		);
 
-		if (isPublishEventTrigger) {
-			EventDto chatEvent = new EventDto();
-			chatEvent.setRouting(new EvtRoutingDto(channel, String.valueOf(channelId)));
-			chatEvent.setMessage(new EvtReactionDto(channelId, messageId));
-			publisher.emit(chatEvent);
-		}
+		chatPushService.pushChannelMessageReactionEvent(EventDto.builder()
+			.channelId(channelId)
+			.messageId(messageId)
+			.build()
+		);
 	}
 
 	@Transactional
@@ -82,12 +78,11 @@ public class ReactionService {
 
 		reactionRepository.delete(reactionEntity);
 
-		if (isPublishEventTrigger) {
-			EventDto chatEvent = new EventDto();
-			chatEvent.setRouting(new EvtRoutingDto(channel, String.valueOf(channelId)));
-			chatEvent.setMessage(new EvtReactionDto(channelId, messageId));
-			publisher.emit(chatEvent);
-		}
+		chatPushService.pushChannelMessageReactionEvent(EventDto.builder()
+			.channelId(channelId)
+			.messageId(messageId)
+			.build()
+		);
 	}
 
 	/*

@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 @ToString
 @Getter

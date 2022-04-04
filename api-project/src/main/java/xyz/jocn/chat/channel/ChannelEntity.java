@@ -46,6 +46,8 @@ public class ChannelEntity {
 
 	private Long firstMessageId;
 
+	private int numberOfParticipants;
+
 	public ChannelEntity(long id) {
 		this.id = id;
 	}
@@ -60,6 +62,20 @@ public class ChannelEntity {
 	public void saveFirstMessageId(Long firstMessageId) {
 		if (this.firstMessageId == null || this.firstMessageId == 0L) {
 			this.firstMessageId = firstMessageId;
+		}
+	}
+
+	public void increaseNumberOfParticipants() {
+		numberOfParticipants++;
+	}
+
+	public void increaseNumberOfParticipants(int newParticipantsCount) {
+		numberOfParticipants += newParticipantsCount;
+	}
+
+	public void decreaseNumberOfParticipants() {
+		if (numberOfParticipants > 0) {
+			numberOfParticipants--;
 		}
 	}
 }

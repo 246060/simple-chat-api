@@ -16,7 +16,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-public class TestToken {
+public class FakeToken {
 
 	private Long userId;
 	private String issue;

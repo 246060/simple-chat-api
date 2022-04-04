@@ -31,14 +31,15 @@ public class StorageLocalRepository implements StorageRepository {
 		log.info("Injected Bean : " + properties.getClass().getSimpleName());
 
 		StorageLocalProperties localProperties = (StorageLocalProperties)properties;
-		fileRootDir = Paths.get(localProperties.getUploadRootPath());
+		fileRootDir = Paths.get(localProperties.getUploadRootPath()).normalize();
+		log.info("fileRootDir : " + fileRootDir);
 
 		if (Files.notExists(fileRootDir)) {
 			throw new RuntimeException("not exist file root folder for upload!");
 		}
 	}
 
-	private Path getFilePath(FileMetaEntity fileMetaEntity){
+	private Path getFilePath(FileMetaEntity fileMetaEntity) {
 		return fileRootDir
 			.resolve(fileMetaEntity.getSavedDir())
 			.resolve(fileMetaEntity.getSavedName())

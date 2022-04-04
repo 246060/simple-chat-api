@@ -18,14 +18,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import net.bytebuddy.NamingStrategy;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.JOSEException;
 
-import xyz.jocn.chat.TestToken;
-import xyz.jocn.chat.friend.FriendController;
+import xyz.jocn.chat.FakeToken;
 import xyz.jocn.chat.participant.dto.ChannelExitDto;
 import xyz.jocn.chat.participant.dto.ChannelInviteRequestDto;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
@@ -43,7 +38,7 @@ class ParticipantControllerTest {
 	@Autowired
 	ObjectMapper om;
 
-	TestToken testToken = new TestToken();
+	FakeToken testToken = new FakeToken();
 
 	@BeforeEach
 	void setUp() {

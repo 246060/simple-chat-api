@@ -12,11 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import xyz.jocn.chat.FakeUser;
 import xyz.jocn.chat.channel.ChannelEntity;
 import xyz.jocn.chat.channel.dto.ChannelDto;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserSettingEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.dto.UserDto;
 
 //@Rollback(false)
@@ -38,8 +40,10 @@ class ChannelRepositoryImplTest {
 	@Test
 	void findAllMyChannels() {
 		// given
-		UserEntity user = UserEntity.builder().name("user00").email("user00@jocn.xyz").build();
+		UserEntity user = FakeUser.generateUser("user01");
+		em.persist(UserSettingEntity.builder().id(user.getId()));
 		em.persist(user);
+
 
 		ChannelEntity channel = ChannelEntity.builder().build();
 		em.persist(channel);
@@ -75,7 +79,7 @@ class ChannelRepositoryImplTest {
 	@Test
 	void findMyChannelById() {
 		// given
-		UserEntity user = UserEntity.builder().name("user00").email("user00@jocn.xyz").build();
+		UserEntity user = FakeUser.generateUser("user01");
 		ChannelEntity channel = ChannelEntity.builder().build();
 		ParticipantEntity participant = ParticipantEntity.builder()
 			.channel(channel)

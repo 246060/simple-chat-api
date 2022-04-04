@@ -9,7 +9,7 @@ import xyz.jocn.chat.notification.enums.EventType;
 import xyz.jocn.chat.user.dto.UserDto;
 
 @Data
-public class EvtChannelJoinDto {
+public class EvtChannelJoin {
 
 	@Setter(AccessLevel.NONE)
 	private String eventType = EventType.channel_join.getEventType();
@@ -17,7 +17,7 @@ public class EvtChannelJoinDto {
 	private Long channelId;
 	private List<UserDto> users;
 
-	public EvtChannelJoinDto(Long channelId, List<UserDto> users) {
+	public EvtChannelJoin(Long channelId, List<UserDto> users) {
 		this.channelId = channelId;
 		this.users = users;
 	}

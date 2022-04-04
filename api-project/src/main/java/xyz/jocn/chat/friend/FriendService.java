@@ -15,7 +15,7 @@ import xyz.jocn.chat.friend.dto.FriendDto;
 import xyz.jocn.chat.friend.dto.FriendRequestDto;
 import xyz.jocn.chat.friend.dto.FriendSearchDto;
 import xyz.jocn.chat.friend.repo.FriendRepository;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
 
 @Slf4j

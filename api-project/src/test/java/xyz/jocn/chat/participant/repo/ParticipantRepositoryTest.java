@@ -15,8 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import xyz.jocn.chat.channel.ChannelEntity;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.participant.ParticipantState;
-import xyz.jocn.chat.user.UserEntity;
-import xyz.jocn.chat.user.enums.UserState;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 //@Rollback(false)
 //@AutoConfigureTestDatabase(replace = NONE)

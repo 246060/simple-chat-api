@@ -29,7 +29,7 @@ public class ParticipantRepositoryImpl implements ParticipantRepositoryExt {
 	}
 
 	@Override
-	public List<ParticipantDto> findCurrentParticipantsInChannel(long channelId) {
+	public List<ParticipantDto> findParticipantsInChannel(long channelId) {
 		QUserEntity user = QUserEntity.userEntity;
 
 		return queryFactory
@@ -51,4 +51,5 @@ public class ParticipantRepositoryImpl implements ParticipantRepositoryExt {
 			.fetchJoin()
 			.fetch();
 	}
+
 }

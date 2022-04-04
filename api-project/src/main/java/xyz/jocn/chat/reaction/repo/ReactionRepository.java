@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import xyz.jocn.chat.message.entity.MessageEntity;
+import xyz.jocn.chat.message.MessageEntity;
 import xyz.jocn.chat.reaction.ReactionEntity;
 import xyz.jocn.chat.participant.ParticipantEntity;
 

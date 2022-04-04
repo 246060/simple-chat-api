@@ -14,7 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -28,7 +27,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import xyz.jocn.chat.file.enums.FileState;
 import xyz.jocn.chat.file.enums.FileVisibility;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 @ToString
 @Getter

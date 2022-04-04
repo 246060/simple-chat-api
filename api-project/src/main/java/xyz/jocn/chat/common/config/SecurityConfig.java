@@ -35,18 +35,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-
 		httpSecurity
 			.cors()
-			.and().csrf().disable()
+			.and()
+			.csrf().disable()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			.and()
 			.authorizeRequests()
-			.antMatchers(GET, "/files/*/data", "/files/*/download").permitAll()
+			.antMatchers(GET, "/files/*/data", "/try/**").permitAll()
 			.antMatchers(POST, "/token", "/token/refresh", "/users").permitAll()
 			.anyRequest().authenticated()
-			.and().oauth2ResourceServer().jwt().decoder(jwtDecoder())
-		;
+			.and()
+			.oauth2ResourceServer().jwt().decoder(jwtDecoder());
 	}
 
 	@Value("${app.jwt-secret}")

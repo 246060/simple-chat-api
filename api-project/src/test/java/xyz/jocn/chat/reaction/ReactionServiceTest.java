@@ -2,8 +2,8 @@ package xyz.jocn.chat.reaction;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
-import static xyz.jocn.chat.message.enums.ChatMessageType.*;
 import static xyz.jocn.chat.message.enums.MessageState.*;
+import static xyz.jocn.chat.message.enums.MessageType.*;
 import static xyz.jocn.chat.reaction.ReactionType.*;
 
 import java.util.ArrayList;
@@ -16,8 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import xyz.jocn.chat.message.entity.MessageEntity;
+import xyz.jocn.chat.message.MessageEntity;
 import xyz.jocn.chat.message.repo.MessageRepository;
+import xyz.jocn.chat.notification.ChatPushService;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.participant.ParticipantService;
 import xyz.jocn.chat.reaction.dto.ReactionAddRequestDto;
@@ -33,8 +34,12 @@ class ReactionServiceTest {
 	MessageRepository messageRepository;
 	@Mock
 	ParticipantService participantService;
+	@Mock
+	ChatPushService chatPushService;
+
 	@InjectMocks
 	ReactionService reactionService;
+
 
 	@Test
 	void addReaction() {
@@ -108,10 +113,10 @@ class ReactionServiceTest {
 			.build();
 
 		MessageEntity message = MessageEntity.builder()
-			.type(SHORT_TEXT)
-			.message("hello")
+			.type(short_text)
+			.text("hello")
 			.sender(participant)
-			.state(ACTIVE)
+			.state(active)
 			.build();
 
 		ReactionEntity reaction = ReactionEntity.builder()

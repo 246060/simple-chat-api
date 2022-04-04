@@ -10,15 +10,14 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
-import xyz.jocn.chat.message.enums.ChatMessageType;
+import xyz.jocn.chat.notification.dto.EventContext;
 import xyz.jocn.chat.notification.dto.EventDto;
-import xyz.jocn.chat.notification.dto.EvtChannelExitDto;
-import xyz.jocn.chat.notification.dto.EvtChannelJoinDto;
-import xyz.jocn.chat.notification.dto.EvtMessageDelDto;
-import xyz.jocn.chat.notification.dto.EvtMessageNewDto;
-import xyz.jocn.chat.notification.dto.EvtRoutingDto;
-import xyz.jocn.chat.participant.repo.ParticipantRepository;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.notification.dto.EventRouting;
+import xyz.jocn.chat.notification.dto.EvtChannelExit;
+import xyz.jocn.chat.notification.dto.EvtChannelJoin;
+import xyz.jocn.chat.notification.dto.EvtMessageDel;
+import xyz.jocn.chat.notification.dto.EvtMessageNew;
+import xyz.jocn.chat.notification.dto.EvtReaction;
 import xyz.jocn.chat.user.dto.UserDto;
 
 @Slf4j
@@ -27,22 +26,22 @@ import xyz.jocn.chat.user.dto.UserDto;
 public class ChatPushService {
 	private final MessagePublisher publisher;
 
-	public void pushChannelNewMessageEvent(long channelId, long messageId, ChatMessageType messageType) {
-		EventDto event = new EventDto();
-		event.setRouting(new EvtRoutingDto(channel, String.valueOf(channelId)));
-		event.setMessage(new EvtMessageNewDto(channelId, messageId, messageType));
-		publisher.emit(event);
+	private EventRouting getChannelEventRouting(EventDto dto) {
+		return new EventRouting(channel, String.valueOf(dto.getChannelId()));
 	}
 
-	public void pushChannelMessageDeletedEvent(long channelId, long messageId) {
-		EventDto event = new EventDto();
-		event.setRouting(new EvtRoutingDto(channel, String.valueOf(channelId)));
-		event.setMessage(new EvtMessageDelDto(channelId, messageId));
-		publisher.emit(event);
+	public void pushChannelNewMessageEvent(EventDto dto) {
+		EvtMessageNew data = new EvtMessageNew(dto.getChannelId(), dto.getMessageId(), dto.getMessageType());
+		publisher.emit(new EventContext(getChannelEventRouting(dto), data));
 	}
 
-	public void pushChannelInviteEvent(long channelId, List<UserEntity> invitees) {
-		List<UserDto> users = invitees.stream()
+	public void pushChannelMessageDeletedEvent(EventDto dto) {
+		EvtMessageDel data = new EvtMessageDel(dto.getChannelId(), dto.getMessageId());
+		publisher.emit(new EventContext(getChannelEventRouting(dto), data));
+	}
+
+	public void pushChannelInviteEvent(EventDto dto) {
+		List<UserDto> users = dto.getInvitees().stream()
 			.map(userEntity -> {
 				UserDto userDto = new UserDto();
 				userDto.setId(userEntity.getId());
@@ -50,17 +49,17 @@ public class ChatPushService {
 				return userDto;
 			}).collect(Collectors.toList());
 
-		EventDto event = new EventDto();
-		event.setRouting(new EvtRoutingDto(channel, String.valueOf(channelId)));
-		event.setMessage(new EvtChannelJoinDto(channelId, users));
-		publisher.emit(event);
+		EvtChannelJoin data = new EvtChannelJoin(dto.getChannelId(), users);
+		publisher.emit(new EventContext(getChannelEventRouting(dto), data));
 	}
 
-	public void pushChannelExitEvent(Long channelId, UserEntity exitUser) {
-		EventDto event = new EventDto();
-		event.setRouting(new EvtRoutingDto(channel, String.valueOf(channelId)));
-		event.setMessage(new EvtChannelExitDto(channelId, exitUser.getId(), exitUser.getName()));
-		publisher.emit(event);
+	public void pushChannelExitEvent(EventDto dto) {
+		EvtChannelExit data = new EvtChannelExit(dto.getChannelId(), dto.getUser().getId(), dto.getUser().getName());
+		publisher.emit(new EventContext(getChannelEventRouting(dto), data));
 	}
 
+	public void pushChannelMessageReactionEvent(EventDto dto) {
+		EvtReaction data = new EvtReaction(dto.getChannelId(), dto.getMessageId());
+		publisher.emit(new EventContext(getChannelEventRouting(dto), data));
+	}
 }

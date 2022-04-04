@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import xyz.jocn.chat.channel.ChannelEntity;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 //@Rollback(false)
 //@AutoConfigureTestDatabase(replace = NONE)
@@ -50,7 +49,7 @@ class ParticipantRepositoryImplTest {
 		em.clear();
 
 		// when
-		List<ParticipantDto> participantDtos = repo.findCurrentParticipantsInChannel(channel.getId());
+		List<ParticipantDto> participantDtos = repo.findParticipantsInChannel(channel.getId());
 		participantDtos.forEach(System.out::println);
 
 		// then

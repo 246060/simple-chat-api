@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import xyz.jocn.chat.TestToken;
+import xyz.jocn.chat.FakeToken;
 import xyz.jocn.chat.reaction.dto.ReactionAddRequestDto;
 import xyz.jocn.chat.reaction.dto.ReactionDto;
 
@@ -36,7 +36,7 @@ class ReactionControllerTest {
 	@Autowired
 	ObjectMapper om;
 
-	TestToken testToken = new TestToken();
+	FakeToken testToken = new FakeToken();
 
 	@BeforeEach
 	void setUp() {

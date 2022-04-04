@@ -1,24 +1,20 @@
 package xyz.jocn.chat.reaction.repo;
 
 import static org.assertj.core.api.Assertions.*;
-import static xyz.jocn.chat.message.enums.ChatMessageType.*;
+import static xyz.jocn.chat.message.enums.MessageType.*;
 
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import xyz.jocn.chat.channel.ChannelEntity;
-import xyz.jocn.chat.message.entity.MessageEntity;
-import xyz.jocn.chat.message.enums.ChatMessageType;
+import xyz.jocn.chat.message.MessageEntity;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.reaction.ReactionEntity;
-import xyz.jocn.chat.user.UserEntity;
 
 //@Rollback(false)
 //@AutoConfigureTestDatabase(replace = NONE)
@@ -39,7 +35,7 @@ class ReactionRepositoryTest {
 	@Test
 	void findAllByMessage() {
 		// given
-		MessageEntity message = MessageEntity.builder().message("hello").type(SHORT_TEXT).build();
+		MessageEntity message = MessageEntity.builder().text("hello").type(short_text).build();
 		em.persist(message);
 
 		ReactionEntity reaction = ReactionEntity.builder().message(message).build();

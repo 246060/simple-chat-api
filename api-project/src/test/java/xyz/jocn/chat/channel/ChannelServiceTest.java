@@ -6,7 +6,6 @@ import static org.mockito.BDDMockito.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,13 +14,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import xyz.jocn.chat.channel.dto.ChannelDto;
-import xyz.jocn.chat.channel.dto.ChannelOpenRequestDto;
 import xyz.jocn.chat.channel.repo.ChannelRepository;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.participant.ParticipantState;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
 import xyz.jocn.chat.participant.repo.ParticipantRepository;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.dto.UserDto;
 import xyz.jocn.chat.user.repo.UserRepository;
 

@@ -19,7 +19,7 @@ import xyz.jocn.chat.common.util.FileUtil;
 import xyz.jocn.chat.file.dto.FileDto;
 import xyz.jocn.chat.file.repo.meta.FileMetaRepository;
 import xyz.jocn.chat.file.repo.storage.StorageRepository;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 @Slf4j
 @RequiredArgsConstructor

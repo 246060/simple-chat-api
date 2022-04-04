@@ -1,5 +1,6 @@
 package xyz.jocn.chat.message;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -13,10 +14,14 @@ class MessageControllerTest {
 	private MockMvc mockMvc;
 
 	@MockBean
-	MessageService roomMessageService;
+	MessageService messageService;
+
+	@BeforeEach
+	void setUp() {
+	}
 
 	@Test
-	void send() {
+	void sendMessage() {
 		// given
 
 		// when
@@ -25,7 +30,7 @@ class MessageControllerTest {
 	}
 
 	@Test
-	void getMessages() {
+	void fetchMessages() {
 		// given
 
 		// when
@@ -34,34 +39,7 @@ class MessageControllerTest {
 	}
 
 	@Test
-	void changeMessage() {
-		// given
-
-		// when
-
-		// then
-	}
-
-	@Test
-	void mark() {
-		// given
-
-		// when
-
-		// then
-	}
-
-	@Test
-	void getMarks() {
-		// given
-
-		// when
-
-		// then
-	}
-
-	@Test
-	void deleteMark() {
+	void deleteMessage() {
 		// given
 
 		// when

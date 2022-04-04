@@ -4,6 +4,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.Topic;
 
+import xyz.jocn.chat.notification.dto.EventContext;
 import xyz.jocn.chat.notification.dto.EventDto;
 
 public class RedisMessagePublisher implements MessagePublisher {
@@ -19,13 +20,13 @@ public class RedisMessagePublisher implements MessagePublisher {
 	}
 
 	@Override
-	public void emit(EventDto event) {
-		redisTemplate.convertAndSend(topic.getTopic(), event);
+	public void emit(EventContext eventContext) {
+		redisTemplate.convertAndSend(topic.getTopic(), eventContext);
 	}
 
 	@Override
-	public void emit(TopicType topicType, EventDto event) {
+	public void emit(TopicType topicType, EventContext eventContext) {
 		Topic topic = new ChannelTopic(topicType.getTopic());
-		redisTemplate.convertAndSend(topic.getTopic(), event);
+		redisTemplate.convertAndSend(topic.getTopic(), eventContext);
 	}
 }

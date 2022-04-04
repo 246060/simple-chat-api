@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import xyz.jocn.chat.TestToken;
+import xyz.jocn.chat.FakeToken;
 import xyz.jocn.chat.channel.dto.ChannelDto;
 import xyz.jocn.chat.channel.dto.ChannelOpenRequestDto;
 import xyz.jocn.chat.common.pubsub.MessagePublisher;
@@ -37,7 +37,7 @@ class ChannelControllerTest {
 	@Autowired
 	ObjectMapper om;
 
-	TestToken testToken = new TestToken();
+	FakeToken testToken = new FakeToken();
 
 	@Test
 	void open() throws Exception {

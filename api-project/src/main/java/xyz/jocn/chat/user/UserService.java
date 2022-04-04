@@ -22,6 +22,7 @@ import xyz.jocn.chat.participant.repo.ParticipantRepository;
 import xyz.jocn.chat.user.dto.UserDto;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
 import xyz.jocn.chat.user.dto.UserUpdateRequestDto;
+import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
 
 @Slf4j

@@ -9,22 +9,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import xyz.jocn.chat.FakeUser;
 import xyz.jocn.chat.channel.ChannelEntity;
 import xyz.jocn.chat.channel.repo.ChannelRepository;
+import xyz.jocn.chat.message.repo.MessageRepository;
 import xyz.jocn.chat.notification.ChatPushService;
 import xyz.jocn.chat.participant.dto.ChannelExitDto;
 import xyz.jocn.chat.participant.dto.ChannelInviteRequestDto;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
 import xyz.jocn.chat.participant.repo.ParticipantRepository;
-import xyz.jocn.chat.user.UserEntity;
 import xyz.jocn.chat.user.dto.UserDto;
+import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +37,8 @@ class ParticipantServiceTest {
 	ChannelRepository channelRepository;
 	@Mock
 	ParticipantRepository participantRepository;
+	@Mock
+	MessageRepository messageRepository;
 	@Mock
 	ChatPushService chatPushService;
 
@@ -56,43 +59,31 @@ class ParticipantServiceTest {
 		given(participantRepository.findByChannelIdAndUserIdAndState(channelId, uid, JOIN))
 			.willReturn(Optional.of(participantEntity));
 
-		ChannelEntity channelEntity = ChannelEntity.builder().build();
-		given(channelRepository.findById(channelId))
-			.willReturn(Optional.of(channelEntity));
-
 		UserEntity userEntity = UserEntity.builder().id(invitees.get(0)).build();
-		given(userRepository.findById(invitees.get(0)))
-			.willReturn(Optional.of(userEntity));
+		given(userRepository.findById(invitees.get(0))).willReturn(Optional.of(userEntity));
 
-		given(participantRepository.findByChannelIdAndUserIdAndState(channelId, invitees.get(0), JOIN))
-			.willReturn(Optional.empty());
+		given(
+			participantRepository.findByChannelIdAndUserIdAndState(channelId, invitees.get(0), JOIN)
+		).willReturn(Optional.empty());
 
-		given(participantRepository.saveAll(any(List.class)))
-			.willReturn(Collections.emptyList());
+		ChannelEntity channelEntity = ChannelEntity.builder().build();
+		given(channelRepository.findById(channelId)).willReturn(Optional.of(channelEntity));
+		given(messageRepository.findLastMessageIdInChannel(channelId)).willReturn(Optional.ofNullable(null));
+		given(participantRepository.saveAll(any(List.class))).willReturn(Collections.emptyList());
 
 		// when
 		service.invite(uid, channelId, dto);
 
 		// then
-		then(participantRepository)
-			.should(times(1))
+		then(participantRepository).should(times(1))
 			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN);
-
-		then(channelRepository)
-			.should(times(1))
-			.findById(channelId);
-
-		then(userRepository)
-			.should(times(1))
-			.findById(invitees.get(0));
-
-		then(participantRepository)
-			.should(times(1))
+		then(userRepository).should().findById(invitees.get(0));
+		then(participantRepository).should(times(1))
 			.findByChannelIdAndUserIdAndState(channelId, invitees.get(0), JOIN);
 
-		then(participantRepository)
-			.should(times(1))
-			.saveAll(any(List.class));
+		then(channelRepository).should().findById(channelId);
+		then(messageRepository).should().findLastMessageIdInChannel(channelId);
+		then(participantRepository).should().saveAll(any(List.class));
 	}
 
 	@Test
@@ -103,7 +94,11 @@ class ParticipantServiceTest {
 		dto.setParticipantId(1L);
 		dto.setUserId(1L);
 
-		ParticipantEntity participantEntity = ParticipantEntity.builder().build();
+		UserEntity user = FakeUser.generateUser("user00");
+		ParticipantEntity participantEntity = ParticipantEntity.builder()
+			.user(user)
+			.build();
+
 		given(participantRepository.findByChannelIdAndUserIdAndState(dto.getChannelId(), dto.getUserId(), JOIN))
 			.willReturn(Optional.of(participantEntity));
 
@@ -139,7 +134,7 @@ class ParticipantServiceTest {
 		List<ParticipantDto> participantDtos = new ArrayList<>();
 		participantDtos.add(participantDto);
 
-		given(participantRepository.findCurrentParticipantsInChannel(channelId))
+		given(participantRepository.findParticipantsInChannel(channelId))
 			.willReturn(participantDtos);
 
 		// when
@@ -152,7 +147,7 @@ class ParticipantServiceTest {
 		assertThat(result).extracting(ParticipantDto::getUser).extracting(UserDto::getId).contains(uid);
 
 		then(participantRepository).should().findByChannelIdAndUserIdAndState(channelId, uid, JOIN);
-		then(participantRepository).should().findCurrentParticipantsInChannel(channelId);
+		then(participantRepository).should().findParticipantsInChannel(channelId);
 	}
 
 	@Test

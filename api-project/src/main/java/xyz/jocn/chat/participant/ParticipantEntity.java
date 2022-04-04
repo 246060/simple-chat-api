@@ -25,7 +25,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import xyz.jocn.chat.channel.ChannelEntity;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 
 @ToString(exclude = "channel")
 @Getter
@@ -54,6 +54,19 @@ public class ParticipantEntity {
 	@CreatedDate
 	private Instant createdAt;
 
+	private Long lastMessageIdBeforeJoin;
+	private Long lastReadMessageId;
+
+	private Boolean notificationActive;
+
+	public void enableNotification() {
+		this.notificationActive = true;
+	}
+
+	public void disableNotification() {
+		this.notificationActive = false;
+	}
+
 	public void exit() {
 		this.state = EXIT;
 	}
@@ -61,5 +74,13 @@ public class ParticipantEntity {
 	public void join(ChannelEntity channel) {
 		this.channel = channel;
 		channel.join(this);
+	}
+
+	public void saveLastMessageIdBeforeJoin(Long messageId) {
+		this.lastMessageIdBeforeJoin = messageId;
+	}
+
+	public void updateCurrentLastReadMessageId(Long messageId) {
+		this.lastReadMessageId = messageId;
 	}
 }

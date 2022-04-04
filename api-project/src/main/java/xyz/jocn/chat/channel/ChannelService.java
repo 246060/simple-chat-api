@@ -14,9 +14,8 @@ import xyz.jocn.chat.channel.dto.ChannelDto;
 import xyz.jocn.chat.channel.repo.ChannelRepository;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.participant.ParticipantEntity;
-import xyz.jocn.chat.participant.ParticipantState;
 import xyz.jocn.chat.participant.repo.ParticipantRepository;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
 
 @Slf4j
@@ -36,15 +35,19 @@ public class ChannelService {
 	@Transactional
 	public Long open(Long hostId, Long inviteeId) {
 
-		UserEntity invitee = userRepository.findById(inviteeId).orElseThrow(() -> new ResourceNotFoundException(USER));
 		UserEntity host = userRepository.findById(hostId).orElseThrow(() -> new ResourceNotFoundException(USER));
+		UserEntity invitee = userRepository.findById(inviteeId).orElseThrow(() -> new ResourceNotFoundException(USER));
 
 		ChannelEntity channel = channelRepository.save(ChannelEntity.builder().build());
 
 		ParticipantEntity participant1 = ParticipantEntity.builder().user(host).build();
 		ParticipantEntity participant2 = ParticipantEntity.builder().user(invitee).build();
+
 		participant1.join(channel);
 		participant2.join(channel);
+		channel.increaseNumberOfParticipants();
+		channel.increaseNumberOfParticipants();
+
 		participantRepository.save(participant1);
 		participantRepository.save(participant2);
 

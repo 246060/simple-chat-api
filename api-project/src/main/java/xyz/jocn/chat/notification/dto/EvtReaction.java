@@ -6,14 +6,14 @@ import lombok.Setter;
 import xyz.jocn.chat.notification.enums.EventType;
 
 @Data
-public class EvtMessageDelDto {
+public class EvtReaction {
 
 	@Setter(AccessLevel.NONE)
-	private String eventType = EventType.channel_message_deleted.getEventType();
+	private String eventType = EventType.channel_message_reaction.getEventType();
 	private Long channelId;
 	private Long messageId;
 
-	public EvtMessageDelDto(Long channelId, Long messageId) {
+	public EvtReaction(Long channelId, Long messageId) {
 		this.channelId = channelId;
 		this.messageId = messageId;
 	}

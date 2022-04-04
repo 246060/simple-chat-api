@@ -17,13 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import xyz.jocn.chat.TestToken;
+import xyz.jocn.chat.FakeToken;
 import xyz.jocn.chat.user.dto.UserDto;
 import xyz.jocn.chat.user.dto.UserSignUpRequestDto;
 import xyz.jocn.chat.user.dto.UserUpdateRequestDto;
@@ -37,7 +35,7 @@ class UserControllerTest {
 	@Autowired
 	ObjectMapper om;
 
-	TestToken testToken = new TestToken();
+	FakeToken testToken = new FakeToken();
 
 	@BeforeEach
 	void setUp() {

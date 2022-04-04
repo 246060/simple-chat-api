@@ -11,6 +11,6 @@ public class MessageSendRequestDto {
 	private MultipartFile file;
 	private String message;
 	private Long parentId;
-
+	private List<Long> mentions;
 	// private List<Long>  mentionedUsers;
 }

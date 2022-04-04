@@ -4,6 +4,7 @@ import static xyz.jocn.chat.common.exception.ResourceType.*;
 import static xyz.jocn.chat.participant.ParticipantState.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -15,12 +16,15 @@ import xyz.jocn.chat.channel.ChannelEntity;
 import xyz.jocn.chat.channel.repo.ChannelRepository;
 import xyz.jocn.chat.common.exception.ResourceAlreadyExistException;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
+import xyz.jocn.chat.message.repo.MessageRepository;
 import xyz.jocn.chat.notification.ChatPushService;
+import xyz.jocn.chat.notification.dto.EventDto;
 import xyz.jocn.chat.participant.dto.ChannelExitDto;
 import xyz.jocn.chat.participant.dto.ChannelInviteRequestDto;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
 import xyz.jocn.chat.participant.repo.ParticipantRepository;
-import xyz.jocn.chat.user.UserEntity;
+import xyz.jocn.chat.user.UserConverter;
+import xyz.jocn.chat.user.entity.UserEntity;
 import xyz.jocn.chat.user.repo.UserRepository;
 
 @Slf4j
@@ -32,6 +36,7 @@ public class ParticipantService {
 	private final UserRepository userRepository;
 	private final ChannelRepository channelRepository;
 	private final ParticipantRepository participantRepository;
+	private final MessageRepository messageRepository;
 
 	private final ChatPushService chatPushService;
 
@@ -48,28 +53,42 @@ public class ParticipantService {
 			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
 			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
-		ChannelEntity channel = channelRepository
-			.findById(channelId)
-			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
-
 		List<UserEntity> invitees = dto.getInvitees().stream()
-			.map(id -> userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(USER)))
-			.collect(Collectors.toList());
+			.map(id ->
+				userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(USER))
+			).collect(Collectors.toList());
 
-		List<ParticipantEntity> newParticipants = invitees.stream()
-			.map(user -> ParticipantEntity.builder().channel(channel).user(user).build())
-			.collect(Collectors.toList());
-
-		for (ParticipantEntity newParticipant : newParticipants) {
+		for (UserEntity invitee : invitees) {
 			participantRepository
-				.findByChannelIdAndUserIdAndState(channelId, newParticipant.getUser().getId(), JOIN)
+				.findByChannelIdAndUserIdAndState(channelId, invitee.getId(), JOIN)
 				.ifPresent(participantEntity -> {
 					throw new ResourceAlreadyExistException(PARTICIPANT);
 				});
 		}
 
+		ChannelEntity channel = channelRepository
+			.findById(channelId)
+			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
+
+		Long lastMessageIdBeforeJoin = messageRepository.findLastMessageIdInChannel(channelId).orElseGet(() -> null);
+
+		List<ParticipantEntity> newParticipants = invitees.stream()
+			.map(user ->
+				ParticipantEntity.builder()
+					.channel(channel)
+					.user(user)
+					.lastMessageIdBeforeJoin(lastMessageIdBeforeJoin)
+					.build()
+			).collect(Collectors.toList());
+
 		participantRepository.saveAll(newParticipants);
-		chatPushService.pushChannelInviteEvent(channelId, invitees);
+		channel.increaseNumberOfParticipants(newParticipants.size());
+
+		chatPushService.pushChannelInviteEvent(EventDto.builder()
+			.channelId(channelId)
+			.invitees(invitees)
+			.build()
+		);
 	}
 
 	@Transactional
@@ -80,7 +99,11 @@ public class ParticipantService {
 			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
 		participantEntity.exit();
-		chatPushService.pushChannelExitEvent(dto.getChannelId(), participantEntity.getUser());
+
+		chatPushService.pushChannelExitEvent(EventDto.builder()
+			.channelId(dto.getChannelId())
+			.user(UserConverter.INSTANCE.toSummaryDto(participantEntity.getUser()))
+			.build());
 	}
 
 	/*
@@ -92,7 +115,7 @@ public class ParticipantService {
 			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
 			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
-		return participantRepository.findCurrentParticipantsInChannel(channelId);
+		return participantRepository.findParticipantsInChannel(channelId);
 	}
 
 	public ParticipantEntity fetchParticipant(long channelId, long uid) {

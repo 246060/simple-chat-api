@@ -1,11 +1,10 @@
 package xyz.jocn.chat.message;
 
 import static xyz.jocn.chat.common.exception.ResourceType.*;
-import static xyz.jocn.chat.message.enums.ChatMessageType.FILE;
-import static xyz.jocn.chat.message.enums.ChatMessageType.*;
-import static xyz.jocn.chat.message.enums.MessageState.*;
+import static xyz.jocn.chat.message.enums.MessageType.*;
 import static xyz.jocn.chat.participant.ParticipantState.*;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
@@ -15,18 +14,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.channel.ChannelEntity;
 import xyz.jocn.chat.channel.repo.ChannelRepository;
-import xyz.jocn.chat.common.dto.PageDto;
+import xyz.jocn.chat.common.dto.SliceCriteria;
 import xyz.jocn.chat.common.exception.ResourceNotFoundException;
 import xyz.jocn.chat.common.util.StringUtil;
 import xyz.jocn.chat.file.FileMetaEntity;
 import xyz.jocn.chat.file.FileService;
 import xyz.jocn.chat.message.dto.MessageDto;
 import xyz.jocn.chat.message.dto.MessageSendRequestDto;
-import xyz.jocn.chat.message.entity.MessageEntity;
-import xyz.jocn.chat.message.entity.MessageFileEntity;
 import xyz.jocn.chat.message.repo.MessageRepository;
-import xyz.jocn.chat.message.repo.message_file.MessageFileRepository;
 import xyz.jocn.chat.notification.ChatPushService;
+import xyz.jocn.chat.notification.dto.EventDto;
 import xyz.jocn.chat.participant.ParticipantEntity;
 import xyz.jocn.chat.participant.ParticipantService;
 import xyz.jocn.chat.participant.repo.ParticipantRepository;
@@ -38,13 +35,13 @@ import xyz.jocn.chat.participant.repo.ParticipantRepository;
 public class MessageService {
 
 	private final MessageRepository messageRepository;
-	private final MessageFileRepository messageFileRepository;
 	private final ParticipantRepository participantRepository;
 	private final ChannelRepository channelRepository;
 
-	private final ParticipantService participantService;
 	private final FileService fileService;
 	private final ChatPushService chatPushService;
+
+	private MessageConverter messageConverter = MessageConverter.INSTANCE;
 
 	private final int MESSAGE_LIMIT_LENGTH = 500;
 
@@ -67,7 +64,9 @@ public class MessageService {
 	@Transactional
 	public void sendMessage(long uid, long channelId, MessageSendRequestDto dto) {
 
-		participantService.checkParticipant(channelId, uid);
+		participantRepository
+			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
+			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
 		if (haveFile(dto)) {
 			sendFileMessage(uid, channelId, dto);
@@ -91,102 +90,140 @@ public class MessageService {
 			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
 			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
-		ChannelEntity channelEntity = channelRepository
+		ChannelEntity channel = channelRepository
 			.findById(channelId)
 			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
 
-		MessageEntity messageEntity = MessageEntity.builder()
-			.channel(channelEntity)
-			.message(dto.getMessage())
+		MessageEntity message = MessageEntity.builder()
+			.channel(channel)
+			.text(dto.getMessage())
 			.sender(participant)
-			.type(SHORT_TEXT)
+			.unreadCount(channel.getNumberOfParticipants())
+			.type(short_text)
+			.parentId(dto.getParentId())
 			.build();
 
-		messageRepository.save(messageEntity);
-		channelEntity.saveFirstMessageId(messageEntity.getId());
+		messageRepository.save(message);
+		channel.saveFirstMessageId(message.getId());
 
-		chatPushService.pushChannelNewMessageEvent(channelId, messageEntity.getId(), SHORT_TEXT);
+		chatPushService.pushChannelNewMessageEvent(EventDto.builder()
+			.channelId(channelId)
+			.messageId(message.getId())
+			.messageType(short_text)
+			.mentions(dto.getMentions())
+			.build()
+		);
 	}
 
 	private void sendLongMessage(long uid, long channelId, MessageSendRequestDto dto) {
 
-		ParticipantEntity participant = participantService.fetchParticipant(channelId, uid);
+		ParticipantEntity participant = participantRepository
+			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
+			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
-		ChannelEntity channelEntity = channelRepository
+		ChannelEntity channel = channelRepository
 			.findById(channelId)
 			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
 
-		MessageEntity messageEntity = MessageEntity.builder()
-			.channel(channelEntity)
-			.message(String.format("%s...", dto.getMessage().substring(0, MESSAGE_LIMIT_LENGTH)))
+		FileMetaEntity fileMeta = fileService.save(uid, dto.getMessage());
+
+		MessageEntity message = MessageEntity.builder()
+			.channel(channel)
+			.text(String.format("%s...", dto.getMessage().substring(0, MESSAGE_LIMIT_LENGTH)))
 			.sender(participant)
-			.type(LONG_TEXT)
+			.file(fileMeta)
+			.type(long_text)
+			.parentId(dto.getParentId())
+			.unreadCount(channel.getNumberOfParticipants())
 			.build();
 
-		messageRepository.save(messageEntity);
-		channelEntity.saveFirstMessageId(messageEntity.getId());
+		messageRepository.save(message);
+		channel.saveFirstMessageId(message.getId());
 
-		FileMetaEntity fileMetaEntity = fileService.save(uid, dto.getMessage());
-		messageFileRepository.save(MessageFileEntity.builder().message(messageEntity).file(fileMetaEntity).build());
-
-		chatPushService.pushChannelNewMessageEvent(channelId, messageEntity.getId(), LONG_TEXT);
+		chatPushService.pushChannelNewMessageEvent(EventDto.builder()
+			.channelId(channelId)
+			.messageId(message.getId())
+			.messageType(long_text)
+			.build()
+		);
 	}
 
 	private void sendFileMessage(long uid, long channelId, MessageSendRequestDto dto) {
-		ParticipantEntity participant = participantService.fetchParticipant(channelId, uid);
+		ParticipantEntity participant = participantRepository
+			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
+			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
-		ChannelEntity channelEntity = channelRepository
+		ChannelEntity channel = channelRepository
 			.findById(channelId)
 			.orElseThrow(() -> new ResourceNotFoundException(CHANNEL));
 
-		MessageEntity messageEntity = MessageEntity.builder()
-			.channel(channelEntity)
-			.message(null)
+		FileMetaEntity fileMeta = fileService.save(dto.getFile(), uid);
+
+		MessageEntity message = MessageEntity.builder()
+			.channel(channel)
+			.text(null)
 			.sender(participant)
-			.type(FILE)
+			.type(file)
+			.file(fileMeta)
+			.parentId(dto.getParentId())
+			.unreadCount(channel.getNumberOfParticipants())
 			.build();
 
-		messageRepository.save(messageEntity);
-		channelEntity.saveFirstMessageId(messageEntity.getId());
+		messageRepository.save(message);
+		channel.saveFirstMessageId(message.getId());
 
-		FileMetaEntity fileMetaEntity = fileService.save(dto.getFile(), uid);
-		messageFileRepository.save(MessageFileEntity.builder().message(messageEntity).file(fileMetaEntity).build());
-
-		chatPushService.pushChannelNewMessageEvent(channelId, messageEntity.getId(), FILE);
+		chatPushService.pushChannelNewMessageEvent(EventDto.builder()
+			.channelId(channelId)
+			.messageId(message.getId())
+			.messageType(file)
+			.build()
+		);
 	}
 
 	@Transactional
 	public void deleteMessage(long uid, long channelId, long messageId) {
 
-		ParticipantEntity participantEntity = participantService.fetchParticipant(channelId, uid);
+		ParticipantEntity participant = participantRepository
+			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
+			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
-		MessageEntity messageEntity = messageRepository
-			.findByIdAndSenderId(messageId, participantEntity.getId())
+		MessageEntity message = messageRepository
+			.findByIdAndSenderId(messageId, participant.getId())
 			.orElseThrow(() -> new ResourceNotFoundException(MESSAGE));
 
-		messageEntity.changeState(DELETED);
-		chatPushService.pushChannelMessageDeletedEvent(channelId, messageEntity.getId());
+		message.delete();
+
+		chatPushService.pushChannelMessageDeletedEvent(EventDto.builder()
+			.channelId(channelId)
+			.messageId(message.getId())
+			.build()
+		);
 	}
 
 	/*
 	 * Query ===============================================================================
 	 * */
 
-	public PageDto<MessageDto> fetchMessages(long uid, long channelId) {
+	@Transactional
+	public List<MessageDto> fetchMessages(long uid, long channelId, SliceCriteria criteria) {
 
-		participantService.checkParticipant(channelId, uid);
+		ParticipantEntity participant = participantRepository
+			.findByChannelIdAndUserIdAndState(channelId, uid, JOIN)
+			.orElseThrow(() -> new ResourceNotFoundException(PARTICIPANT));
 
-		// PageMeta meta = new PageMeta();
-		// meta.setPageIndex(page.getNumber());
-		// meta.setSizePerPage(page.getNumberOfElements());
-		// meta.setHasNext(page.hasNext());
-		// meta.setHasPrev(page.hasPrevious());
-		// meta.setTotalItems(page.getTotalElements());
-		// meta.setTotalPages(page.getTotalPages());
-		//
-		// return new PageDto(meta, page.getContent());
+		List<MessageEntity> messages = messageRepository.findMessagesInChannel(channelId, criteria);
 
-		return null;
+		Long lastReadMessageId = participant.getLastReadMessageId();
+		for (MessageEntity message : messages) {
+			if (participant.getLastReadMessageId() == null ||
+				participant.getLastReadMessageId() < message.getId()) {
+				message.unReadCountDown();
+				lastReadMessageId = Math.max(lastReadMessageId, message.getId());
+			}
+		}
+
+		participant.updateCurrentLastReadMessageId(lastReadMessageId);
+		return messageConverter.toDto(messages);
 	}
 
 }

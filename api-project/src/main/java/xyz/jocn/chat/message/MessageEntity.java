@@ -1,4 +1,4 @@
-package xyz.jocn.chat.message.entity;
+package xyz.jocn.chat.message;
 
 import static javax.persistence.FetchType.*;
 import static javax.persistence.GenerationType.*;
@@ -12,12 +12,14 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.redis.connection.ReactiveStreamCommands;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -26,8 +28,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import xyz.jocn.chat.channel.ChannelEntity;
-import xyz.jocn.chat.message.enums.ChatMessageType;
+import xyz.jocn.chat.file.FileMetaEntity;
 import xyz.jocn.chat.message.enums.MessageState;
+import xyz.jocn.chat.message.enums.MessageType;
 import xyz.jocn.chat.participant.ParticipantEntity;
 
 @ToString
@@ -42,17 +45,17 @@ public class MessageEntity {
 
 	@GeneratedValue(strategy = AUTO)
 	@Id
-	private long id;
+	private Long id;
 
 	@Column(length = 1000)
-	private String message;
+	private String text;
 
 	@Column(nullable = false, length = 10)
-	private ChatMessageType type;
+	private MessageType type;
 
 	@Builder.Default
 	@Column(nullable = false, length = 10)
-	private MessageState state = ACTIVE;
+	private MessageState state = active;
 
 	private boolean hasReaction = false;
 
@@ -63,13 +66,20 @@ public class MessageEntity {
 	private Instant updatedAt;
 
 	@LastModifiedBy
-	private long updatedBy;
+	private Long updatedBy;
 
 	@ManyToOne(fetch = LAZY)
 	private ParticipantEntity sender;
 
 	@ManyToOne(fetch = LAZY)
 	private ChannelEntity channel;
+
+	@OneToOne(fetch = LAZY)
+	private FileMetaEntity file;
+
+	private Long parentId;
+
+	private int unreadCount;
 
 	public MessageEntity(long id) {
 		this.id = id;
@@ -79,8 +89,13 @@ public class MessageEntity {
 		return hasReaction;
 	}
 
-	public void changeState(MessageState state) {
-		this.state = state;
+	public void delete() {
+		this.state = deleted;
 	}
 
+	public void unReadCountDown() {
+		if (unreadCount > 0) {
+			--unreadCount;
+		}
+	}
 }

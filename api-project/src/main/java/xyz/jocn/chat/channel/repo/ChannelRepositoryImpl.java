@@ -18,8 +18,8 @@ import xyz.jocn.chat.channel.QChannelEntity;
 import xyz.jocn.chat.channel.dto.ChannelDto;
 import xyz.jocn.chat.participant.QParticipantEntity;
 import xyz.jocn.chat.participant.dto.ParticipantDto;
-import xyz.jocn.chat.user.QUserEntity;
 import xyz.jocn.chat.user.dto.UserDto;
+import xyz.jocn.chat.user.entity.QUserEntity;
 
 @Repository
 public class ChannelRepositoryImpl implements ChannelRepositoryExt {

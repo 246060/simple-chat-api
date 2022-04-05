@@ -175,7 +175,7 @@ class UserControllerTest {
 		userDto.setProfileImgUrl("/files/1");
 		userDto.setStateMessage("change message");
 
-		given(userService.updateMe(anyLong(), any(UserUpdateRequestDto.class))).willReturn(userDto);
+		willDoNothing().given(userService).updateMe(anyLong(), any(UserUpdateRequestDto.class));
 
 		UserUpdateRequestDto dto = new UserUpdateRequestDto();
 		dto.setName("user02");

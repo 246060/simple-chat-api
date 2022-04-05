@@ -4,6 +4,9 @@ import static org.springframework.http.ResponseEntity.*;
 import static xyz.jocn.chat.common.AppConstants.*;
 import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
+import javax.validation.Valid;
+
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.chat.common.dto.ApiResponseDto;
 import xyz.jocn.chat.participant.dto.ChannelExitDto;
 import xyz.jocn.chat.participant.dto.ChannelInviteRequestDto;
 
@@ -24,28 +28,30 @@ import xyz.jocn.chat.participant.dto.ChannelInviteRequestDto;
 public class ParticipantController {
 
 	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
+	private final String JSON = MediaType.APPLICATION_JSON_VALUE;
+
 	private final ParticipantService participantService;
 
-	@PostMapping("/channels/{channelId}/participants")
-	public ResponseEntity invite(
+	@PostMapping(value = "/channels/{channelId}/participants", consumes = JSON, produces = JSON)
+	public ResponseEntity<ApiResponseDto> invite(
 		@PathVariable Long channelId,
-		@RequestBody ChannelInviteRequestDto dto,
+		@Valid @RequestBody ChannelInviteRequestDto dto,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
 		participantService.invite(Long.parseLong(uid), channelId, dto);
 		return ok(success());
 	}
 
-	@GetMapping("/channels/{channelId}/participants")
-	public ResponseEntity fetchCurrentParticipantsInChannel(
+	@GetMapping(value = "/channels/{channelId}/participants", produces = JSON)
+	public ResponseEntity<ApiResponseDto> fetchCurrentParticipantsInChannel(
 		@PathVariable Long channelId,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
 		return ok(success(participantService.fetchCurrentParticipantsInChannel(Long.parseLong(uid), channelId)));
 	}
 
-	@GetMapping("/channels/{channelId}/participants/{participantId}")
-	public ResponseEntity fetchOneInChannel(
+	@GetMapping(value = "/channels/{channelId}/participants/{participantId}", produces = JSON)
+	public ResponseEntity<ApiResponseDto> fetchOneInChannel(
 		@PathVariable Long channelId,
 		@PathVariable Long participantId,
 		@AuthenticationPrincipal(expression = UID) String uid
@@ -53,8 +59,8 @@ public class ParticipantController {
 		return ok(success(participantService.fetchOneInChannel(Long.parseLong(uid), channelId, participantId)));
 	}
 
-	@DeleteMapping("/channels/{channelId}/participants/{participantId}")
-	public ResponseEntity exit(
+	@DeleteMapping(value = "/channels/{channelId}/participants/{participantId}", produces = JSON)
+	public ResponseEntity<ApiResponseDto> exit(
 		@PathVariable Long channelId,
 		@PathVariable Long participantId,
 		@AuthenticationPrincipal(expression = UID) String uid

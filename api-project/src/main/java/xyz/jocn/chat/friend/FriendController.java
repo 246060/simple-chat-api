@@ -9,6 +9,7 @@ import java.net.URI;
 
 import javax.validation.Valid;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.jocn.chat.common.dto.ApiResponseDto;
 import xyz.jocn.chat.friend.dto.FriendDto;
 import xyz.jocn.chat.friend.dto.FriendRequestDto;
 import xyz.jocn.chat.friend.dto.FriendSearchDto;
@@ -35,11 +37,13 @@ import xyz.jocn.chat.friend.dto.FriendSearchDto;
 @RestController
 public class FriendController {
 
-	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
+	private final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
+	private final String JSON = MediaType.APPLICATION_JSON_VALUE;
+
 	private final FriendService friendService;
 
-	@PostMapping("/friends")
-	public ResponseEntity addFriend(
+	@PostMapping(value = "/friends", consumes = JSON, produces = JSON)
+	public ResponseEntity<ApiResponseDto> addFriend(
 		@RequestBody @Valid FriendRequestDto dto,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
@@ -48,16 +52,16 @@ public class FriendController {
 		return created(uri).body(success());
 	}
 
-	@GetMapping("/friends/{friendId}")
-	public ResponseEntity fetchOne(
+	@GetMapping(value = "/friends/{friendId}", produces = JSON)
+	public ResponseEntity<ApiResponseDto> fetchOne(
 		@PathVariable Long friendId,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
 		return ok(success(friendService.fetchOne(Long.parseLong(uid), friendId)));
 	}
 
-	@GetMapping("/friends")
-	public ResponseEntity fetchFriends(
+	@GetMapping(value = "/friends", produces = JSON)
+	public ResponseEntity<ApiResponseDto> fetchFriends(
 		@RequestParam(required = false, defaultValue = "false") Boolean hidden,
 		@RequestParam(required = false, defaultValue = "false") Boolean favorite,
 		@AuthenticationPrincipal(expression = UID) String uid
@@ -68,8 +72,8 @@ public class FriendController {
 		return ok(success(friendService.fetchFriends(Long.parseLong(uid), dto)));
 	}
 
-	@PatchMapping("/friends/{friendId}")
-	public ResponseEntity updateFriend(
+	@PatchMapping(value = "/friends/{friendId}", consumes = JSON, produces = JSON)
+	public ResponseEntity<ApiResponseDto> updateFriend(
 		@PathVariable Long friendId,
 		@RequestBody @Valid FriendDto dto,
 		@AuthenticationPrincipal(expression = UID) String uid
@@ -77,8 +81,8 @@ public class FriendController {
 		return ok(success(friendService.updateFriend(Long.parseLong(uid), friendId, dto)));
 	}
 
-	@DeleteMapping("/friends/{friendId}")
-	public ResponseEntity deleteFriend(
+	@DeleteMapping(value = "/friends/{friendId}", produces = JSON)
+	public ResponseEntity<ApiResponseDto> deleteFriend(
 		@PathVariable Long friendId,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {

@@ -81,7 +81,6 @@ public class UserEntity {
 	@LastModifiedBy
 	private Long updatedBy;
 
-
 	@ToString.Exclude
 	@Builder.Default
 	@OneToOne(fetch = LAZY, cascade = {PERSIST, REMOVE})

@@ -7,6 +7,9 @@ import static xyz.jocn.chat.common.dto.ApiResponseDto.*;
 
 import java.net.URI;
 
+import javax.validation.Valid;
+
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,18 +21,21 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.jocn.chat.channel.dto.ChannelOpenRequestDto;
+import xyz.jocn.chat.common.dto.ApiResponseDto;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 public class ChannelController {
 
-	private static final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
+	private final String UID = JWT_CLAIM_FIELD_NAME_USER_KEY;
+	private final String JSON = MediaType.APPLICATION_JSON_VALUE;
+
 	private final ChannelService channelService;
 
-	@PostMapping("/channels")
-	public ResponseEntity open(
-		@RequestBody ChannelOpenRequestDto dto,
+	@PostMapping(value = "/channels", consumes = JSON, produces = JSON)
+	public ResponseEntity<ApiResponseDto> open(
+		@Valid @RequestBody ChannelOpenRequestDto dto,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {
 		Long id = channelService.open(Long.parseLong(uid), dto.getInviteeId());
@@ -37,13 +43,15 @@ public class ChannelController {
 		return created(uri).body(success());
 	}
 
-	@GetMapping("/channels")
-	public ResponseEntity fetchMyChannels(@AuthenticationPrincipal(expression = UID) String uid) {
+	@GetMapping(value = "/channels", produces = JSON)
+	public ResponseEntity<ApiResponseDto> fetchMyChannels(
+		@AuthenticationPrincipal(expression = UID) String uid
+	) {
 		return ok(success(channelService.fetchMyChannels(Long.parseLong(uid))));
 	}
 
-	@GetMapping("/channels/{channelId}")
-	public ResponseEntity fetchMyChannels(
+	@GetMapping(value = "/channels/{channelId}", produces = JSON)
+	public ResponseEntity<ApiResponseDto> fetchMyChannels(
 		@PathVariable Long channelId,
 		@AuthenticationPrincipal(expression = UID) String uid
 	) {

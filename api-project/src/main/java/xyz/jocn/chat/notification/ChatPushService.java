@@ -18,6 +18,7 @@ import xyz.jocn.chat.notification.dto.EvtChannelJoin;
 import xyz.jocn.chat.notification.dto.EvtMessageDel;
 import xyz.jocn.chat.notification.dto.EvtMessageNew;
 import xyz.jocn.chat.notification.dto.EvtReaction;
+import xyz.jocn.chat.notification.dto.EvtUnReadMessage;
 import xyz.jocn.chat.user.dto.UserDto;
 
 @Slf4j
@@ -37,6 +38,11 @@ public class ChatPushService {
 
 	public void pushChannelMessageDeletedEvent(EventDto dto) {
 		EvtMessageDel data = new EvtMessageDel(dto.getChannelId(), dto.getMessageId());
+		publisher.emit(new EventContext(getChannelEventRouting(dto), data));
+	}
+
+	public void pushChannelReadMessageEvent(EventDto dto) {
+		EvtUnReadMessage data = new EvtUnReadMessage(dto.getChannelId(), dto.getMessageId());
 		publisher.emit(new EventContext(getChannelEventRouting(dto), data));
 	}
 

@@ -150,13 +150,9 @@ class UserServiceTest {
 		given(userRepository.findById(uid)).willReturn(Optional.of(user));
 
 		// when
-		UserDto result = service.updateMe(uid, dto);
-		System.out.println("result = " + result);
+		service.updateMe(uid, dto);
 
 		// then
-		assertThat(result).extracting(UserDto::getId).isEqualTo(uid);
-		assertThat(result).extracting(UserDto::getName).isEqualTo("user02");
-		assertThat(result).extracting(UserDto::getStateMessage).isEqualTo("change message");
 		then(userRepository).should(times(1)).findById(uid);
 	}
 

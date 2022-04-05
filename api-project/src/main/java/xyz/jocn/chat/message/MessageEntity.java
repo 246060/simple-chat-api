@@ -91,11 +91,10 @@ public class MessageEntity {
 
 	public void delete() {
 		this.state = deleted;
+		this.updateUnReadCount(0);
 	}
 
-	public void unReadCountDown() {
-		if (unreadCount > 0) {
-			--unreadCount;
-		}
+	public void updateUnReadCount(int unreadCount) {
+		this.unreadCount = unreadCount;
 	}
 }

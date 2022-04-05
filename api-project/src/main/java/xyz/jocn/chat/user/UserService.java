@@ -71,7 +71,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserDto updateMe(long uid, UserUpdateRequestDto dto) {
+	public void updateMe(long uid, UserUpdateRequestDto dto) {
 
 		UserEntity me = userRepository
 			.findById(uid)
@@ -83,8 +83,6 @@ public class UserService {
 		if (StringUtil.isNotBlank(dto.getStateMessage())) {
 			me.changeStateMessage(dto.getStateMessage());
 		}
-
-		return userConverter.toDto(me);
 	}
 
 	@Transactional

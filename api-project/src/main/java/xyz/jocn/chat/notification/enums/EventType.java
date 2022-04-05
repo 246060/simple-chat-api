@@ -8,6 +8,7 @@ public enum EventType {
 	channel_message_new("channel.message.new"),
 	channel_message_deleted("channel.message.deleted"),
 	channel_message_reaction("channel.message.reaction"),
+	channel_message_read("channel.message.read"),
 
 	all_ad("all.ad"),
 	all_urgent("all.urgent");

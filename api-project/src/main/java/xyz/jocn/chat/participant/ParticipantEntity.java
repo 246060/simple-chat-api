@@ -55,7 +55,6 @@ public class ParticipantEntity {
 	private Instant createdAt;
 
 	private Long lastMessageIdBeforeJoin;
-	private Long lastReadMessageId;
 
 	private Boolean notificationActive;
 
@@ -78,9 +77,5 @@ public class ParticipantEntity {
 
 	public void saveLastMessageIdBeforeJoin(Long messageId) {
 		this.lastMessageIdBeforeJoin = messageId;
-	}
-
-	public void updateCurrentLastReadMessageId(Long messageId) {
-		this.lastReadMessageId = messageId;
 	}
 }

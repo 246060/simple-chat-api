@@ -175,7 +175,7 @@ class UserControllerTest {
 		userDto.setProfileImgUrl("/files/1");
 		userDto.setStateMessage("change message");
 
-		given(userService.updateMe(anyLong(), any(UserUpdateRequestDto.class))).willReturn(userDto);
+		willDoNothing().given(userService).updateMe(anyLong(), any(UserUpdateRequestDto.class));
 
 		UserUpdateRequestDto dto = new UserUpdateRequestDto();
 		dto.setName("user02");
@@ -200,17 +200,11 @@ class UserControllerTest {
 
 			.andExpect(jsonPath("$.meta").doesNotExist())
 			.andExpect(jsonPath("$.error").doesNotExist())
+			.andExpect(jsonPath("$.data").doesNotExist())
 
 			.andExpect(jsonPath("$.success").exists())
 			.andExpect(jsonPath("$.success").isBoolean())
 			.andExpect(jsonPath("$.success").value(true))
-
-			.andExpect(jsonPath("$.data").exists())
-			.andExpect(jsonPath("$.data.id").exists())
-			.andExpect(jsonPath("$.data.email").exists())
-			.andExpect(jsonPath("$.data.name").exists())
-			.andExpect(jsonPath("$.data.profileImgUrl").exists())
-			.andExpect(jsonPath("$.data.stateMessage").exists())
 		;
 
 		then(userService).should(times(1)).updateMe(anyLong(), any(UserUpdateRequestDto.class));
